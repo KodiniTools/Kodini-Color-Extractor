@@ -15,7 +15,15 @@ const translations = {
     downloadTxt: 'Download TXT',
     downloadPng: 'Download PNG',
     clickToCopy: 'Click to copy',
-    copied: 'Copied!'
+    copied: 'Copied!',
+    editPanelTitle: 'Image Editing',
+    zoom: 'Zoom',
+    brightness: 'Brightness',
+    contrast: 'Contrast',
+    saturation: 'Saturation',
+    hue: 'Hue',
+    reset: 'Reset',
+    resetAll: 'Reset all'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -31,7 +39,15 @@ const translations = {
     downloadTxt: 'TXT herunterladen',
     downloadPng: 'PNG herunterladen',
     clickToCopy: 'Klicken zum Kopieren',
-    copied: 'Kopiert!'
+    copied: 'Kopiert!',
+    editPanelTitle: 'Bildbearbeitung',
+    zoom: 'Zoom',
+    brightness: 'Helligkeit',
+    contrast: 'Kontrast',
+    saturation: 'Saettigung',
+    hue: 'Farbton',
+    reset: 'Zuruecksetzen',
+    resetAll: 'Alles zuruecksetzen'
   }
 }
 

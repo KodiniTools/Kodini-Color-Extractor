@@ -5,6 +5,7 @@ import { useI18n } from './composables/useI18n'
 import ColorList from './components/ColorList.vue'
 import ImageUploader from './components/ImageUploader.vue'
 import MainContent from './components/MainContent.vue'
+import ImageEditPanel from './components/ImageEditPanel.vue'
 
 const store = usePaletteStore()
 const { t, locale, availableLocales } = useI18n()
@@ -77,6 +78,7 @@ function toggleLocale() {
     </aside>
 
     <MainContent />
+    <ImageEditPanel />
   </div>
 </template>
 
@@ -216,6 +218,12 @@ function toggleLocale() {
 
 .btn-secondary:hover {
   background: #cbd5e0;
+}
+
+@media (max-width: 1200px) {
+  .app-container {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 900px) {

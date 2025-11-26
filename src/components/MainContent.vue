@@ -6,6 +6,16 @@ import { useI18n } from '../composables/useI18n'
 const store = usePaletteStore()
 const { t } = useI18n()
 
+// Computed style for image filters
+const imageFilterStyle = computed(() => {
+  const { zoom, brightness, contrast, saturation, hue } = store.imageAdjustments
+  return {
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
+    transform: `scale(${zoom / 100})`,
+    transformOrigin: 'center center'
+  }
+})
+
 const imageContainer = ref(null)
 const displayImage = ref(null)
 const pixelZoom = ref(null)
@@ -126,6 +136,7 @@ onUnmounted(() => {
           :src="store.currentImage"
           alt="Uploaded"
           class="preview-image"
+          :style="imageFilterStyle"
           @load="updateRects"
         >
 
