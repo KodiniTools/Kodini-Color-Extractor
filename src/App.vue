@@ -23,6 +23,16 @@ const format = computed({
   set: (val) => store.setDownloadFormat(val)
 })
 
+const imageFormat = computed({
+  get: () => store.imageExportFormat,
+  set: (val) => store.setImageExportFormat(val)
+})
+
+const imageSize = computed({
+  get: () => store.imageExportSize,
+  set: (val) => store.setImageExportSize(val)
+})
+
 function toggleLocale() {
   locale.value = locale.value === 'de' ? 'en' : 'de'
 }
@@ -67,13 +77,38 @@ function toggleLocale() {
         <ColorList />
       </div>
 
-      <div v-if="store.hasColors" class="download-buttons">
-        <button class="btn btn-secondary" @click="store.downloadTxt">
-          {{ t('downloadTxt') }}
-        </button>
-        <button class="btn btn-primary" @click="store.downloadPng">
-          {{ t('downloadPng') }}
-        </button>
+      <div v-if="store.hasColors" class="download-section">
+        <h3 class="download-title">{{ t('downloadTitle') }}</h3>
+
+        <div class="export-options">
+          <div class="control-group">
+            <label>{{ t('imageFormatLabel') }}</label>
+            <select v-model="imageFormat">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPEG</option>
+              <option value="webp">WEBP</option>
+            </select>
+          </div>
+
+          <div class="control-group">
+            <label>{{ t('imageSizeLabel') }}</label>
+            <select v-model="imageSize">
+              <option value="small">{{ t('sizeSmall') }}</option>
+              <option value="medium">{{ t('sizeMedium') }}</option>
+              <option value="large">{{ t('sizeLarge') }}</option>
+              <option value="xlarge">{{ t('sizeXLarge') }}</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="download-buttons">
+          <button class="btn btn-secondary" @click="store.downloadTxt">
+            {{ t('downloadTxt') }}
+          </button>
+          <button class="btn btn-primary" @click="store.downloadImage">
+            {{ t('downloadImage') }}
+          </button>
+        </div>
       </div>
     </aside>
 
@@ -183,12 +218,38 @@ function toggleLocale() {
   margin: 0 0 12px 0;
 }
 
-.download-buttons {
-  display: flex;
-  gap: 10px;
+.download-section {
   margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid #e2e8f0;
+}
+
+.download-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0 0 12px 0;
+}
+
+.export-options {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.export-options .control-group {
+  flex: 1;
+}
+
+.export-options .control-group select {
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.download-buttons {
+  display: flex;
+  gap: 10px;
 }
 
 .btn {
