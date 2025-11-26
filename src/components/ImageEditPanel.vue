@@ -1,0 +1,326 @@
+<script setup>
+import { computed } from 'vue'
+import { usePaletteStore } from '../stores/palette'
+import { useI18n } from '../composables/useI18n'
+
+const store = usePaletteStore()
+const { t } = useI18n()
+
+const zoom = computed({
+  get: () => store.imageAdjustments.zoom,
+  set: (val) => store.setImageAdjustment('zoom', val)
+})
+
+const brightness = computed({
+  get: () => store.imageAdjustments.brightness,
+  set: (val) => store.setImageAdjustment('brightness', val)
+})
+
+const contrast = computed({
+  get: () => store.imageAdjustments.contrast,
+  set: (val) => store.setImageAdjustment('contrast', val)
+})
+
+const saturation = computed({
+  get: () => store.imageAdjustments.saturation,
+  set: (val) => store.setImageAdjustment('saturation', val)
+})
+
+const hue = computed({
+  get: () => store.imageAdjustments.hue,
+  set: (val) => store.setImageAdjustment('hue', val)
+})
+
+function resetAll() {
+  store.resetImageAdjustments()
+}
+
+function resetSlider(prop) {
+  const defaults = { zoom: 100, brightness: 100, contrast: 100, saturation: 100, hue: 0 }
+  store.setImageAdjustment(prop, defaults[prop])
+}
+</script>
+
+<template>
+  <aside class="edit-panel" v-if="store.currentImage">
+    <div class="panel-header">
+      <h2 class="panel-title">{{ t('editPanelTitle') }}</h2>
+      <button class="reset-all-btn" @click="resetAll" :title="t('resetAll')">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+          <path d="M3 3v5h5"/>
+        </svg>
+      </button>
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('zoom') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ zoom }}%</span>
+          <button class="reset-btn" @click="resetSlider('zoom')" :title="t('reset')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input
+        type="range"
+        v-model.number="zoom"
+        min="25"
+        max="400"
+        step="5"
+        class="slider"
+      >
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('brightness') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ brightness }}%</span>
+          <button class="reset-btn" @click="resetSlider('brightness')" :title="t('reset')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input
+        type="range"
+        v-model.number="brightness"
+        min="0"
+        max="200"
+        step="1"
+        class="slider"
+      >
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('contrast') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ contrast }}%</span>
+          <button class="reset-btn" @click="resetSlider('contrast')" :title="t('reset')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input
+        type="range"
+        v-model.number="contrast"
+        min="0"
+        max="200"
+        step="1"
+        class="slider"
+      >
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('saturation') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ saturation }}%</span>
+          <button class="reset-btn" @click="resetSlider('saturation')" :title="t('reset')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input
+        type="range"
+        v-model.number="saturation"
+        min="0"
+        max="200"
+        step="1"
+        class="slider"
+      >
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('hue') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ hue }}°</span>
+          <button class="reset-btn" @click="resetSlider('hue')" :title="t('reset')">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+              <path d="M3 3v5h5"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input
+        type="range"
+        v-model.number="hue"
+        min="-180"
+        max="180"
+        step="1"
+        class="slider slider-hue"
+      >
+    </div>
+  </aside>
+</template>
+
+<style scoped>
+.edit-panel {
+  width: 280px;
+  min-width: 280px;
+  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  max-height: 100vh;
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.panel-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: #2d3748;
+  margin: 0;
+}
+
+.reset-all-btn {
+  background: #e2e8f0;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: #4a5568;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+}
+
+.reset-all-btn:hover {
+  background: #cbd5e0;
+  color: #2d3748;
+}
+
+.slider-group {
+  margin-bottom: 20px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.slider-header label {
+  font-size: 13px;
+  font-weight: 500;
+  color: #4a5568;
+}
+
+.slider-value-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.slider-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2d3748;
+  min-width: 45px;
+  text-align: right;
+}
+
+.reset-btn {
+  background: transparent;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  color: #718096;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+  transition: all 0.2s;
+}
+
+.reset-btn:hover {
+  background: #e2e8f0;
+  color: #4a5568;
+}
+
+.slider {
+  width: 100%;
+  height: 6px;
+  border-radius: 3px;
+  background: #e2e8f0;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0F5CD4;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.15s ease;
+}
+
+.slider::-webkit-slider-thumb:hover {
+  transform: scale(1.1);
+}
+
+.slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #0F5CD4;
+  cursor: pointer;
+  border: 3px solid white;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+.slider-hue {
+  background: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
+}
+
+@media (max-width: 1200px) {
+  .edit-panel {
+    width: 100%;
+    min-width: 100%;
+    max-height: none;
+    border-left: none;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
+</style>

@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 
 export const usePaletteStore = defineStore('palette', () => {
   const colors = ref([])
@@ -9,7 +9,17 @@ export const usePaletteStore = defineStore('palette', () => {
   const downloadFormat = ref('hex')
   const selectedColorIndex = ref(-1)
   const canvasRef = ref(null)
+  const filteredCanvasRef = ref(null)
   const originalImageSize = ref({ width: 0, height: 0 })
+
+  // Image adjustment settings
+  const imageAdjustments = ref({
+    zoom: 100,
+    brightness: 100,
+    contrast: 100,
+    saturation: 100,
+    hue: 0
+  })
 
   const hasColors = computed(() => colors.value.length > 0)
 
@@ -27,6 +37,73 @@ export const usePaletteStore = defineStore('palette', () => {
 
   function setSelectedColor(index) {
     selectedColorIndex.value = index
+  }
+
+  function setImageAdjustment(prop, value) {
+    imageAdjustments.value[prop] = value
+    applyFiltersToCanvas()
+  }
+
+  function resetImageAdjustments() {
+    imageAdjustments.value = {
+      zoom: 100,
+      brightness: 100,
+      contrast: 100,
+      saturation: 100,
+      hue: 0
+    }
+    applyFiltersToCanvas()
+  }
+
+  function applyFiltersToCanvas() {
+    if (!canvasRef.value || !currentImage.value) return
+
+    const { brightness, contrast, saturation, hue } = imageAdjustments.value
+
+    // Create filtered canvas if not exists
+    if (!filteredCanvasRef.value) {
+      filteredCanvasRef.value = document.createElement('canvas')
+    }
+
+    const filteredCanvas = filteredCanvasRef.value
+    const originalCanvas = canvasRef.value
+
+    filteredCanvas.width = originalCanvas.width
+    filteredCanvas.height = originalCanvas.height
+
+    const ctx = filteredCanvas.getContext('2d')
+
+    // Apply CSS-like filters using canvas
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`
+    ctx.drawImage(originalCanvas, 0, 0)
+
+    // Reset filter for future operations
+    ctx.filter = 'none'
+
+    // Update all color indicators with filtered colors
+    updateAllColorsFromFilteredCanvas()
+  }
+
+  function updateAllColorsFromFilteredCanvas() {
+    if (!filteredCanvasRef.value || colors.value.length === 0) return
+
+    const ctx = filteredCanvasRef.value.getContext('2d')
+
+    colors.value = colors.value.map((color, index) => {
+      if (!color.position) return color
+
+      const imgX = Math.max(0, Math.min(originalImageSize.value.width - 1, Math.round(color.position.x)))
+      const imgY = Math.max(0, Math.min(originalImageSize.value.height - 1, Math.round(color.position.y)))
+
+      const pixel = ctx.getImageData(imgX, imgY, 1, 1).data
+      const r = pixel[0]
+      const g = pixel[1]
+      const b = pixel[2]
+      const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
+      const hsl = rgbToHsl(r, g, b)
+
+      return { r, g, b, hex, hsl, position: color.position }
+    })
   }
 
   function rgbToHsl(r, g, b) {
@@ -70,6 +147,13 @@ export const usePaletteStore = defineStore('palette', () => {
 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
         canvasRef.value = canvas
+
+        // Initialize filtered canvas with same content
+        filteredCanvasRef.value = document.createElement('canvas')
+        filteredCanvasRef.value.width = canvas.width
+        filteredCanvasRef.value.height = canvas.height
+        const filteredCtx = filteredCanvasRef.value.getContext('2d')
+        filteredCtx.drawImage(canvas, 0, 0)
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         imageData.value = imgData
@@ -119,9 +203,11 @@ export const usePaletteStore = defineStore('palette', () => {
   }
 
   function updateColorFromPosition(index, x, y) {
-    if (!canvasRef.value || index < 0 || index >= colors.value.length) return
+    // Use filtered canvas if available, otherwise original
+    const canvas = filteredCanvasRef.value || canvasRef.value
+    if (!canvas || index < 0 || index >= colors.value.length) return
 
-    const ctx = canvasRef.value.getContext('2d')
+    const ctx = canvas.getContext('2d')
     const imgX = Math.max(0, Math.min(originalImageSize.value.width - 1, Math.round(x)))
     const imgY = Math.max(0, Math.min(originalImageSize.value.height - 1, Math.round(y)))
 
@@ -139,9 +225,11 @@ export const usePaletteStore = defineStore('palette', () => {
   }
 
   function getPixelZoomData(x, y, size = 12) {
-    if (!canvasRef.value) return null
+    // Use filtered canvas if available, otherwise original
+    const canvas = filteredCanvasRef.value || canvasRef.value
+    if (!canvas) return null
 
-    const ctx = canvasRef.value.getContext('2d')
+    const ctx = canvas.getContext('2d')
     const imgX = Math.max(0, Math.min(originalImageSize.value.width - size, Math.round(x - size / 2)))
     const imgY = Math.max(0, Math.min(originalImageSize.value.height - size, Math.round(y - size / 2)))
 
@@ -247,10 +335,15 @@ export const usePaletteStore = defineStore('palette', () => {
     hasColors,
     selectedColorIndex,
     originalImageSize,
+    imageAdjustments,
+    filteredCanvasRef,
     setImage,
     setColorCount,
     setDownloadFormat,
     setSelectedColor,
+    setImageAdjustment,
+    resetImageAdjustments,
+    applyFiltersToCanvas,
     extractColors,
     updateColorFromPosition,
     getPixelZoomData,
