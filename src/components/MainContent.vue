@@ -6,15 +6,19 @@ import { useI18n } from '../composables/useI18n'
 const store = usePaletteStore()
 const { t } = useI18n()
 
-// Computed style for image filters
+// Computed style for image filters and pan
 const imageFilterStyle = computed(() => {
   const { zoom, brightness, contrast, saturation, hue } = store.imageAdjustments
+  const { x: panX, y: panY } = store.panPosition
   return {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
-    transform: `scale(${zoom / 100})`,
+    transform: `scale(${zoom / 100}) translate(${panX}px, ${panY}px)`,
     transformOrigin: 'center center'
   }
 })
+
+// Check if zoomed in (pan should only work when zoomed)
+const isZoomed = computed(() => store.imageAdjustments.zoom > 100)
 
 const imageContainer = ref(null)
 const displayImage = ref(null)
@@ -26,6 +30,11 @@ const isDragging = ref(false)
 const dragIndex = ref(-1)
 const showZoom = ref(false)
 const zoomPosition = ref({ x: 0, y: 0 })
+
+// Pan state
+const isPanning = ref(false)
+const panStart = ref({ x: 0, y: 0 })
+const panStartPosition = ref({ x: 0, y: 0 })
 
 function updateRects() {
   if (displayImage.value && imageContainer.value) {
@@ -39,20 +48,33 @@ function getIndicatorStyle(color, index) {
     return { display: 'none' }
   }
 
+  const zoom = store.imageAdjustments.zoom / 100
+  const { x: panX, y: panY } = store.panPosition
+
   const scaleX = imageRect.value.width / store.originalImageSize.width
   const scaleY = imageRect.value.height / store.originalImageSize.height
 
   const imageOffsetX = imageRect.value.left - containerRect.value.left
   const imageOffsetY = imageRect.value.top - containerRect.value.top
 
-  const x = imageOffsetX + (color.position.x * scaleX) - 16
-  const y = imageOffsetY + (color.position.y * scaleY) - 16
+  // Calculate base position
+  const baseX = imageOffsetX + (color.position.x * scaleX) - 16
+  const baseY = imageOffsetY + (color.position.y * scaleY) - 16
+
+  // Apply zoom and pan transformation relative to container center
+  const containerCenterX = containerRect.value.width / 2
+  const containerCenterY = containerRect.value.height / 2
+
+  // Calculate position with zoom and pan
+  const x = containerCenterX + (baseX - containerCenterX + 16 + panX * scaleX) * zoom - 16
+  const y = containerCenterY + (baseY - containerCenterY + 16 + panY * scaleY) * zoom - 16
 
   return {
     left: `${x}px`,
     top: `${y}px`,
     backgroundColor: color.hex,
-    borderColor: store.selectedColorIndex === index ? '#0F5CD4' : 'white'
+    borderColor: store.selectedColorIndex === index ? '#0F5CD4' : 'white',
+    transform: `scale(${Math.min(zoom, 1.5)})`
   }
 }
 
@@ -74,11 +96,19 @@ function handleDrag(e) {
   if (!isDragging.value || dragIndex.value < 0) return
   if (!imageRect.value || !containerRect.value) return
 
+  const zoom = store.imageAdjustments.zoom / 100
+  const { x: panX, y: panY } = store.panPosition
+
   const scaleX = store.originalImageSize.width / imageRect.value.width
   const scaleY = store.originalImageSize.height / imageRect.value.height
 
-  const relX = e.clientX - imageRect.value.left
-  const relY = e.clientY - imageRect.value.top
+  // Calculate mouse position relative to container center
+  const containerCenterX = containerRect.value.left + containerRect.value.width / 2
+  const containerCenterY = containerRect.value.top + containerRect.value.height / 2
+
+  // Reverse the zoom and pan transformation to get image coordinates
+  const relX = (e.clientX - containerCenterX) / zoom + containerRect.value.width / 2 - (imageRect.value.left - containerRect.value.left) - panX * (imageRect.value.width / store.originalImageSize.width)
+  const relY = (e.clientY - containerCenterY) / zoom + containerRect.value.height / 2 - (imageRect.value.top - containerRect.value.top) - panY * (imageRect.value.height / store.originalImageSize.height)
 
   const imgX = Math.max(0, Math.min(store.originalImageSize.width - 1, relX * scaleX))
   const imgY = Math.max(0, Math.min(store.originalImageSize.height - 1, relY * scaleY))
@@ -112,8 +142,70 @@ function selectColor(index) {
   store.setSelectedColor(index)
 }
 
+// Pan functionality
+function startPan(e) {
+  // Only pan when zoomed and not dragging a color indicator
+  if (!isZoomed.value || isDragging.value) return
+
+  e.preventDefault()
+  isPanning.value = true
+  panStart.value = { x: e.clientX, y: e.clientY }
+  panStartPosition.value = { ...store.panPosition }
+
+  document.addEventListener('mousemove', handlePan)
+  document.addEventListener('mouseup', stopPan)
+  document.body.style.cursor = 'grabbing'
+}
+
+function handlePan(e) {
+  if (!isPanning.value) return
+
+  const zoom = store.imageAdjustments.zoom / 100
+  const deltaX = (e.clientX - panStart.value.x) / zoom
+  const deltaY = (e.clientY - panStart.value.y) / zoom
+
+  // Calculate pan limits based on zoom level and image size
+  const maxPan = calculateMaxPan()
+
+  const newX = Math.max(-maxPan.x, Math.min(maxPan.x, panStartPosition.value.x + deltaX))
+  const newY = Math.max(-maxPan.y, Math.min(maxPan.y, panStartPosition.value.y + deltaY))
+
+  store.setPanPosition(newX, newY)
+}
+
+function calculateMaxPan() {
+  if (!imageRect.value || !containerRect.value) return { x: 0, y: 0 }
+
+  const zoom = store.imageAdjustments.zoom / 100
+  const scaledWidth = imageRect.value.width * zoom
+  const scaledHeight = imageRect.value.height * zoom
+
+  // Calculate how much the image exceeds the container
+  const excessX = Math.max(0, (scaledWidth - containerRect.value.width) / 2)
+  const excessY = Math.max(0, (scaledHeight - containerRect.value.height) / 2)
+
+  return {
+    x: excessX / zoom,
+    y: excessY / zoom
+  }
+}
+
+function stopPan() {
+  isPanning.value = false
+  document.removeEventListener('mousemove', handlePan)
+  document.removeEventListener('mouseup', stopPan)
+  document.body.style.cursor = ''
+}
+
 watch(() => store.currentImage, () => {
   setTimeout(updateRects, 100)
+})
+
+// Reset pan when zoom changes to 100%
+watch(() => store.imageAdjustments.zoom, (newZoom) => {
+  if (newZoom <= 100) {
+    store.resetPanPosition()
+  }
 })
 
 onMounted(() => {
@@ -124,12 +216,19 @@ onUnmounted(() => {
   window.removeEventListener('resize', updateRects)
   document.removeEventListener('mousemove', handleDrag)
   document.removeEventListener('mouseup', stopDrag)
+  document.removeEventListener('mousemove', handlePan)
+  document.removeEventListener('mouseup', stopPan)
 })
 </script>
 
 <template>
   <main class="main-content">
-    <div ref="imageContainer" class="image-container">
+    <div
+      ref="imageContainer"
+      class="image-container"
+      :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning }"
+      @mousedown="startPan"
+    >
       <template v-if="store.currentImage">
         <img
           ref="displayImage"
@@ -138,6 +237,7 @@ onUnmounted(() => {
           class="preview-image"
           :style="imageFilterStyle"
           @load="updateRects"
+          draggable="false"
         >
 
         <!-- Color Indicators -->
@@ -192,7 +292,15 @@ onUnmounted(() => {
   background: #f8f9fa;
   border-radius: 12px;
   border: 2px dashed #e2e8f0;
-  overflow: visible;
+  overflow: hidden;
+}
+
+.image-container.is-zoomed {
+  cursor: grab;
+}
+
+.image-container.is-zoomed.is-panning {
+  cursor: grabbing;
 }
 
 .preview-image {
@@ -200,6 +308,8 @@ onUnmounted(() => {
   max-height: 100%;
   object-fit: contain;
   border-radius: 8px;
+  user-select: none;
+  -webkit-user-drag: none;
 }
 
 .color-indicator {

@@ -21,6 +21,9 @@ export const usePaletteStore = defineStore('palette', () => {
     hue: 0
   })
 
+  // Pan position for zoomed image
+  const panPosition = ref({ x: 0, y: 0 })
+
   const hasColors = computed(() => colors.value.length > 0)
 
   function setImage(imgSrc) {
@@ -41,7 +44,19 @@ export const usePaletteStore = defineStore('palette', () => {
 
   function setImageAdjustment(prop, value) {
     imageAdjustments.value[prop] = value
+    // Reset pan position when zoom is reset to 100%
+    if (prop === 'zoom' && value === 100) {
+      panPosition.value = { x: 0, y: 0 }
+    }
     applyFiltersToCanvas()
+  }
+
+  function setPanPosition(x, y) {
+    panPosition.value = { x, y }
+  }
+
+  function resetPanPosition() {
+    panPosition.value = { x: 0, y: 0 }
   }
 
   function resetImageAdjustments() {
@@ -52,6 +67,7 @@ export const usePaletteStore = defineStore('palette', () => {
       saturation: 100,
       hue: 0
     }
+    panPosition.value = { x: 0, y: 0 }
     applyFiltersToCanvas()
   }
 
@@ -336,12 +352,15 @@ export const usePaletteStore = defineStore('palette', () => {
     selectedColorIndex,
     originalImageSize,
     imageAdjustments,
+    panPosition,
     filteredCanvasRef,
     setImage,
     setColorCount,
     setDownloadFormat,
     setSelectedColor,
     setImageAdjustment,
+    setPanPosition,
+    resetPanPosition,
     resetImageAdjustments,
     applyFiltersToCanvas,
     extractColors,
