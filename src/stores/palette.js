@@ -12,6 +12,18 @@ export const usePaletteStore = defineStore('palette', () => {
   const filteredCanvasRef = ref(null)
   const originalImageSize = ref({ width: 0, height: 0 })
 
+  // Image export settings
+  const imageExportFormat = ref('png')
+  const imageExportSize = ref('medium')
+
+  // Available export sizes (width in pixels, height auto-calculated)
+  const exportSizes = {
+    small: { label: 'Small (400px)', width: 400 },
+    medium: { label: 'Medium (800px)', width: 800 },
+    large: { label: 'Large (1200px)', width: 1200 },
+    xlarge: { label: 'XL (1600px)', width: 1600 }
+  }
+
   // Image adjustment settings
   const imageAdjustments = ref({
     zoom: 100,
@@ -36,6 +48,14 @@ export const usePaletteStore = defineStore('palette', () => {
 
   function setDownloadFormat(format) {
     downloadFormat.value = format
+  }
+
+  function setImageExportFormat(format) {
+    imageExportFormat.value = format
+  }
+
+  function setImageExportSize(size) {
+    imageExportSize.value = size
   }
 
   function setSelectedColor(index) {
@@ -296,50 +316,95 @@ export const usePaletteStore = defineStore('palette', () => {
     URL.revokeObjectURL(link.href)
   }
 
-  function downloadPng() {
+  function downloadImage() {
     const f = downloadFormat.value
     const cols = colors.value
-    const swatchSize = 80
-    const textHeight = 50
-    const padding = 20
+    const exportFormat = imageExportFormat.value
+    const targetWidth = exportSizes[imageExportSize.value].width
+
+    // Calculate scale factor based on target width
+    const baseSwatchSize = 80
+    const basePadding = 20
+    const baseGap = 10
+    const baseTextHeight = 50
     const cols_per_row = Math.min(cols.length, 5)
     const rows = Math.ceil(cols.length / cols_per_row)
 
+    // Calculate base dimensions
+    const baseWidth = basePadding * 2 + cols_per_row * (baseSwatchSize + baseGap) - baseGap
+    const scale = targetWidth / baseWidth
+
+    // Scaled dimensions
+    const swatchSize = Math.round(baseSwatchSize * scale)
+    const padding = Math.round(basePadding * scale)
+    const gap = Math.round(baseGap * scale)
+    const textHeight = Math.round(baseTextHeight * scale)
+
     const pCanvas = document.createElement('canvas')
-    pCanvas.width = padding * 2 + cols_per_row * (swatchSize + 10) - 10
-    pCanvas.height = padding * 2 + rows * (swatchSize + textHeight + 10) - 10
+    pCanvas.width = padding * 2 + cols_per_row * (swatchSize + gap) - gap
+    pCanvas.height = padding * 2 + rows * (swatchSize + textHeight + gap) - gap
     const pCtx = pCanvas.getContext('2d')
 
+    // Background (white for JPEG, transparent for PNG/WEBP optional)
     pCtx.fillStyle = '#ffffff'
     pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height)
+
+    // Font sizes scaled
+    const mainFontSize = Math.round(11 * scale)
+    const subFontSize = Math.round(10 * scale)
 
     cols.forEach((c, i) => {
       const row = Math.floor(i / cols_per_row)
       const col = i % cols_per_row
-      const x = padding + col * (swatchSize + 10)
-      const y = padding + row * (swatchSize + textHeight + 10)
+      const x = padding + col * (swatchSize + gap)
+      const y = padding + row * (swatchSize + textHeight + gap)
 
       pCtx.fillStyle = c.hex
       pCtx.fillRect(x, y, swatchSize, swatchSize)
       pCtx.strokeStyle = '#E5E7EB'
+      pCtx.lineWidth = Math.max(1, scale)
       pCtx.strokeRect(x, y, swatchSize, swatchSize)
 
       pCtx.fillStyle = '#2d3748'
-      pCtx.font = '600 11px -apple-system, BlinkMacSystemFont, sans-serif'
+      pCtx.font = `600 ${mainFontSize}px -apple-system, BlinkMacSystemFont, sans-serif`
       pCtx.textAlign = 'center'
-      pCtx.fillText(getFormatted(c, i), x + swatchSize / 2, y + swatchSize + 20)
+      pCtx.fillText(getFormatted(c, i), x + swatchSize / 2, y + swatchSize + Math.round(20 * scale))
 
       if (f !== 'hex') {
         pCtx.fillStyle = '#718096'
-        pCtx.font = '500 10px -apple-system, BlinkMacSystemFont, sans-serif'
-        pCtx.fillText(c.hex.toUpperCase(), x + swatchSize / 2, y + swatchSize + 35)
+        pCtx.font = `500 ${subFontSize}px -apple-system, BlinkMacSystemFont, sans-serif`
+        pCtx.fillText(c.hex.toUpperCase(), x + swatchSize / 2, y + swatchSize + Math.round(35 * scale))
       }
     })
 
+    // Determine MIME type and quality
+    let mimeType, quality, extension
+    switch (exportFormat) {
+      case 'jpeg':
+        mimeType = 'image/jpeg'
+        quality = 0.92
+        extension = 'jpg'
+        break
+      case 'webp':
+        mimeType = 'image/webp'
+        quality = 0.92
+        extension = 'webp'
+        break
+      default:
+        mimeType = 'image/png'
+        quality = undefined
+        extension = 'png'
+    }
+
     const link = document.createElement('a')
-    link.download = `color-palette-${f}.png`
-    link.href = pCanvas.toDataURL('image/png')
+    link.download = `color-palette-${f}.${extension}`
+    link.href = pCanvas.toDataURL(mimeType, quality)
     link.click()
+  }
+
+  // Keep downloadPng as alias for backwards compatibility
+  function downloadPng() {
+    downloadImage()
   }
 
   return {
@@ -354,9 +419,14 @@ export const usePaletteStore = defineStore('palette', () => {
     imageAdjustments,
     panPosition,
     filteredCanvasRef,
+    imageExportFormat,
+    imageExportSize,
+    exportSizes,
     setImage,
     setColorCount,
     setDownloadFormat,
+    setImageExportFormat,
+    setImageExportSize,
     setSelectedColor,
     setImageAdjustment,
     setPanPosition,
@@ -368,6 +438,7 @@ export const usePaletteStore = defineStore('palette', () => {
     getPixelZoomData,
     getFormatted,
     downloadTxt,
+    downloadImage,
     downloadPng,
     rgbToHsl
   }
