@@ -322,10 +322,19 @@ export const usePaletteStore = defineStore('palette', () => {
     const exportFormat = imageExportFormat.value
     const targetWidth = exportSizes[imageExportSize.value].width
 
-    // Calculate scale factor based on target width
-    const baseSwatchSize = 80
+    // Calculate minimum swatch width based on format text length
+    // Longer formats like rgba need more space to prevent text overlap
+    const formatWidths = {
+      hex: 80,
+      rgb: 110,
+      rgba: 130,
+      hsl: 130,
+      hsla: 145,
+      css: 150
+    }
+    const baseSwatchSize = formatWidths[f] || 80
     const basePadding = 20
-    const baseGap = 10
+    const baseGap = 15
     const baseTextHeight = 50
     const cols_per_row = Math.min(cols.length, 5)
     const rows = Math.ceil(cols.length / cols_per_row)
@@ -349,8 +358,16 @@ export const usePaletteStore = defineStore('palette', () => {
     pCtx.fillStyle = '#ffffff'
     pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height)
 
-    // Font sizes scaled
-    const mainFontSize = Math.round(11 * scale)
+    // Font sizes scaled - use smaller font for longer formats
+    const baseFontSizes = {
+      hex: 12,
+      rgb: 11,
+      rgba: 10,
+      hsl: 10,
+      hsla: 9,
+      css: 9
+    }
+    const mainFontSize = Math.round((baseFontSizes[f] || 11) * scale)
     const subFontSize = Math.round(10 * scale)
 
     cols.forEach((c, i) => {
