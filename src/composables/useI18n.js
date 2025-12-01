@@ -9,7 +9,7 @@ const translations = {
     formatLabel: 'Format',
     paletteTitle: 'Extracted colors',
     placeholderText: 'Upload an image to get started',
-    placeholderHint: 'Drag & drop or click "Choose image"',
+    placeholderHint: 'Drag & drop, paste (Ctrl+V) or click upload',
     processingText: 'Processing image...',
     processingHint: 'Extracting colors',
     downloadTitle: 'Download',
@@ -31,7 +31,15 @@ const translations = {
     saturation: 'Saturation',
     hue: 'Hue',
     reset: 'Reset',
-    resetAll: 'Reset all'
+    resetAll: 'Reset all',
+    // Toast messages
+    copiedToClipboard: 'Color copied to clipboard',
+    imagePasted: 'Image loaded from clipboard',
+    noImageInClipboard: 'No image found in clipboard',
+    clipboardError: 'Could not access clipboard',
+    downloadStarted: 'Download started',
+    // Keyboard hints
+    keyboardHint: 'Use arrow keys to navigate, Enter or Ctrl+C to copy'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -41,7 +49,7 @@ const translations = {
     formatLabel: 'Format',
     paletteTitle: 'Extrahierte Farben',
     placeholderText: 'Lade ein Bild hoch, um zu beginnen',
-    placeholderHint: 'Drag & Drop oder klicke auf "Bild waehlen"',
+    placeholderHint: 'Drag & Drop, Einfuegen (Strg+V) oder Upload klicken',
     processingText: 'Bild wird verarbeitet...',
     processingHint: 'Farben werden extrahiert',
     downloadTitle: 'Herunterladen',
@@ -63,7 +71,15 @@ const translations = {
     saturation: 'Saettigung',
     hue: 'Farbton',
     reset: 'Zuruecksetzen',
-    resetAll: 'Alles zuruecksetzen'
+    resetAll: 'Alles zuruecksetzen',
+    // Toast messages
+    copiedToClipboard: 'Farbe in Zwischenablage kopiert',
+    imagePasted: 'Bild aus Zwischenablage geladen',
+    noImageInClipboard: 'Kein Bild in Zwischenablage gefunden',
+    clipboardError: 'Zugriff auf Zwischenablage fehlgeschlagen',
+    downloadStarted: 'Download gestartet',
+    // Keyboard hints
+    keyboardHint: 'Pfeiltasten zum Navigieren, Enter oder Strg+C zum Kopieren'
   }
 }
 
