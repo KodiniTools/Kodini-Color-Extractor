@@ -73,7 +73,7 @@ function getIndicatorStyle(color, index) {
     left: `${x}px`,
     top: `${y}px`,
     backgroundColor: color.hex,
-    borderColor: store.selectedColorIndex === index ? '#0F5CD4' : 'white',
+    borderColor: store.selectedColorIndex === index ? 'var(--selection-color)' : 'white',
     transform: `scale(${Math.min(zoom, 1.5)})`
   }
 }
@@ -263,7 +263,13 @@ onUnmounted(() => {
       </template>
 
       <div v-else class="placeholder">
-        <div class="placeholder-icon">🖼️</div>
+        <div class="placeholder-icon">
+          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
+            <circle cx="8.5" cy="8.5" r="1.5"/>
+            <polyline points="21 15 16 10 5 21"/>
+          </svg>
+        </div>
         <p class="placeholder-text">{{ t('placeholderText') }}</p>
         <p class="placeholder-hint">{{ t('placeholderHint') }}</p>
       </div>
@@ -278,7 +284,8 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   padding: 40px;
-  background: #ffffff;
+  background: var(--bg-secondary);
+  transition: background 0.3s ease;
 }
 
 .image-container {
@@ -289,10 +296,11 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f8f9fa;
+  background: var(--bg-primary);
   border-radius: 12px;
-  border: 2px dashed #e2e8f0;
+  border: 2px dashed var(--border-color);
   overflow: hidden;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .image-container.is-zoomed {
@@ -318,7 +326,7 @@ onUnmounted(() => {
   height: 32px;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft);
   cursor: grab;
   z-index: 10;
   transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
@@ -326,13 +334,13 @@ onUnmounted(() => {
 
 .color-indicator:hover {
   transform: scale(1.15);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px var(--shadow-medium), 0 0 0 1px var(--shadow-soft);
 }
 
 .color-indicator.selected {
-  border-color: #0F5CD4;
+  border-color: var(--selection-color);
   border-width: 4px;
-  box-shadow: 0 0 0 3px rgba(15, 92, 212, 0.3), 0 4px 12px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium);
   transform: scale(1.1);
 }
 
@@ -348,11 +356,11 @@ onUnmounted(() => {
   height: 120px;
   border: 3px solid white;
   border-radius: 50%;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+  box-shadow: 0 4px 20px var(--shadow-medium);
   pointer-events: none;
   z-index: 1000;
   overflow: hidden;
-  background: #fff;
+  background: var(--bg-secondary);
 }
 
 .pixel-zoom canvas {
@@ -370,7 +378,7 @@ onUnmounted(() => {
   left: 50%;
   width: 4px;
   height: 4px;
-  background: rgba(0, 0, 0, 0.6);
+  background: var(--text-primary);
   border: 1px solid white;
   transform: translate(-50%, -50%);
   border-radius: 1px;
@@ -382,21 +390,24 @@ onUnmounted(() => {
 }
 
 .placeholder-icon {
-  font-size: 64px;
+  color: var(--text-tertiary);
   margin-bottom: 20px;
+  transition: color 0.3s ease;
 }
 
 .placeholder-text {
   font-size: 18px;
   font-weight: 500;
-  color: #4a5568;
+  color: var(--text-secondary);
   margin: 0 0 8px 0;
+  transition: color 0.3s ease;
 }
 
 .placeholder-hint {
   font-size: 14px;
-  color: #718096;
+  color: var(--text-tertiary);
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 @media (max-width: 900px) {

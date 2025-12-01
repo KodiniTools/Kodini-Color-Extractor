@@ -4,13 +4,91 @@
   box-sizing: border-box;
 }
 
+:root {
+  /* New Color Scheme */
+  --color-accent: #F2E28E;
+  --color-secondary: #A28680;
+  --color-neutral: #5E5F69;
+  --color-tertiary: #AEAFB7;
+  --color-dark: #0C0C10;
+
+  /* Light Theme */
+  --bg-primary: #f8f9fa;
+  --bg-secondary: #ffffff;
+  --bg-sidebar: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  --bg-input: #ffffff;
+  --bg-hover: #f0f1f3;
+
+  --text-primary: #0C0C10;
+  --text-secondary: #5E5F69;
+  --text-tertiary: #AEAFB7;
+  --text-on-accent: #0C0C10;
+
+  --border-color: #AEAFB7;
+  --border-light: #e2e8f0;
+  --border-hover: #5E5F69;
+
+  --btn-primary-bg: #5E5F69;
+  --btn-primary-hover: #0C0C10;
+  --btn-primary-text: #ffffff;
+  --btn-secondary-bg: #AEAFB7;
+  --btn-secondary-hover: #5E5F69;
+  --btn-secondary-text: #0C0C10;
+
+  --accent-bg: #F2E28E;
+  --accent-hover: #e6d57a;
+  --accent-text: #0C0C10;
+
+  --selection-color: #5E5F69;
+  --selection-glow: rgba(94, 95, 105, 0.2);
+
+  --shadow-soft: rgba(0, 0, 0, 0.08);
+  --shadow-medium: rgba(0, 0, 0, 0.12);
+}
+
+[data-theme="dark"] {
+  --bg-primary: #0C0C10;
+  --bg-secondary: #1a1a20;
+  --bg-sidebar: linear-gradient(180deg, #0C0C10 0%, #1a1a20 100%);
+  --bg-input: #1a1a20;
+  --bg-hover: #252530;
+
+  --text-primary: #f8f9fa;
+  --text-secondary: #AEAFB7;
+  --text-tertiary: #5E5F69;
+  --text-on-accent: #0C0C10;
+
+  --border-color: #5E5F69;
+  --border-light: #2a2a35;
+  --border-hover: #AEAFB7;
+
+  --btn-primary-bg: #F2E28E;
+  --btn-primary-hover: #e6d57a;
+  --btn-primary-text: #0C0C10;
+  --btn-secondary-bg: #5E5F69;
+  --btn-secondary-hover: #AEAFB7;
+  --btn-secondary-text: #f8f9fa;
+
+  --accent-bg: #F2E28E;
+  --accent-hover: #e6d57a;
+  --accent-text: #0C0C10;
+
+  --selection-color: #F2E28E;
+  --selection-glow: rgba(242, 226, 142, 0.25);
+
+  --shadow-soft: rgba(0, 0, 0, 0.3);
+  --shadow-medium: rgba(0, 0, 0, 0.4);
+}
+
 html, body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
-  background: #f8f9fa;
-  color: #2d3748;
+  background: var(--bg-primary);
+  color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-transform: lowercase;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 #app {
@@ -19,8 +97,22 @@ html, body {
 
 button {
   font-family: inherit;
+  text-transform: lowercase;
 }
 
 select {
   font-family: inherit;
+  text-transform: lowercase;
+}
+
+label {
+  text-transform: lowercase;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-transform: lowercase;
+}
+
+option {
+  text-transform: lowercase;
 }

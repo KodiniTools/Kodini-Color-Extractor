@@ -32,7 +32,7 @@ function selectColor(index) {
 }
 
 function getSecondaryText(color) {
-  return `RGB(${color.r}, ${color.g}, ${color.b})`
+  return `rgb(${color.r}, ${color.g}, ${color.b})`
 }
 </script>
 
@@ -79,7 +79,7 @@ function getSecondaryText(color) {
         <div class="color-swatch"></div>
         <div class="color-info">
           <div class="color-primary">#------</div>
-          <div class="color-secondary">RGB(---, ---, ---)</div>
+          <div class="color-secondary">rgb(---, ---, ---)</div>
         </div>
       </div>
     </template>
@@ -96,23 +96,23 @@ function getSecondaryText(color) {
 .color-item {
   display: flex;
   align-items: center;
-  background: white;
+  background: var(--bg-secondary);
   border-radius: 8px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-light);
   padding: 10px 12px;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .color-item:hover {
-  background-color: #f8fafc;
-  border-color: #cbd5e0;
+  background-color: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 .color-item.selected {
-  border-color: #0F5CD4;
-  box-shadow: 0 0 0 2px rgba(15, 92, 212, 0.15);
-  background-color: #f0f7ff;
+  border-color: var(--selection-color);
+  box-shadow: 0 0 0 2px var(--selection-glow);
+  background-color: var(--bg-hover);
 }
 
 .color-item.placeholder {
@@ -120,8 +120,8 @@ function getSecondaryText(color) {
 }
 
 .color-item.placeholder:hover {
-  background: white;
-  border-color: #e2e8f0;
+  background: var(--bg-secondary);
+  border-color: var(--border-light);
 }
 
 .color-swatch {
@@ -129,9 +129,10 @@ function getSecondaryText(color) {
   height: 36px;
   border-radius: 6px;
   margin-right: 12px;
-  border: 1px solid #e2e8f0;
-  background: #E5E7EB;
+  border: 1px solid var(--border-light);
+  background: var(--text-tertiary);
   flex-shrink: 0;
+  transition: border-color 0.2s ease;
 }
 
 .color-info {
@@ -142,14 +143,16 @@ function getSecondaryText(color) {
 .color-primary {
   font-size: 13px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin-bottom: 2px;
   word-break: break-all;
+  transition: color 0.2s ease;
 }
 
 .color-secondary {
   font-size: 11px;
-  color: #718096;
+  color: var(--text-secondary);
+  transition: color 0.2s ease;
 }
 
 .copy-btn {
@@ -157,21 +160,21 @@ function getSecondaryText(color) {
   border: none;
   padding: 6px;
   cursor: pointer;
-  color: #a0aec0;
+  color: var(--text-tertiary);
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .copy-btn:hover {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: var(--btn-secondary-bg);
+  color: var(--text-primary);
 }
 
 .placeholder .color-primary,
 .placeholder .color-secondary {
-  color: #9CA3AF;
+  color: var(--text-tertiary);
 }
 </style>
