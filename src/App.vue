@@ -2,6 +2,7 @@
 import { ref, computed } from 'vue'
 import { usePaletteStore } from './stores/palette'
 import { useI18n } from './composables/useI18n'
+import { useTheme } from './composables/useTheme'
 import ColorList from './components/ColorList.vue'
 import ImageUploader from './components/ImageUploader.vue'
 import MainContent from './components/MainContent.vue'
@@ -9,6 +10,7 @@ import ImageEditPanel from './components/ImageEditPanel.vue'
 
 const store = usePaletteStore()
 const { t, locale, availableLocales } = useI18n()
+const { theme, toggleTheme } = useTheme()
 
 const count = computed({
   get: () => store.colorCount,
@@ -44,9 +46,27 @@ function toggleLocale() {
       <div class="sidebar-header">
         <h1 class="title">{{ t('title') }}</h1>
         <p class="subtitle">{{ t('subtitle') }}</p>
-        <button class="locale-toggle" @click="toggleLocale">
-          {{ locale.toUpperCase() }}
-        </button>
+        <div class="header-controls">
+          <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'light mode' : 'dark mode'">
+            <svg v-if="theme === 'dark'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="5"></circle>
+              <line x1="12" y1="1" x2="12" y2="3"></line>
+              <line x1="12" y1="21" x2="12" y2="23"></line>
+              <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+              <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+              <line x1="1" y1="12" x2="3" y2="12"></line>
+              <line x1="21" y1="12" x2="23" y2="12"></line>
+              <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+              <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+            <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+          </button>
+          <button class="locale-toggle" @click="toggleLocale">
+            {{ locale }}
+          </button>
+        </div>
       </div>
 
       <ImageUploader />
@@ -62,12 +82,12 @@ function toggleLocale() {
         <div class="control-group">
           <label>{{ t('formatLabel') }}</label>
           <select v-model="format" class="format-select">
-            <option value="hex">HEX</option>
-            <option value="rgb">RGB</option>
-            <option value="rgba">RGBA</option>
-            <option value="hsl">HSL</option>
-            <option value="hsla">HSLA</option>
-            <option value="css">CSS Variables</option>
+            <option value="hex">hex</option>
+            <option value="rgb">rgb</option>
+            <option value="rgba">rgba</option>
+            <option value="hsl">hsl</option>
+            <option value="hsla">hsla</option>
+            <option value="css">css variables</option>
           </select>
         </div>
       </div>
@@ -84,9 +104,9 @@ function toggleLocale() {
           <div class="control-group">
             <label>{{ t('imageFormatLabel') }}</label>
             <select v-model="imageFormat">
-              <option value="png">PNG</option>
-              <option value="jpeg">JPEG</option>
-              <option value="webp">WEBP</option>
+              <option value="png">png</option>
+              <option value="jpeg">jpeg</option>
+              <option value="webp">webp</option>
             </select>
           </div>
 
@@ -121,19 +141,21 @@ function toggleLocale() {
 .app-container {
   display: flex;
   min-height: 100vh;
-  background: #f8f9fa;
+  background: var(--bg-primary);
+  transition: background 0.3s ease;
 }
 
 .sidebar {
   width: 320px;
   min-width: 320px;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  background: var(--bg-sidebar);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid rgba(0, 0, 0, 0.1);
+  border-right: 1px solid var(--border-light);
   overflow-y: auto;
   max-height: 100vh;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .sidebar-header {
@@ -144,32 +166,59 @@ function toggleLocale() {
 .title {
   font-size: 22px;
   font-weight: 700;
-  color: #2d3748;
+  color: var(--text-primary);
   margin: 0 0 6px 0;
+  transition: color 0.3s ease;
 }
 
 .subtitle {
   font-size: 13px;
-  color: #718096;
+  color: var(--text-secondary);
   margin: 0;
+  transition: color 0.3s ease;
 }
 
-.locale-toggle {
+.header-controls {
   position: absolute;
   top: 0;
   right: 0;
-  background: #e2e8f0;
+  display: flex;
+  gap: 6px;
+}
+
+.theme-toggle {
+  background: var(--btn-secondary-bg);
+  border: none;
+  border-radius: 4px;
+  padding: 6px;
+  cursor: pointer;
+  color: var(--btn-secondary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.theme-toggle:hover {
+  background: var(--btn-secondary-hover);
+  color: var(--btn-primary-text);
+}
+
+.locale-toggle {
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: 4px;
   padding: 4px 8px;
   font-size: 11px;
   font-weight: 600;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--btn-secondary-text);
+  transition: all 0.2s ease;
 }
 
 .locale-toggle:hover {
-  background: #cbd5e0;
+  background: var(--btn-secondary-hover);
+  color: var(--btn-primary-text);
 }
 
 .controls {
@@ -188,22 +237,29 @@ function toggleLocale() {
 .control-group label {
   font-size: 13px;
   font-weight: 500;
-  color: #4a5568;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .control-group select {
   padding: 10px 12px;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   font-size: 14px;
-  background: white;
+  background: var(--bg-input);
+  color: var(--text-primary);
   cursor: pointer;
+  transition: all 0.2s ease;
 }
 
 .control-group select:focus {
   outline: none;
-  border-color: #0F5CD4;
-  box-shadow: 0 0 0 3px rgba(15, 92, 212, 0.1);
+  border-color: var(--selection-color);
+  box-shadow: 0 0 0 3px var(--selection-glow);
+}
+
+.control-group select:hover {
+  border-color: var(--border-hover);
 }
 
 .palette-section {
@@ -214,21 +270,24 @@ function toggleLocale() {
 .palette-title {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin: 0 0 12px 0;
+  transition: color 0.3s ease;
 }
 
 .download-section {
   margin-top: 20px;
   padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid var(--border-light);
+  transition: border-color 0.3s ease;
 }
 
 .download-title {
   font-size: 14px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin: 0 0 12px 0;
+  transition: color 0.3s ease;
 }
 
 .export-options {
@@ -260,25 +319,26 @@ function toggleLocale() {
   font-size: 13px;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .btn-primary {
-  background: #0F5CD4;
-  color: white;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
 }
 
 .btn-primary:hover {
-  background: #0D4DB8;
+  background: var(--btn-primary-hover);
 }
 
 .btn-secondary {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: var(--btn-secondary-bg);
+  color: var(--btn-secondary-text);
 }
 
 .btn-secondary:hover {
-  background: #cbd5e0;
+  background: var(--btn-secondary-hover);
+  color: var(--btn-primary-text);
 }
 
 @media (max-width: 1200px) {
@@ -297,7 +357,7 @@ function toggleLocale() {
     min-width: 100%;
     max-height: none;
     border-right: none;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    border-bottom: 1px solid var(--border-light);
   }
 }
 </style>

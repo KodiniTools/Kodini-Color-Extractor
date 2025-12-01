@@ -61,37 +61,48 @@ async function processFile(file) {
       class="file-input"
       @change="handleFile"
     >
-    <span v-if="isProcessing" class="upload-text">{{ t('processingText') }}</span>
-    <span v-else class="upload-text">{{ t('uploadText') }}</span>
+    <span v-if="isProcessing" class="upload-content">
+      <svg class="upload-icon spinning" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      </svg>
+    </span>
+    <span v-else class="upload-content">
+      <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="17 8 12 3 7 8"/>
+        <line x1="12" y1="3" x2="12" y2="15"/>
+      </svg>
+    </span>
   </div>
 </template>
 
 <style scoped>
 .upload-area {
-  background: #0F5CD4;
-  color: white;
+  background: var(--accent-bg);
+  color: var(--accent-text);
   border: none;
   border-radius: 8px;
   padding: 16px 24px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
-  font-size: 15px;
-  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .upload-area:hover {
-  background: #0D4DB8;
+  background: var(--accent-hover);
   transform: translateY(-1px);
 }
 
 .upload-area.dragging {
-  background: #0D4DB8;
-  box-shadow: 0 0 0 3px rgba(15, 92, 212, 0.3);
+  background: var(--accent-hover);
+  box-shadow: 0 0 0 3px var(--selection-glow);
 }
 
 .upload-area.processing {
-  background: #718096;
+  background: var(--text-tertiary);
   cursor: wait;
 }
 
@@ -99,7 +110,27 @@ async function processFile(file) {
   display: none;
 }
 
-.upload-text {
-  display: block;
+.upload-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-icon {
+  width: 24px;
+  height: 24px;
+}
+
+.upload-icon.spinning {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 </style>

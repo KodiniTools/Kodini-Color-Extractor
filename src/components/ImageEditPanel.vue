@@ -174,13 +174,14 @@ function resetSlider(prop) {
 .edit-panel {
   width: 280px;
   min-width: 280px;
-  background: linear-gradient(180deg, #f8f9fa 0%, #e9ecef 100%);
+  background: var(--bg-sidebar);
   padding: 24px;
   display: flex;
   flex-direction: column;
-  border-left: 1px solid rgba(0, 0, 0, 0.1);
+  border-left: 1px solid var(--border-light);
   overflow-y: auto;
   max-height: 100vh;
+  transition: background 0.3s ease, border-color 0.3s ease;
 }
 
 .panel-header {
@@ -193,26 +194,27 @@ function resetSlider(prop) {
 .panel-title {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   margin: 0;
+  transition: color 0.3s ease;
 }
 
 .reset-all-btn {
-  background: #e2e8f0;
+  background: var(--btn-secondary-bg);
   border: none;
   border-radius: 6px;
   padding: 6px 8px;
   cursor: pointer;
-  color: #4a5568;
+  color: var(--btn-secondary-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .reset-all-btn:hover {
-  background: #cbd5e0;
-  color: #2d3748;
+  background: var(--btn-secondary-hover);
+  color: var(--btn-primary-text);
 }
 
 .slider-group {
@@ -229,7 +231,8 @@ function resetSlider(prop) {
 .slider-header label {
   font-size: 13px;
   font-weight: 500;
-  color: #4a5568;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
 .slider-value-group {
@@ -241,9 +244,10 @@ function resetSlider(prop) {
 .slider-value {
   font-size: 12px;
   font-weight: 600;
-  color: #2d3748;
+  color: var(--text-primary);
   min-width: 45px;
   text-align: right;
+  transition: color 0.3s ease;
 }
 
 .reset-btn {
@@ -251,27 +255,28 @@ function resetSlider(prop) {
   border: none;
   padding: 4px;
   cursor: pointer;
-  color: #718096;
+  color: var(--text-tertiary);
   display: flex;
   align-items: center;
   justify-content: center;
   border-radius: 4px;
-  transition: all 0.2s;
+  transition: all 0.2s ease;
 }
 
 .reset-btn:hover {
-  background: #e2e8f0;
-  color: #4a5568;
+  background: var(--btn-secondary-bg);
+  color: var(--text-primary);
 }
 
 .slider {
   width: 100%;
   height: 6px;
   border-radius: 3px;
-  background: #e2e8f0;
+  background: var(--border-color);
   outline: none;
   -webkit-appearance: none;
   appearance: none;
+  transition: background 0.3s ease;
 }
 
 .slider::-webkit-slider-thumb {
@@ -280,10 +285,10 @@ function resetSlider(prop) {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #0F5CD4;
+  background: var(--accent-bg);
   cursor: pointer;
   border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px var(--shadow-medium);
   transition: transform 0.15s ease;
 }
 
@@ -295,10 +300,10 @@ function resetSlider(prop) {
   width: 18px;
   height: 18px;
   border-radius: 50%;
-  background: #0F5CD4;
+  background: var(--accent-bg);
   cursor: pointer;
   border: 3px solid white;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2px 6px var(--shadow-medium);
 }
 
 .slider-hue {
@@ -320,7 +325,7 @@ function resetSlider(prop) {
     min-width: 100%;
     max-height: none;
     border-left: none;
-    border-top: 1px solid rgba(0, 0, 0, 0.1);
+    border-top: 1px solid var(--border-light);
   }
 }
 </style>
