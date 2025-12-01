@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
@@ -6,6 +7,9 @@ import { useToast } from '../composables/useToast'
 const store = usePaletteStore()
 const { t } = useI18n()
 const toast = useToast()
+
+const hoveredIndex = ref(null)
+const tooltipPosition = ref({ x: 0, y: 0 })
 
 async function copyColor(color, index) {
   const text = store.getFormatted(color, index)
@@ -31,6 +35,23 @@ function selectColor(index) {
 function getSecondaryText(color) {
   return `rgb(${color.r}, ${color.g}, ${color.b})`
 }
+
+function showTooltip(event, index) {
+  hoveredIndex.value = index
+  updateTooltipPosition(event)
+}
+
+function updateTooltipPosition(event) {
+  const rect = event.currentTarget.getBoundingClientRect()
+  tooltipPosition.value = {
+    x: rect.left + rect.width / 2,
+    y: rect.top - 8
+  }
+}
+
+function hideTooltip() {
+  hoveredIndex.value = null
+}
 </script>
 
 <template>
@@ -43,6 +64,9 @@ function getSecondaryText(color) {
         :class="{ selected: store.selectedColorIndex === index }"
         @click="selectColor(index)"
         @dblclick="copyColor(color, index)"
+        @mouseenter="showTooltip($event, index)"
+        @mousemove="updateTooltipPosition"
+        @mouseleave="hideTooltip"
       >
         <div
           class="color-swatch"
@@ -73,6 +97,29 @@ function getSecondaryText(color) {
         </div>
       </div>
     </template>
+
+    <!-- Tooltip -->
+    <Teleport to="body">
+      <Transition name="tooltip">
+        <div
+          v-if="hoveredIndex !== null && store.colors[hoveredIndex]"
+          class="color-tooltip"
+          :style="{
+            left: tooltipPosition.x + 'px',
+            top: tooltipPosition.y + 'px'
+          }"
+        >
+          <div
+            class="tooltip-swatch"
+            :style="{ backgroundColor: store.colors[hoveredIndex].hex }"
+          ></div>
+          <div class="tooltip-content">
+            <span class="tooltip-hex">{{ store.colors[hoveredIndex].hex }}</span>
+            <span class="tooltip-hint">{{ t('doubleClickToCopy') }}</span>
+          </div>
+        </div>
+      </Transition>
+    </Teleport>
   </div>
 </template>
 
@@ -166,5 +213,91 @@ function getSecondaryText(color) {
 .placeholder .color-primary,
 .placeholder .color-secondary {
   color: var(--text-tertiary);
+}
+
+/* Tooltip styles */
+.color-tooltip {
+  position: fixed;
+  z-index: 10000;
+  transform: translate(-50%, -100%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  box-shadow: 0 4px 20px var(--shadow-medium);
+  pointer-events: none;
+}
+
+.color-tooltip::after {
+  content: '';
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%) rotate(45deg);
+  width: 10px;
+  height: 10px;
+  background: var(--bg-secondary);
+  border-right: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.tooltip-swatch {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border-light);
+  flex-shrink: 0;
+}
+
+.tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tooltip-hex {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+  text-transform: uppercase;
+}
+
+.tooltip-hint {
+  font-size: 11px;
+  color: var(--text-tertiary);
+}
+
+/* Tooltip transitions */
+.tooltip-enter-active {
+  animation: tooltip-in 0.15s ease-out;
+}
+
+.tooltip-leave-active {
+  animation: tooltip-out 0.1s ease-in forwards;
+}
+
+@keyframes tooltip-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+}
+
+@keyframes tooltip-out {
+  from {
+    opacity: 1;
+    transform: translate(-50%, -100%);
+  }
+  to {
+    opacity: 0;
+    transform: translate(-50%, -90%);
+  }
 }
 </style>

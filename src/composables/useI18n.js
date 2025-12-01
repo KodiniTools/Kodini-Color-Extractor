@@ -39,7 +39,9 @@ const translations = {
     clipboardError: 'Could not access clipboard',
     downloadStarted: 'Download started',
     // Keyboard hints
-    keyboardHint: 'Use arrow keys to navigate, Enter or Ctrl+C to copy'
+    keyboardHint: 'Use arrow keys to navigate, Enter or Ctrl+C to copy',
+    // Tooltips
+    doubleClickToCopy: 'Double-click to copy'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -79,7 +81,9 @@ const translations = {
     clipboardError: 'Zugriff auf Zwischenablage fehlgeschlagen',
     downloadStarted: 'Download gestartet',
     // Keyboard hints
-    keyboardHint: 'Pfeiltasten zum Navigieren, Enter oder Strg+C zum Kopieren'
+    keyboardHint: 'Pfeiltasten zum Navigieren, Enter oder Strg+C zum Kopieren',
+    // Tooltips
+    doubleClickToCopy: 'Doppelklick zum Kopieren'
   }
 }
 
