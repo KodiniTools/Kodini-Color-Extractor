@@ -41,7 +41,10 @@ const translations = {
     // Keyboard hints
     keyboardHint: 'Use arrow keys to navigate, Enter or Ctrl+C to copy',
     // Tooltips
-    doubleClickToCopy: 'Double-click to copy'
+    doubleClickToCopy: 'Double-click to copy',
+    // Donate
+    donate: 'support this project',
+    donateTitle: 'Donate via PayPal'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -83,7 +86,10 @@ const translations = {
     // Keyboard hints
     keyboardHint: 'Pfeiltasten zum Navigieren, Enter oder Strg+C zum Kopieren',
     // Tooltips
-    doubleClickToCopy: 'Doppelklick zum Kopieren'
+    doubleClickToCopy: 'Doppelklick zum Kopieren',
+    // Donate
+    donate: 'projekt unterstuetzen',
+    donateTitle: 'Spenden via PayPal'
   }
 }
 
