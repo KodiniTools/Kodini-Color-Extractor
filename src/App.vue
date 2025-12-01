@@ -3,14 +3,21 @@ import { ref, computed } from 'vue'
 import { usePaletteStore } from './stores/palette'
 import { useI18n } from './composables/useI18n'
 import { useTheme } from './composables/useTheme'
+import { useKeyboard } from './composables/useKeyboard'
+import { useToast } from './composables/useToast'
 import ColorList from './components/ColorList.vue'
 import ImageUploader from './components/ImageUploader.vue'
 import MainContent from './components/MainContent.vue'
 import ImageEditPanel from './components/ImageEditPanel.vue'
+import ToastContainer from './components/ToastContainer.vue'
 
 const store = usePaletteStore()
 const { t, locale, availableLocales } = useI18n()
 const { theme, toggleTheme } = useTheme()
+const toast = useToast()
+
+// Initialize keyboard shortcuts
+useKeyboard()
 
 const count = computed({
   get: () => store.colorCount,
@@ -134,6 +141,7 @@ function toggleLocale() {
 
     <MainContent />
     <ImageEditPanel />
+    <ToastContainer />
   </div>
 </template>
 

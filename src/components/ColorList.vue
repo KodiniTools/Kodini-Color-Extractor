@@ -1,11 +1,11 @@
 <script setup>
-import { ref } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
+import { useToast } from '../composables/useToast'
 
 const store = usePaletteStore()
 const { t } = useI18n()
-const copiedIndex = ref(null)
+const toast = useToast()
 
 async function copyColor(color, index) {
   const text = store.getFormatted(color, index)
@@ -21,10 +21,7 @@ async function copyColor(color, index) {
     document.execCommand('copy')
     document.body.removeChild(ta)
   }
-  copiedIndex.value = index
-  setTimeout(() => {
-    copiedIndex.value = null
-  }, 1500)
+  toast.success(t('copiedToClipboard'))
 }
 
 function selectColor(index) {
@@ -52,14 +49,7 @@ function getSecondaryText(color) {
           :style="{ backgroundColor: color.hex }"
         ></div>
         <div class="color-info">
-          <div class="color-primary">
-            <template v-if="copiedIndex === index">
-              {{ t('copied') }}
-            </template>
-            <template v-else>
-              {{ store.getFormatted(color, index) }}
-            </template>
-          </div>
+          <div class="color-primary">{{ store.getFormatted(color, index) }}</div>
           <div class="color-secondary">{{ getSecondaryText(color) }}</div>
         </div>
         <button class="copy-btn" @click.stop="copyColor(color, index)" :title="t('clickToCopy')">
