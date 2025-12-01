@@ -51,8 +51,6 @@ function toggleLocale() {
   <div class="app-container">
     <aside class="sidebar">
       <div class="sidebar-header">
-        <h1 class="title">{{ t('title') }}</h1>
-        <p class="subtitle">{{ t('subtitle') }}</p>
         <div class="header-controls">
           <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'light mode' : 'dark mode'">
             <svg v-if="theme === 'dark'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -74,6 +72,8 @@ function toggleLocale() {
             {{ locale }}
           </button>
         </div>
+        <h1 class="title">{{ t('title') }}</h1>
+        <p class="subtitle">{{ t('subtitle') }}</p>
       </div>
 
       <ImageUploader />
@@ -180,8 +180,14 @@ function toggleLocale() {
 }
 
 .sidebar-header {
-  position: relative;
   margin-bottom: 24px;
+}
+
+.header-controls {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-bottom: 12px;
 }
 
 .title {
@@ -197,14 +203,6 @@ function toggleLocale() {
   color: var(--text-secondary);
   margin: 0;
   transition: color 0.3s ease;
-}
-
-.header-controls {
-  position: absolute;
-  top: 0;
-  right: 0;
-  display: flex;
-  gap: 6px;
 }
 
 .theme-toggle {
