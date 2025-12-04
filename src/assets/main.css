@@ -87,7 +87,6 @@ html, body {
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  text-transform: lowercase;
   transition: background 0.3s ease, color 0.3s ease;
 }
 
@@ -97,22 +96,9 @@ html, body {
 
 button {
   font-family: inherit;
-  text-transform: lowercase;
 }
 
 select {
   font-family: inherit;
-  text-transform: lowercase;
 }
 
-label {
-  text-transform: lowercase;
-}
-
-h1, h2, h3, h4, h5, h6 {
-  text-transform: lowercase;
-}
-
-option {
-  text-transform: lowercase;
-}
