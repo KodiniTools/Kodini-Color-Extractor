@@ -2,6 +2,7 @@
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
+import SampleImages from './SampleImages.vue'
 
 const store = usePaletteStore()
 const { t } = useI18n()
@@ -223,9 +224,11 @@ onUnmounted(() => {
 
 <template>
   <main class="main-content">
-    <div
-      ref="imageContainer"
-      class="image-container"
+    <div class="main-content-inner">
+      <SampleImages />
+      <div
+        ref="imageContainer"
+        class="image-container"
       :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning }"
       @mousedown="startPan"
     >
@@ -274,6 +277,7 @@ onUnmounted(() => {
         <p class="placeholder-hint">{{ t('placeholderHint') }}</p>
       </div>
     </div>
+    </div>
   </main>
 </template>
 
@@ -286,6 +290,14 @@ onUnmounted(() => {
   padding: 40px;
   background: var(--bg-secondary);
   transition: background 0.3s ease;
+}
+
+.main-content-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 800px;
 }
 
 .image-container {
