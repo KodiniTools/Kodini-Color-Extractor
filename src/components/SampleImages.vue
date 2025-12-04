@@ -6,16 +6,16 @@ import { useI18n } from '../composables/useI18n'
 const store = usePaletteStore()
 const { t } = useI18n()
 
-// Sample images configuration - paths to be replaced with actual images
+// Sample images configuration - using relative paths for subdirectory deployment
 const sampleImages = ref([
-  { id: 1, src: '/samples/sample-1.jpg', alt: 'Sample 1' },
-  { id: 2, src: '/samples/sample-2.jpg', alt: 'Sample 2' },
-  { id: 3, src: '/samples/sample-3.jpg', alt: 'Sample 3' },
-  { id: 4, src: '/samples/sample-4.jpg', alt: 'Sample 4' },
-  { id: 5, src: '/samples/sample-5.jpg', alt: 'Sample 5' },
-  { id: 6, src: '/samples/sample-6.jpg', alt: 'Sample 6' },
-  { id: 7, src: '/samples/sample-7.jpg', alt: 'Sample 7' },
-  { id: 8, src: '/samples/sample-8.jpg', alt: 'Sample 8' }
+  { id: 1, src: './samples/sample-1.jpg', alt: 'Sample 1' },
+  { id: 2, src: './samples/sample-2.jpg', alt: 'Sample 2' },
+  { id: 3, src: './samples/sample-3.jpg', alt: 'Sample 3' },
+  { id: 4, src: './samples/sample-4.jpg', alt: 'Sample 4' },
+  { id: 5, src: './samples/sample-5.jpg', alt: 'Sample 5' },
+  { id: 6, src: './samples/sample-6.jpg', alt: 'Sample 6' },
+  { id: 7, src: './samples/sample-7.jpg', alt: 'Sample 7' },
+  { id: 8, src: './samples/sample-8.jpg', alt: 'Sample 8' }
 ])
 
 const selectedSampleId = ref(null)
