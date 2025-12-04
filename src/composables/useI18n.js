@@ -44,7 +44,10 @@ const translations = {
     doubleClickToCopy: 'Double-click to copy',
     // Donate
     donate: 'support this project',
-    donateTitle: 'Donate via PayPal'
+    donateTitle: 'Donate via PayPal',
+    // Sample images
+    sampleImagesLabel: 'Try with sample images:',
+    sampleImageHint: 'Click to load this sample image'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -89,7 +92,10 @@ const translations = {
     doubleClickToCopy: 'Doppelklick zum Kopieren',
     // Donate
     donate: 'projekt unterstuetzen',
-    donateTitle: 'Spenden via PayPal'
+    donateTitle: 'Spenden via PayPal',
+    // Sample images
+    sampleImagesLabel: 'Mit Beispielbildern testen:',
+    sampleImageHint: 'Klicken um dieses Beispielbild zu laden'
   }
 }
 
