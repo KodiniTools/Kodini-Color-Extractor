@@ -37,6 +37,9 @@ const isPanning = ref(false)
 const panStart = ref({ x: 0, y: 0 })
 const panStartPosition = ref({ x: 0, y: 0 })
 
+// Performance optimization: track pending animation frame
+let animationFrameId = null
+
 function updateRects() {
   if (displayImage.value && imageContainer.value) {
     imageRect.value = displayImage.value.getBoundingClientRect()
@@ -79,21 +82,55 @@ function getIndicatorStyle(color, index) {
   }
 }
 
+// Get client coordinates from mouse or touch event
+function getEventCoords(e) {
+  if (e.touches && e.touches.length > 0) {
+    return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }
+  }
+  return { clientX: e.clientX, clientY: e.clientY }
+}
+
 function startDrag(e, index) {
   e.preventDefault()
   e.stopPropagation()
+
+  // Update rects at drag start for accuracy
+  updateRects()
 
   isDragging.value = true
   dragIndex.value = index
   store.setSelectedColor(index)
   showZoom.value = true
 
+  // Mouse events
   document.addEventListener('mousemove', handleDrag)
   document.addEventListener('mouseup', stopDrag)
+  // Touch events
+  document.addEventListener('touchmove', handleDrag, { passive: false })
+  document.addEventListener('touchend', stopDrag)
+  document.addEventListener('touchcancel', stopDrag)
   document.body.style.userSelect = 'none'
 }
 
 function handleDrag(e) {
+  if (!isDragging.value || dragIndex.value < 0) return
+  if (!imageRect.value || !containerRect.value) return
+
+  // Prevent scrolling on touch devices
+  if (e.cancelable) e.preventDefault()
+
+  // Use requestAnimationFrame for smooth updates
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
+
+  animationFrameId = requestAnimationFrame(() => {
+    const coords = getEventCoords(e)
+    processDrag(coords.clientX, coords.clientY)
+  })
+}
+
+function processDrag(clientX, clientY) {
   if (!isDragging.value || dragIndex.value < 0) return
   if (!imageRect.value || !containerRect.value) return
 
@@ -108,8 +145,8 @@ function handleDrag(e) {
   const containerCenterY = containerRect.value.top + containerRect.value.height / 2
 
   // Reverse the zoom and pan transformation to get image coordinates
-  const relX = (e.clientX - containerCenterX) / zoom + containerRect.value.width / 2 - (imageRect.value.left - containerRect.value.left) - panX * (imageRect.value.width / store.originalImageSize.width)
-  const relY = (e.clientY - containerCenterY) / zoom + containerRect.value.height / 2 - (imageRect.value.top - containerRect.value.top) - panY * (imageRect.value.height / store.originalImageSize.height)
+  const relX = (clientX - containerCenterX) / zoom + containerRect.value.width / 2 - (imageRect.value.left - containerRect.value.left) - panX * (imageRect.value.width / store.originalImageSize.width)
+  const relY = (clientY - containerCenterY) / zoom + containerRect.value.height / 2 - (imageRect.value.top - containerRect.value.top) - panY * (imageRect.value.height / store.originalImageSize.height)
 
   const imgX = Math.max(0, Math.min(store.originalImageSize.width - 1, relX * scaleX))
   const imgY = Math.max(0, Math.min(store.originalImageSize.height - 1, relY * scaleY))
@@ -118,8 +155,8 @@ function handleDrag(e) {
 
   // Update zoom position
   zoomPosition.value = {
-    x: e.clientX - containerRect.value.left + 30,
-    y: e.clientY - containerRect.value.top - 60
+    x: clientX - containerRect.value.left + 30,
+    y: clientY - containerRect.value.top - 60
   }
 
   // Draw zoom canvas
@@ -131,11 +168,23 @@ function handleDrag(e) {
 }
 
 function stopDrag() {
+  // Cancel any pending animation frame
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+    animationFrameId = null
+  }
+
   isDragging.value = false
   dragIndex.value = -1
   showZoom.value = false
+
+  // Remove mouse events
   document.removeEventListener('mousemove', handleDrag)
   document.removeEventListener('mouseup', stopDrag)
+  // Remove touch events
+  document.removeEventListener('touchmove', handleDrag)
+  document.removeEventListener('touchend', stopDrag)
+  document.removeEventListener('touchcancel', stopDrag)
   document.body.style.userSelect = ''
 }
 
@@ -214,11 +263,20 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
+  // Cancel any pending animation frame
+  if (animationFrameId) {
+    cancelAnimationFrame(animationFrameId)
+  }
   window.removeEventListener('resize', updateRects)
+  // Mouse events
   document.removeEventListener('mousemove', handleDrag)
   document.removeEventListener('mouseup', stopDrag)
   document.removeEventListener('mousemove', handlePan)
   document.removeEventListener('mouseup', stopPan)
+  // Touch events
+  document.removeEventListener('touchmove', handleDrag)
+  document.removeEventListener('touchend', stopDrag)
+  document.removeEventListener('touchcancel', stopDrag)
 })
 </script>
 
@@ -251,6 +309,7 @@ onUnmounted(() => {
           :class="{ selected: store.selectedColorIndex === index, dragging: isDragging && dragIndex === index }"
           :style="getIndicatorStyle(color, index)"
           @mousedown="startDrag($event, index)"
+          @touchstart.prevent="startDrag($event, index)"
           @click.stop="selectColor(index)"
         ></div>
 
@@ -343,6 +402,10 @@ onUnmounted(() => {
   z-index: 10;
   transition: transform 0.15s ease, border-color 0.15s ease;
   animation: pulse 2s ease-in-out infinite;
+  /* Touch optimization */
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-tap-highlight-color: transparent;
 }
 
 @keyframes pulse {
