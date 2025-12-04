@@ -300,20 +300,34 @@ export const usePaletteStore = defineStore('palette', () => {
     }
   }
 
+  function getPaletteText() {
+    const f = downloadFormat.value
+    if (f === 'css') {
+      return ':root {\n' + colors.value.map((c, i) => '  ' + getFormatted(c, i)).join('\n') + '\n}'
+    } else {
+      return colors.value.map((c, i) => getFormatted(c, i)).join('\n')
+    }
+  }
+
   function downloadTxt() {
     const f = downloadFormat.value
-    let content = ''
-    if (f === 'css') {
-      content = ':root {\n' + colors.value.map((c, i) => '  ' + getFormatted(c, i)).join('\n') + '\n}'
-    } else {
-      content = colors.value.map((c, i) => getFormatted(c, i)).join('\n')
-    }
+    const content = getPaletteText()
     const blob = new Blob([content], { type: 'text/plain' })
     const link = document.createElement('a')
     link.download = `color-palette-${f}.txt`
     link.href = URL.createObjectURL(blob)
     link.click()
     URL.revokeObjectURL(link.href)
+  }
+
+  async function copyPalette() {
+    const content = getPaletteText()
+    try {
+      await navigator.clipboard.writeText(content)
+      return true
+    } catch {
+      return false
+    }
   }
 
   function downloadImage() {
@@ -457,6 +471,7 @@ export const usePaletteStore = defineStore('palette', () => {
     downloadTxt,
     downloadImage,
     downloadPng,
+    copyPalette,
     rgbToHsl
   }
 })
