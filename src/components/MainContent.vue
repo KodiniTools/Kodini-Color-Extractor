@@ -341,7 +341,17 @@ onUnmounted(() => {
   box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft);
   cursor: grab;
   z-index: 10;
-  transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  transition: transform 0.15s ease, border-color 0.15s ease;
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% {
+    box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft), 0 0 0 0 rgba(255, 255, 255, 0.4);
+  }
+  50% {
+    box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft), 0 0 0 8px rgba(255, 255, 255, 0);
+  }
 }
 
 .color-indicator:hover {
@@ -352,14 +362,24 @@ onUnmounted(() => {
 .color-indicator.selected {
   border-color: var(--selection-color);
   border-width: 4px;
-  box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium);
   transform: scale(1.1);
+  animation: pulse-selected 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-selected {
+  0%, 100% {
+    box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium), 0 0 0 0 var(--selection-glow);
+  }
+  50% {
+    box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium), 0 0 0 10px transparent;
+  }
 }
 
 .color-indicator.dragging {
   cursor: grabbing;
   transform: scale(1.2);
   z-index: 100;
+  animation: none;
 }
 
 .pixel-zoom {
