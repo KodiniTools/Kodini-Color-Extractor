@@ -91,7 +91,7 @@ const translations = {
     // Tooltips
     doubleClickToCopy: 'Doppelklick zum Kopieren',
     // Donate
-    donate: 'projekt unterstuetzen',
+    donate: 'Projekt unterstuetzen',
     donateTitle: 'Spenden via PayPal',
     // Sample images
     sampleImagesLabel: 'Mit Beispielbildern testen:',
