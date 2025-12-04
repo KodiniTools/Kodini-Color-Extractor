@@ -45,6 +45,25 @@ const imageSize = computed({
 function toggleLocale() {
   locale.value = locale.value === 'de' ? 'en' : 'de'
 }
+
+async function handleCopy() {
+  const success = await store.copyPalette()
+  if (success) {
+    toast.show(t('paletteCopied'), 'success')
+  } else {
+    toast.show(t('clipboardError'), 'error')
+  }
+}
+
+function handleDownloadTxt() {
+  store.downloadTxt()
+  toast.show(t('downloadStarted'), 'success')
+}
+
+function handleDownloadImage() {
+  store.downloadImage()
+  toast.show(t('downloadStarted'), 'success')
+}
 </script>
 
 <template>
@@ -104,36 +123,46 @@ function toggleLocale() {
         <ColorList />
       </div>
 
-      <div v-if="store.hasColors" class="download-section">
-        <h3 class="download-title">{{ t('downloadTitle') }}</h3>
-
-        <div class="export-options">
-          <div class="control-group">
-            <label>{{ t('imageFormatLabel') }}</label>
-            <select v-model="imageFormat">
-              <option value="png">png</option>
-              <option value="jpeg">jpeg</option>
-              <option value="webp">webp</option>
+      <div v-if="store.hasColors" class="export-section">
+        <div class="export-header">
+          <h3 class="export-title">{{ t('exportTitle') }}</h3>
+          <div class="export-format-selects">
+            <select v-model="imageFormat" class="export-select" :title="t('imageFormatLabel')">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPG</option>
+              <option value="webp">WebP</option>
             </select>
-          </div>
-
-          <div class="control-group">
-            <label>{{ t('imageSizeLabel') }}</label>
-            <select v-model="imageSize">
-              <option value="small">{{ t('sizeSmall') }}</option>
-              <option value="medium">{{ t('sizeMedium') }}</option>
-              <option value="large">{{ t('sizeLarge') }}</option>
-              <option value="xlarge">{{ t('sizeXLarge') }}</option>
+            <select v-model="imageSize" class="export-select" :title="t('imageSizeLabel')">
+              <option value="small">400px</option>
+              <option value="medium">800px</option>
+              <option value="large">1200px</option>
+              <option value="xlarge">1600px</option>
             </select>
           </div>
         </div>
 
-        <div class="download-buttons">
-          <button class="btn btn-secondary" @click="store.downloadTxt">
-            {{ t('downloadTxt') }}
+        <div class="export-buttons">
+          <button class="export-btn" @click="handleCopy" :title="t('copyPalette')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+            </svg>
           </button>
-          <button class="btn btn-primary" @click="store.downloadImage">
-            {{ t('downloadImage') }}
+          <button class="export-btn" @click="handleDownloadTxt" :title="t('downloadTxt')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" y1="13" x2="8" y2="13"></line>
+              <line x1="16" y1="17" x2="8" y2="17"></line>
+              <polyline points="10 9 9 9 8 9"></polyline>
+            </svg>
+          </button>
+          <button class="export-btn export-btn-primary" @click="handleDownloadImage" :title="t('downloadImage')">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+              <circle cx="8.5" cy="8.5" r="1.5"></circle>
+              <polyline points="21 15 16 10 5 21"></polyline>
+            </svg>
           </button>
         </div>
       </div>
@@ -294,70 +323,87 @@ function toggleLocale() {
   transition: color 0.3s ease;
 }
 
-.download-section {
+.export-section {
   margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid var(--border-light);
   transition: border-color 0.3s ease;
 }
 
-.download-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 12px 0;
-  transition: color 0.3s ease;
-}
-
-.export-options {
+.export-header {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
   margin-bottom: 12px;
 }
 
-.export-options .control-group {
-  flex: 1;
+.export-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin: 0;
+  transition: color 0.3s ease;
 }
 
-.export-options .control-group select {
-  width: 100%;
-  padding: 8px 10px;
-  font-size: 13px;
-}
-
-.download-buttons {
+.export-format-selects {
   display: flex;
-  gap: 10px;
+  gap: 6px;
 }
 
-.btn {
-  flex: 1;
-  padding: 12px 16px;
-  border: none;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
+.export-select {
+  padding: 6px 8px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  font-size: 11px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.btn-primary {
+.export-select:hover {
+  border-color: var(--border-hover);
+}
+
+.export-select:focus {
+  outline: none;
+  border-color: var(--selection-color);
+}
+
+.export-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.export-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.export-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.export-btn-primary {
   background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
 }
 
-.btn-primary:hover {
+.export-btn-primary:hover {
   background: var(--btn-primary-hover);
-}
-
-.btn-secondary {
-  background: var(--btn-secondary-bg);
-  color: var(--btn-secondary-text);
-}
-
-.btn-secondary:hover {
-  background: var(--btn-secondary-hover);
-  color: var(--btn-primary-text);
+  border-color: var(--btn-primary-hover);
 }
 
 /* Donate Section */
