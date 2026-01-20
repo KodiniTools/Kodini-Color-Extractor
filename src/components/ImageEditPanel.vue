@@ -33,12 +33,21 @@ const hue = computed({
   set: (val) => store.setImageAdjustment('hue', val)
 })
 
+const defaults = { zoom: 100, brightness: 100, contrast: 100, saturation: 100, hue: 0 }
+
+const isModified = computed(() => ({
+  zoom: zoom.value !== defaults.zoom,
+  brightness: brightness.value !== defaults.brightness,
+  contrast: contrast.value !== defaults.contrast,
+  saturation: saturation.value !== defaults.saturation,
+  hue: hue.value !== defaults.hue
+}))
+
 function resetAll() {
   store.resetImageAdjustments()
 }
 
 function resetSlider(prop) {
-  const defaults = { zoom: 100, brightness: 100, contrast: 100, saturation: 100, hue: 0 }
   store.setImageAdjustment(prop, defaults[prop])
 }
 </script>
@@ -68,7 +77,7 @@ function resetSlider(prop) {
         <label>{{ t('zoom') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ zoom }}%</span>
-          <button class="reset-btn" @click="resetSlider('zoom')" :title="t('reset')">
+          <button class="reset-btn" :class="{ active: isModified.zoom }" @click="resetSlider('zoom')" :title="t('reset')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -91,7 +100,7 @@ function resetSlider(prop) {
         <label>{{ t('brightness') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ brightness }}%</span>
-          <button class="reset-btn" @click="resetSlider('brightness')" :title="t('reset')">
+          <button class="reset-btn" :class="{ active: isModified.brightness }" @click="resetSlider('brightness')" :title="t('reset')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -114,7 +123,7 @@ function resetSlider(prop) {
         <label>{{ t('contrast') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ contrast }}%</span>
-          <button class="reset-btn" @click="resetSlider('contrast')" :title="t('reset')">
+          <button class="reset-btn" :class="{ active: isModified.contrast }" @click="resetSlider('contrast')" :title="t('reset')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -137,7 +146,7 @@ function resetSlider(prop) {
         <label>{{ t('saturation') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ saturation }}%</span>
-          <button class="reset-btn" @click="resetSlider('saturation')" :title="t('reset')">
+          <button class="reset-btn" :class="{ active: isModified.saturation }" @click="resetSlider('saturation')" :title="t('reset')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -160,7 +169,7 @@ function resetSlider(prop) {
         <label>{{ t('hue') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ hue }}°</span>
-          <button class="reset-btn" @click="resetSlider('hue')" :title="t('reset')">
+          <button class="reset-btn" :class="{ active: isModified.hue }" @click="resetSlider('hue')" :title="t('reset')">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
               <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
               <path d="M3 3v5h5"/>
@@ -299,6 +308,15 @@ function resetSlider(prop) {
 .reset-btn:hover {
   background: var(--btn-secondary-bg);
   color: var(--text-primary);
+}
+
+.reset-btn.active {
+  color: #4ade80;
+}
+
+.reset-btn.active:hover {
+  background: rgba(74, 222, 128, 0.15);
+  color: #4ade80;
 }
 
 .slider {
