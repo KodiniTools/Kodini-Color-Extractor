@@ -9,6 +9,7 @@ import ColorList from './components/ColorList.vue'
 import ImageUploader from './components/ImageUploader.vue'
 import MainContent from './components/MainContent.vue'
 import ImageEditPanel from './components/ImageEditPanel.vue'
+import ImagePreviewModal from './components/ImagePreviewModal.vue'
 import ToastContainer from './components/ToastContainer.vue'
 
 const store = usePaletteStore()
@@ -18,6 +19,9 @@ const toast = useToast()
 
 // Initialize keyboard shortcuts
 useKeyboard()
+
+// Preview modal state
+const showPreviewModal = ref(false)
 
 const count = computed({
   get: () => store.colorCount,
@@ -182,7 +186,8 @@ function handleDownloadImage() {
     </aside>
 
     <MainContent />
-    <ImageEditPanel />
+    <ImageEditPanel @open-preview="showPreviewModal = true" />
+    <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
     <ToastContainer />
   </div>
 </template>

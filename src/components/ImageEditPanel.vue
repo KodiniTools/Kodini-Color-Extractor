@@ -6,6 +6,8 @@ import { useI18n } from '../composables/useI18n'
 const store = usePaletteStore()
 const { t } = useI18n()
 
+const emit = defineEmits(['open-preview'])
+
 const zoom = computed({
   get: () => store.imageAdjustments.zoom,
   set: (val) => store.setImageAdjustment('zoom', val)
@@ -45,12 +47,20 @@ function resetSlider(prop) {
   <aside class="edit-panel" v-if="store.currentImage">
     <div class="panel-header">
       <h2 class="panel-title">{{ t('editPanelTitle') }}</h2>
-      <button class="reset-all-btn" @click="resetAll" :title="t('resetAll')">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-          <path d="M3 3v5h5"/>
-        </svg>
-      </button>
+      <div class="header-buttons">
+        <button class="preview-btn" @click="emit('open-preview')" :title="t('preview')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+        </button>
+        <button class="reset-all-btn" @click="resetAll" :title="t('resetAll')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+            <path d="M3 3v5h5"/>
+          </svg>
+        </button>
+      </div>
     </div>
 
     <div class="slider-group">
@@ -189,6 +199,29 @@ function resetSlider(prop) {
   align-items: center;
   justify-content: space-between;
   margin-bottom: 24px;
+}
+
+.header-buttons {
+  display: flex;
+  gap: 6px;
+}
+
+.preview-btn {
+  background: var(--btn-secondary-bg);
+  border: none;
+  border-radius: 6px;
+  padding: 6px 8px;
+  cursor: pointer;
+  color: var(--btn-secondary-text);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.preview-btn:hover {
+  background: var(--accent-bg);
+  color: var(--btn-primary-text);
 }
 
 .panel-title {
