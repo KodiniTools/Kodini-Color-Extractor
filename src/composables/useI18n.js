@@ -50,7 +50,13 @@ const translations = {
     donateTitle: 'Donate via PayPal',
     // Sample images
     sampleImagesLabel: 'Try with sample images:',
-    sampleImageHint: 'Click to load this sample image'
+    sampleImageHint: 'Click to load this sample image',
+    // Preview modal
+    preview: 'Preview',
+    previewTitle: 'Before / After Comparison',
+    before: 'Before',
+    after: 'After',
+    closePreview: 'Close preview'
   },
   de: {
     title: 'Kodini Color Extractor',
@@ -101,7 +107,13 @@ const translations = {
     donateTitle: 'Spenden via PayPal',
     // Sample images
     sampleImagesLabel: 'Mit Beispielbildern testen:',
-    sampleImageHint: 'Klicken um dieses Beispielbild zu laden'
+    sampleImageHint: 'Klicken um dieses Beispielbild zu laden',
+    // Preview modal
+    preview: 'Vorschau',
+    previewTitle: 'Vorher / Nachher Vergleich',
+    before: 'Vorher',
+    after: 'Nachher',
+    closePreview: 'Vorschau schliessen'
   }
 }
 
