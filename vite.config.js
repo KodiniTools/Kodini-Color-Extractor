@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 
 export default defineConfig({
   plugins: [vue()],
-  base: './',
+  base: '/kodini-color-extractor/',
   build: {
     outDir: 'dist',
     assetsDir: 'assets'
