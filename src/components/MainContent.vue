@@ -7,6 +7,35 @@ import SampleImages from './SampleImages.vue'
 const store = usePaletteStore()
 const { t } = useI18n()
 
+// Drag and drop for image upload
+const isFileDragging = ref(false)
+
+function handleFileDragOver(e) {
+  e.preventDefault()
+  isFileDragging.value = true
+}
+
+function handleFileDragLeave(e) {
+  e.preventDefault()
+  isFileDragging.value = false
+}
+
+async function handleFileDrop(e) {
+  e.preventDefault()
+  isFileDragging.value = false
+
+  const file = e.dataTransfer?.files?.[0]
+  if (file && file.type.startsWith('image/')) {
+    const reader = new FileReader()
+    reader.onload = async (event) => {
+      const imgSrc = event.target.result
+      store.setImage(imgSrc)
+      await store.extractColors(imgSrc)
+    }
+    reader.readAsDataURL(file)
+  }
+}
+
 // Computed style for image filters and pan
 const imageFilterStyle = computed(() => {
   const { zoom, brightness, contrast, saturation, hue } = store.imageAdjustments
@@ -281,15 +310,21 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <main class="main-content">
+  <main
+    class="main-content"
+    :class="{ 'file-dragging': isFileDragging }"
+    @dragover.prevent="handleFileDragOver"
+    @dragleave.prevent="handleFileDragLeave"
+    @drop.prevent="handleFileDrop"
+  >
     <div class="main-content-inner">
       <SampleImages />
       <div
         ref="imageContainer"
         class="image-container"
-      :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning }"
-      @mousedown="startPan"
-    >
+        :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning, 'file-dragging': isFileDragging }"
+        @mousedown="startPan"
+      >
       <template v-if="store.currentImage">
         <img
           ref="displayImage"
@@ -351,6 +386,10 @@ onUnmounted(() => {
   transition: background 0.3s ease;
 }
 
+.main-content.file-dragging {
+  background: var(--bg-hover);
+}
+
 .main-content-inner {
   display: flex;
   flex-direction: column;
@@ -372,6 +411,12 @@ onUnmounted(() => {
   border: 2px dashed var(--border-color);
   overflow: hidden;
   transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.image-container.file-dragging {
+  border-color: var(--selection-color);
+  border-width: 3px;
+  background: var(--bg-hover);
 }
 
 .image-container.is-zoomed {
