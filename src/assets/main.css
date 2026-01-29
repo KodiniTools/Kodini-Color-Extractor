@@ -92,6 +92,7 @@ html, body {
 
 #app {
   min-height: 100vh;
+  padding-top: 60px; /* Space for global navigation */
 }
 
 button {

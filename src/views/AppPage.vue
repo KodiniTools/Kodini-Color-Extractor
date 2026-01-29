@@ -221,16 +221,14 @@ function handleDownloadImage() {
 
 /* App Header */
 .app-header {
-  position: sticky;
-  top: 0;
-  z-index: 90;
+  position: relative;
+  z-index: 50;
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 12px 20px;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-light);
-  backdrop-filter: blur(8px);
   transition: all 0.3s ease;
 }
 
