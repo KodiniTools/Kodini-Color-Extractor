@@ -2,6 +2,7 @@ import { ref, computed } from 'vue'
 
 const translations = {
   en: {
+    // App
     title: 'Kodini Color Extractor',
     subtitle: 'Extract colors from any image',
     uploadText: 'Choose image',
@@ -56,9 +57,81 @@ const translations = {
     previewTitle: 'Before / After Comparison',
     before: 'Before',
     after: 'After',
-    closePreview: 'Close preview'
+    closePreview: 'Close preview',
+
+    // Navigation
+    navHome: 'Home',
+    navApp: 'Open App',
+    navFaq: 'FAQ',
+
+    // Landing Page - Hero
+    heroTitle: 'Extract Beautiful Color Palettes from Any Image',
+    heroSubtitle: 'A free, privacy-focused tool that runs entirely in your browser. No uploads, no tracking - just pure color extraction.',
+    heroCta: 'Start Extracting Colors',
+
+    // Landing Page - Features
+    feature1Title: 'Drag & Drop Upload',
+    feature1Desc: 'Simply drag your image into the browser or paste from clipboard. Support for all common image formats.',
+    feature2Title: 'Precise Color Picking',
+    feature2Desc: 'Drag color indicators directly on the image to pick exact colors with pixel-level precision.',
+    feature3Title: 'Multiple Export Formats',
+    feature3Desc: 'Export as HEX, RGB, HSL, or CSS variables. Download as text file or beautifully designed palette image.',
+
+    // Landing Page - Details
+    detailsTitle: 'All Features at a Glance',
+    detailsSubtitle: 'Professional color extraction with everything you need.',
+
+    detail1Title: 'Image Processing',
+    detail1Desc: 'Adjust brightness, contrast, saturation and hue in real-time.',
+    detail2Title: 'Up to 20 Colors',
+    detail2Desc: 'Extract between 1 and 20 dominant colors from your image.',
+    detail3Title: 'Easy to Use',
+    detail3Desc: 'Intuitive interface with keyboard shortcuts for power users.',
+    detail4Title: '100% Private',
+    detail4Desc: 'All processing happens locally. Your images never leave your device.',
+    detail5Title: 'Keyboard Shortcuts',
+    detail5Desc: 'Navigate with arrow keys, copy with Ctrl+C, paste images with Ctrl+V.',
+    detail6Title: 'Responsive Design',
+    detail6Desc: 'Works on desktop, tablet and mobile devices.',
+
+    // Landing Page - CTA
+    ctaTitle: 'Ready to Extract Colors?',
+    ctaSubtitle: 'No registration required. Start using the tool right away.',
+    ctaButton: 'Launch Color Extractor',
+
+    // FAQ Page
+    faqTitle: 'Frequently Asked Questions',
+    faqSubtitle: 'Everything you need to know about Kodini Color Extractor.',
+
+    faq1Question: 'Is Kodini Color Extractor free to use?',
+    faq1Answer: 'Yes, Kodini Color Extractor is completely free to use. There are no hidden costs, subscriptions, or premium features. All functionality is available to everyone.',
+
+    faq2Question: 'Are my images uploaded to a server?',
+    faq2Answer: 'No, your images are never uploaded anywhere. All processing happens directly in your browser using the HTML5 Canvas API. Your images and extracted colors stay completely private on your device.',
+
+    faq3Question: 'What image formats are supported?',
+    faq3Answer: 'The tool supports all common image formats including JPEG, PNG, WebP, GIF, and BMP. You can drag & drop files, paste from clipboard, or use the file picker.',
+
+    faq4Question: 'How do I extract a specific color from my image?',
+    faq4Answer: 'After loading your image, you will see color indicators placed on the image. Simply drag these indicators to any position to extract the exact color at that pixel. A 12x12 pixel magnifier helps you with precision positioning.',
+
+    faq5Question: 'What export formats are available?',
+    faq5Answer: 'You can export your color palette in multiple formats: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA, and CSS custom properties. Export as a text file or as a beautiful palette image in PNG, JPG, or WebP format.',
+
+    faq6Question: 'Can I adjust the image before extracting colors?',
+    faq6Answer: 'Yes, the image edit panel allows you to adjust zoom, brightness, contrast, saturation, and hue. This is useful when you want to extract colors from a modified version of your image.',
+
+    faq7Question: 'Does it work on mobile devices?',
+    faq7Answer: 'Yes, Kodini Color Extractor is fully responsive and works on smartphones and tablets. The interface adapts to smaller screens while maintaining full functionality.',
+
+    faq8Question: 'Is there a dark mode?',
+    faq8Answer: 'Yes, the application supports both light and dark themes. Click the sun/moon icon to toggle between modes. Your preference is saved locally.',
+
+    faqCtaTitle: 'Still have questions? Try it yourself!',
+    faqCtaButton: 'Open Color Extractor'
   },
   de: {
+    // App
     title: 'Kodini Color Extractor',
     subtitle: 'Extrahiere Farben aus jedem Bild',
     uploadText: 'Bild waehlen',
@@ -113,7 +186,78 @@ const translations = {
     previewTitle: 'Vorher / Nachher Vergleich',
     before: 'Vorher',
     after: 'Nachher',
-    closePreview: 'Vorschau schliessen'
+    closePreview: 'Vorschau schliessen',
+
+    // Navigation
+    navHome: 'Start',
+    navApp: 'App oeffnen',
+    navFaq: 'FAQ',
+
+    // Landing Page - Hero
+    heroTitle: 'Extrahiere Farbpaletten aus jedem Bild',
+    heroSubtitle: 'Ein kostenloses, datenschutzfreundliches Tool, das vollstaendig in deinem Browser laeuft. Keine Uploads, kein Tracking - nur reine Farbextraktion.',
+    heroCta: 'Farben extrahieren',
+
+    // Landing Page - Features
+    feature1Title: 'Drag & Drop Upload',
+    feature1Desc: 'Ziehe dein Bild einfach in den Browser oder fuege es aus der Zwischenablage ein. Unterstuetzung fuer alle gaengigen Bildformate.',
+    feature2Title: 'Praezise Farbauswahl',
+    feature2Desc: 'Ziehe Farbindikatoren direkt auf dem Bild, um exakte Farben mit Pixel-Genauigkeit auszuwaehlen.',
+    feature3Title: 'Mehrere Exportformate',
+    feature3Desc: 'Exportiere als HEX, RGB, HSL oder CSS-Variablen. Download als Textdatei oder als ansprechend gestaltetes Palettenbild.',
+
+    // Landing Page - Details
+    detailsTitle: 'Alle Funktionen im Ueberblick',
+    detailsSubtitle: 'Professionelle Farbextraktion mit allem was du brauchst.',
+
+    detail1Title: 'Bildbearbeitung',
+    detail1Desc: 'Passe Helligkeit, Kontrast, Saettigung und Farbton in Echtzeit an.',
+    detail2Title: 'Bis zu 20 Farben',
+    detail2Desc: 'Extrahiere zwischen 1 und 20 dominante Farben aus deinem Bild.',
+    detail3Title: 'Einfache Bedienung',
+    detail3Desc: 'Intuitive Oberflaeche mit Tastaturkuerzeln fuer Power-User.',
+    detail4Title: '100% Privat',
+    detail4Desc: 'Alle Verarbeitung erfolgt lokal. Deine Bilder verlassen niemals dein Geraet.',
+    detail5Title: 'Tastaturkuerzel',
+    detail5Desc: 'Navigiere mit Pfeiltasten, kopiere mit Strg+C, fuege Bilder mit Strg+V ein.',
+    detail6Title: 'Responsives Design',
+    detail6Desc: 'Funktioniert auf Desktop, Tablet und mobilen Geraeten.',
+
+    // Landing Page - CTA
+    ctaTitle: 'Bereit Farben zu extrahieren?',
+    ctaSubtitle: 'Keine Registrierung erforderlich. Starte sofort mit dem Tool.',
+    ctaButton: 'Color Extractor starten',
+
+    // FAQ Page
+    faqTitle: 'Haeufig gestellte Fragen',
+    faqSubtitle: 'Alles was du ueber Kodini Color Extractor wissen musst.',
+
+    faq1Question: 'Ist Kodini Color Extractor kostenlos?',
+    faq1Answer: 'Ja, Kodini Color Extractor ist vollstaendig kostenlos. Es gibt keine versteckten Kosten, Abonnements oder Premium-Funktionen. Alle Funktionen sind fuer jeden verfuegbar.',
+
+    faq2Question: 'Werden meine Bilder auf einen Server hochgeladen?',
+    faq2Answer: 'Nein, deine Bilder werden nirgendwo hochgeladen. Die gesamte Verarbeitung erfolgt direkt in deinem Browser mit der HTML5 Canvas API. Deine Bilder und extrahierten Farben bleiben vollstaendig privat auf deinem Geraet.',
+
+    faq3Question: 'Welche Bildformate werden unterstuetzt?',
+    faq3Answer: 'Das Tool unterstuetzt alle gaengigen Bildformate wie JPEG, PNG, WebP, GIF und BMP. Du kannst Dateien per Drag & Drop, aus der Zwischenablage oder ueber die Dateiauswahl laden.',
+
+    faq4Question: 'Wie extrahiere ich eine bestimmte Farbe aus meinem Bild?',
+    faq4Answer: 'Nach dem Laden deines Bildes siehst du Farbindikatoren auf dem Bild. Ziehe diese Indikatoren einfach an eine beliebige Position, um die exakte Farbe an diesem Pixel zu extrahieren. Eine 12x12 Pixel Lupe hilft dir bei der praezisen Positionierung.',
+
+    faq5Question: 'Welche Exportformate sind verfuegbar?',
+    faq5Answer: 'Du kannst deine Farbpalette in mehreren Formaten exportieren: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA und CSS Custom Properties. Export als Textdatei oder als ansprechendes Palettenbild im PNG-, JPG- oder WebP-Format.',
+
+    faq6Question: 'Kann ich das Bild vor der Farbextraktion anpassen?',
+    faq6Answer: 'Ja, das Bildbearbeitungspanel ermoeglicht die Anpassung von Zoom, Helligkeit, Kontrast, Saettigung und Farbton. Dies ist nuetzlich, wenn du Farben aus einer modifizierten Version deines Bildes extrahieren moechtest.',
+
+    faq7Question: 'Funktioniert es auf mobilen Geraeten?',
+    faq7Answer: 'Ja, Kodini Color Extractor ist vollstaendig responsiv und funktioniert auf Smartphones und Tablets. Die Oberflaeche passt sich an kleinere Bildschirme an und behaelt dabei die volle Funktionalitaet.',
+
+    faq8Question: 'Gibt es einen Dark Mode?',
+    faq8Answer: 'Ja, die Anwendung unterstuetzt sowohl helle als auch dunkle Themes. Klicke auf das Sonnen-/Mond-Symbol, um zwischen den Modi zu wechseln. Deine Praeferenz wird lokal gespeichert.',
+
+    faqCtaTitle: 'Noch Fragen? Probiere es selbst aus!',
+    faqCtaButton: 'Color Extractor oeffnen'
   }
 }
 
