@@ -56,12 +56,10 @@ function toggleLocale() {
 
 <style scoped>
 .landing-nav {
-  position: sticky;
-  top: 0;
-  z-index: 100;
+  position: relative;
+  z-index: 50;
   background: var(--bg-primary);
   border-bottom: 1px solid var(--border-light);
-  backdrop-filter: blur(8px);
   transition: all 0.3s ease;
 }
 
