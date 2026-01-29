@@ -25,7 +25,7 @@ function toggleLocale() {
 
       <div class="nav-links">
         <router-link to="/" class="nav-link">{{ t('navHome') }}</router-link>
-        <router-link to="/app" class="nav-link nav-link-primary">{{ t('navApp') }}</router-link>
+        <router-link to="/app" class="nav-link">{{ t('navApp') }}</router-link>
         <router-link to="/faq" class="nav-link">{{ t('navFaq') }}</router-link>
       </div>
 
@@ -116,21 +116,6 @@ function toggleLocale() {
 .nav-link.router-link-active {
   color: var(--text-primary);
   background: var(--bg-hover);
-}
-
-.nav-link-primary {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-}
-
-.nav-link-primary:hover {
-  background: var(--btn-primary-hover);
-  color: var(--btn-primary-text);
-}
-
-.nav-link-primary.router-link-active {
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
 }
 
 .nav-controls {
