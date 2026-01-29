@@ -42,6 +42,17 @@ export const usePaletteStore = defineStore('palette', () => {
     currentImage.value = imgSrc
   }
 
+  function clearImage() {
+    currentImage.value = null
+    colors.value = []
+    imageData.value = null
+    canvasRef.value = null
+    filteredCanvasRef.value = null
+    selectedColorIndex.value = -1
+    originalImageSize.value = { width: 0, height: 0 }
+    resetImageAdjustments()
+  }
+
   function setColorCount(count) {
     colorCount.value = count
   }
@@ -454,6 +465,7 @@ export const usePaletteStore = defineStore('palette', () => {
     imageExportSize,
     exportSizes,
     setImage,
+    clearImage,
     setColorCount,
     setDownloadFormat,
     setImageExportFormat,

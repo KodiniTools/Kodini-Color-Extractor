@@ -36,6 +36,7 @@ const translations = {
     hue: 'Hue',
     reset: 'Reset',
     resetAll: 'Reset all',
+    deleteImage: 'Delete image',
     // Toast messages
     copiedToClipboard: 'Color copied to clipboard',
     imagePasted: 'Image loaded from clipboard',
@@ -165,6 +166,7 @@ const translations = {
     hue: 'Farbton',
     reset: 'Zurücksetzen',
     resetAll: 'Alles zurücksetzen',
+    deleteImage: 'Bild löschen',
     // Toast messages
     copiedToClipboard: 'Farbe in Zwischenablage kopiert',
     imagePasted: 'Bild aus Zwischenablage geladen',
