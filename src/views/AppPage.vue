@@ -2,7 +2,6 @@
 import { ref, computed } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
-import { useTheme } from '../composables/useTheme'
 import { useKeyboard } from '../composables/useKeyboard'
 import { useToast } from '../composables/useToast'
 import ColorList from '../components/ColorList.vue'
@@ -13,8 +12,7 @@ import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 
 const store = usePaletteStore()
-const { t, locale } = useI18n()
-const { theme, toggleTheme } = useTheme()
+const { t } = useI18n()
 const toast = useToast()
 
 // Initialize keyboard shortcuts
@@ -45,10 +43,6 @@ const imageSize = computed({
   get: () => store.imageExportSize,
   set: (val) => store.setImageExportSize(val)
 })
-
-function toggleLocale() {
-  locale.value = locale.value === 'de' ? 'en' : 'de'
-}
 
 async function handleCopy() {
   const success = await store.copyPalette()
@@ -88,25 +82,6 @@ function handleDownloadImage() {
       </div>
       <div class="header-right">
         <router-link to="/faq" class="header-link">{{ t('navFaq') }}</router-link>
-        <button class="theme-toggle" @click="toggleTheme" :title="theme === 'dark' ? 'light mode' : 'dark mode'">
-          <svg v-if="theme === 'dark'" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="5"></circle>
-            <line x1="12" y1="1" x2="12" y2="3"></line>
-            <line x1="12" y1="21" x2="12" y2="23"></line>
-            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
-            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
-            <line x1="1" y1="12" x2="3" y2="12"></line>
-            <line x1="21" y1="12" x2="23" y2="12"></line>
-            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
-            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
-          </svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-          </svg>
-        </button>
-        <button class="locale-toggle" @click="toggleLocale">
-          {{ locale }}
-        </button>
       </div>
     </header>
 
@@ -287,41 +262,6 @@ function handleDownloadImage() {
 .header-link:hover {
   color: var(--text-primary);
   background: var(--bg-hover);
-}
-
-.theme-toggle {
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 4px;
-  padding: 6px;
-  cursor: pointer;
-  color: var(--btn-secondary-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.theme-toggle:hover {
-  background: var(--btn-secondary-hover);
-  color: var(--btn-primary-text);
-}
-
-.locale-toggle {
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 4px;
-  padding: 4px 8px;
-  font-size: 11px;
-  font-weight: 600;
-  cursor: pointer;
-  color: var(--btn-secondary-text);
-  transition: all 0.2s ease;
-}
-
-.locale-toggle:hover {
-  background: var(--btn-secondary-hover);
-  color: var(--btn-primary-text);
 }
 
 /* App Container */
