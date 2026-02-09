@@ -263,26 +263,34 @@ const translations = {
   }
 }
 
-// Resolve initial locale: localStorage (set by SSI nav) > browser language > 'en'
+// ─── SSI Navigation Synchronisation ───
+// Die SSI-Nav (nav.html) steuert Sprachwechsel über:
+//   localStorage key: 'locale' (default: 'de')
+//   CustomEvent: 'language-changed' mit { detail: { lang: 'de'|'en' } }
+//
+// Event-Fluss:
+//   SSI-Nav-Klick → localStorage.setItem('locale', lang)
+//   → new CustomEvent('language-changed', { detail: { lang } })
+//   → dieser Listener → currentLocale.value update → Vue re-render
+
+// Default 'de' - identisch mit SSI-Nav: localStorage.getItem('locale') || 'de'
 function getInitialLocale() {
   const stored = localStorage.getItem('locale')
   if (stored && translations[stored]) return stored
-  const browserLang = (navigator.language || 'en').split('-')[0]
-  return translations[browserLang] ? browserLang : 'en'
+  return 'de'
 }
 
 const currentLocale = ref(getInitialLocale())
 
-// Listen for language-changed CustomEvent from SSI navigation
-// SSI nav dispatches: new CustomEvent('language-changed', { detail: { lang: targetLang } })
+// SSI-Nav dispatcht: new CustomEvent('language-changed', { detail: { lang: targetLang } })
 window.addEventListener('language-changed', (e) => {
-  const newLocale = e.detail?.lang || e.detail?.locale || e.detail
-  if (newLocale && translations[newLocale]) {
-    currentLocale.value = newLocale
+  const lang = e.detail?.lang
+  if (lang && translations[lang]) {
+    currentLocale.value = lang
   }
 })
 
-// Also sync when localStorage changes from another tab/context
+// Tab-übergreifende Synchronisation via storage Event
 window.addEventListener('storage', (e) => {
   if (e.key === 'locale' && e.newValue && translations[e.newValue]) {
     currentLocale.value = e.newValue
@@ -290,7 +298,10 @@ window.addEventListener('storage', (e) => {
 })
 
 export function useI18n() {
-  const t = (key) => translations[currentLocale.value]?.[key] || translations.en[key] || key
+  const t = (key) => {
+    const val = translations[currentLocale.value]?.[key] || translations.de[key] || key
+    return val
+  }
 
   const locale = computed({
     get: () => currentLocale.value,
