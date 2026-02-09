@@ -263,8 +263,30 @@ const translations = {
   }
 }
 
-const browserLang = (navigator.language || 'en').split('-')[0]
-const currentLocale = ref(translations[browserLang] ? browserLang : 'en')
+// Resolve initial locale: localStorage (set by SSI nav) > browser language > 'en'
+function getInitialLocale() {
+  const stored = localStorage.getItem('locale')
+  if (stored && translations[stored]) return stored
+  const browserLang = (navigator.language || 'en').split('-')[0]
+  return translations[browserLang] ? browserLang : 'en'
+}
+
+const currentLocale = ref(getInitialLocale())
+
+// Listen for language-changed CustomEvent from SSI navigation
+window.addEventListener('language-changed', (e) => {
+  const newLocale = e.detail?.locale || e.detail
+  if (newLocale && translations[newLocale]) {
+    currentLocale.value = newLocale
+  }
+})
+
+// Also sync when localStorage changes from another tab/context
+window.addEventListener('storage', (e) => {
+  if (e.key === 'locale' && e.newValue && translations[e.newValue]) {
+    currentLocale.value = e.newValue
+  }
+})
 
 export function useI18n() {
   const t = (key) => translations[currentLocale.value]?.[key] || translations.en[key] || key
