@@ -274,8 +274,9 @@ function getInitialLocale() {
 const currentLocale = ref(getInitialLocale())
 
 // Listen for language-changed CustomEvent from SSI navigation
+// SSI nav dispatches: new CustomEvent('language-changed', { detail: { lang: targetLang } })
 window.addEventListener('language-changed', (e) => {
-  const newLocale = e.detail?.locale || e.detail
+  const newLocale = e.detail?.lang || e.detail?.locale || e.detail
   if (newLocale && translations[newLocale]) {
     currentLocale.value = newLocale
   }
