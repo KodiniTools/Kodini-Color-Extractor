@@ -1,4 +1,4 @@
-import { ref, computed } from 'vue'
+import { ref, computed, triggerRef } from 'vue'
 
 const translations = {
   en: {
@@ -267,11 +267,12 @@ const translations = {
 // Die SSI-Nav (nav.html) steuert Sprachwechsel über:
 //   localStorage key: 'locale' (default: 'de')
 //   CustomEvent: 'language-changed' mit { detail: { lang: 'de'|'en' } }
+//   document.documentElement.setAttribute('lang', lang)
 //
-// Event-Fluss:
-//   SSI-Nav-Klick → localStorage.setItem('locale', lang)
-//   → new CustomEvent('language-changed', { detail: { lang } })
-//   → dieser Listener → currentLocale.value update → Vue re-render
+// Sync-Mechanismen (dreifach-redundant):
+//   1. CustomEvent 'language-changed' → direkter Update
+//   2. MutationObserver auf <html lang="..."> → Fallback
+//   3. storage Event → Tab-übergreifende Synchronisation
 
 // Default 'de' - identisch mit SSI-Nav: localStorage.getItem('locale') || 'de'
 function getInitialLocale() {
@@ -282,31 +283,86 @@ function getInitialLocale() {
 
 const currentLocale = ref(getInitialLocale())
 
-// SSI-Nav dispatcht: new CustomEvent('language-changed', { detail: { lang: targetLang } })
+// Computed für aktuelle Übersetzungen – stärkt die reaktive Abhängigkeitskette
+const currentTranslations = computed(() => translations[currentLocale.value] || translations.de)
+
+function setLocale(lang) {
+  if (lang && translations[lang] && currentLocale.value !== lang) {
+    currentLocale.value = lang
+    triggerRef(currentLocale)
+  }
+}
+
+// Sync 1: CustomEvent von SSI-Nav
 window.addEventListener('language-changed', (e) => {
   const lang = e.detail?.lang
-  if (lang && translations[lang]) {
-    currentLocale.value = lang
+  setLocale(lang)
+})
+
+// Sync 2: MutationObserver auf <html lang> Attribut (Fallback)
+if (typeof MutationObserver !== 'undefined') {
+  const langObserver = new MutationObserver((mutations) => {
+    for (const mutation of mutations) {
+      if (mutation.attributeName === 'lang') {
+        const lang = document.documentElement.lang
+        setLocale(lang)
+      }
+    }
+  })
+
+  function initLangObserver() {
+    langObserver.observe(document.documentElement, {
+      attributes: true,
+      attributeFilter: ['lang']
+    })
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLangObserver)
+  } else {
+    initLangObserver()
+  }
+}
+
+// Sync 3: Tab-übergreifende Synchronisation via storage Event
+window.addEventListener('storage', (e) => {
+  if (e.key === 'locale' && e.newValue) {
+    setLocale(e.newValue)
   }
 })
 
-// Tab-übergreifende Synchronisation via storage Event
-window.addEventListener('storage', (e) => {
-  if (e.key === 'locale' && e.newValue && translations[e.newValue]) {
-    currentLocale.value = e.newValue
+// Initiale Synchronisation mit SSI-Nav (falls locale vor Vue-Mount gesetzt wurde)
+function syncInitialLocale() {
+  const stored = localStorage.getItem('locale')
+  if (stored && translations[stored] && currentLocale.value !== stored) {
+    currentLocale.value = stored
   }
-})
+  const docLang = document.documentElement.lang
+  if (docLang && translations[docLang] && currentLocale.value !== docLang) {
+    currentLocale.value = docLang
+  }
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', syncInitialLocale)
+} else {
+  syncInitialLocale()
+}
 
 export function useI18n() {
   const t = (key) => {
-    const val = translations[currentLocale.value]?.[key] || translations.de[key] || key
-    return val
+    return currentTranslations.value[key] || translations.de[key] || key
   }
 
   const locale = computed({
     get: () => currentLocale.value,
     set: (val) => {
-      if (translations[val]) currentLocale.value = val
+      if (translations[val]) {
+        currentLocale.value = val
+        localStorage.setItem('locale', val)
+        document.documentElement.setAttribute('lang', val)
+        window.dispatchEvent(new CustomEvent('language-changed', { detail: { lang: val } }))
+      }
     }
   })
 
