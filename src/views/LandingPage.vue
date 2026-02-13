@@ -437,4 +437,92 @@ const { t } = useI18n()
     padding: 48px 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .hero {
+    padding: 32px 12px;
+  }
+
+  .hero-content {
+    margin: 0 auto 36px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+    margin-bottom: 24px;
+  }
+
+  .hero-cta {
+    padding: 12px 24px;
+    font-size: 14px;
+  }
+
+  .feature-cards {
+    max-width: 100%;
+    gap: 12px;
+  }
+
+  .feature-card {
+    padding: 20px 16px;
+  }
+
+  .feature-title {
+    font-size: 16px;
+  }
+
+  .feature-description {
+    font-size: 13px;
+  }
+
+  .details-section {
+    padding: 40px 12px;
+  }
+
+  .details-header {
+    margin: 0 auto 32px;
+  }
+
+  .details-grid {
+    gap: 16px;
+  }
+
+  .detail-item {
+    gap: 12px;
+  }
+
+  .detail-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+  }
+
+  .detail-content h4 {
+    font-size: 14px;
+  }
+
+  .detail-content p {
+    font-size: 12px;
+  }
+
+  .cta-section {
+    padding: 32px 12px;
+  }
+
+  .cta-content h2 {
+    font-size: 20px;
+  }
+
+  .cta-content p {
+    font-size: 14px;
+  }
+
+  .cta-button {
+    padding: 12px 28px;
+    font-size: 14px;
+  }
+}
 </style>

@@ -133,4 +133,11 @@ async function processFile(file) {
     transform: rotate(360deg);
   }
 }
+
+@media (max-width: 480px) {
+  .upload-area {
+    padding: 14px 18px;
+    min-height: 44px;
+  }
+}
 </style>

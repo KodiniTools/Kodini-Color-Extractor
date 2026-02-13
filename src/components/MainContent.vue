@@ -555,4 +555,36 @@ onUnmounted(() => {
     padding: 20px;
   }
 }
+
+@media (max-width: 480px) {
+  .main-content {
+    padding: 12px;
+  }
+
+  .image-container {
+    border-radius: 8px;
+  }
+
+  .pixel-zoom {
+    width: 80px;
+    height: 80px;
+  }
+
+  .placeholder {
+    padding: 24px 16px;
+  }
+
+  .placeholder-icon svg {
+    width: 48px;
+    height: 48px;
+  }
+
+  .placeholder-text {
+    font-size: 16px;
+  }
+
+  .placeholder-hint {
+    font-size: 12px;
+  }
+}
 </style>

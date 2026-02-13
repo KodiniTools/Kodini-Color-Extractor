@@ -300,4 +300,36 @@ function hideTooltip() {
     transform: translate(-50%, -90%);
   }
 }
+
+@media (max-width: 768px) {
+  .color-tooltip {
+    max-width: 90vw;
+  }
+}
+
+@media (max-width: 480px) {
+  .color-item {
+    padding: 10px;
+  }
+
+  .color-swatch {
+    width: 32px;
+    height: 32px;
+    margin-right: 10px;
+  }
+
+  .color-primary {
+    font-size: 13px;
+  }
+
+  .color-secondary {
+    font-size: 12px;
+  }
+
+  .copy-btn {
+    padding: 8px;
+    min-width: 36px;
+    min-height: 36px;
+  }
+}
 </style>

@@ -359,14 +359,47 @@ onUnmounted(() => {
     padding: 12px;
   }
 
+  .close-btn {
+    padding: 10px;
+    min-height: 44px;
+    min-width: 44px;
+  }
+
   .slider-handle {
-    width: 36px;
-    height: 36px;
+    width: 44px;
+    height: 44px;
   }
 
   .slider-handle svg {
     width: 14px;
     height: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  .modal-overlay {
+    padding: 8px;
+  }
+
+  .modal-header {
+    padding: 10px 12px;
+  }
+
+  .modal-title {
+    font-size: 16px;
+  }
+
+  .modal-body {
+    padding: 8px;
+  }
+
+  .image-wrapper img {
+    max-height: 50vh;
+  }
+
+  .image-label {
+    font-size: 11px;
+    padding: 4px 8px;
   }
 }
 </style>

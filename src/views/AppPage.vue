@@ -514,5 +514,71 @@ function handleDownloadImage() {
   .header-link {
     display: none;
   }
+
+  .sidebar {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .app-header {
+    padding: 8px 10px;
+  }
+
+  .header-title {
+    font-size: 13px;
+  }
+
+  .header-left,
+  .header-right {
+    gap: 4px;
+  }
+
+  .sidebar {
+    padding: 12px;
+  }
+
+  .sidebar-header {
+    margin-bottom: 16px;
+  }
+
+  .controls {
+    gap: 12px;
+    margin: 16px 0;
+  }
+
+  .control-group select {
+    padding: 12px;
+    font-size: 15px;
+    min-height: 44px;
+  }
+
+  .export-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .export-format-selects {
+    width: 100%;
+  }
+
+  .export-select {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 36px;
+    flex: 1;
+  }
+
+  .export-btn {
+    padding: 14px;
+    min-height: 44px;
+  }
+
+  .donate-btn {
+    padding: 12px 16px;
+    font-size: 14px;
+    min-height: 44px;
+  }
 }
 </style>

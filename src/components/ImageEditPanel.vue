@@ -409,4 +409,44 @@ function clearImage() {
     border-top: 1px solid var(--border-light);
   }
 }
+
+@media (max-width: 768px) {
+  .edit-panel {
+    padding: 16px;
+  }
+
+  .panel-header {
+    margin-bottom: 16px;
+  }
+
+  .slider::-webkit-slider-thumb {
+    width: 24px;
+    height: 24px;
+    border: 2px solid white;
+  }
+
+  .slider::-moz-range-thumb {
+    width: 24px;
+    height: 24px;
+    border: 2px solid white;
+  }
+}
+
+@media (max-width: 480px) {
+  .edit-panel {
+    padding: 12px;
+  }
+
+  .preview-btn,
+  .reset-all-btn,
+  .delete-btn {
+    padding: 8px 10px;
+    min-height: 40px;
+    min-width: 40px;
+  }
+
+  .slider-group {
+    margin-bottom: 16px;
+  }
+}
 </style>

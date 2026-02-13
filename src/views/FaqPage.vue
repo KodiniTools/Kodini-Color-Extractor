@@ -225,4 +225,58 @@ const faqCount = 8
     padding: 48px 16px;
   }
 }
+
+@media (max-width: 480px) {
+  .faq-hero {
+    padding: 24px 12px 20px;
+  }
+
+  .faq-title {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .faq-subtitle {
+    font-size: 14px;
+  }
+
+  .faq-content {
+    padding: 0 12px 32px;
+  }
+
+  .faq-list {
+    gap: 10px;
+  }
+
+  .faq-question {
+    padding: 12px;
+    font-size: 13px;
+    min-height: 44px;
+  }
+
+  .faq-answer {
+    padding: 0 12px 12px;
+  }
+
+  .faq-answer p {
+    font-size: 13px;
+  }
+
+  .faq-cta {
+    padding: 32px 12px;
+  }
+
+  .faq-cta-content h2 {
+    font-size: 18px;
+    margin-bottom: 16px;
+  }
+
+  .faq-cta-button {
+    padding: 14px 28px;
+    font-size: 15px;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+}
 </style>
