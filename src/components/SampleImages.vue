@@ -190,4 +190,19 @@ async function loadSampleImage(sample) {
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .sample-images-container {
+    margin-bottom: 12px;
+  }
+
+  .sample-label {
+    font-size: 12px;
+    margin: 0 0 6px 0;
+  }
+
+  .sample-thumbnail {
+    border-radius: 6px;
+  }
+}
 </style>

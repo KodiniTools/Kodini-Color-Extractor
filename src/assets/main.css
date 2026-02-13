@@ -112,3 +112,9 @@ select {
   font-family: inherit;
 }
 
+@media (max-width: 480px) {
+  #app {
+    padding-top: 50px;
+  }
+}
+

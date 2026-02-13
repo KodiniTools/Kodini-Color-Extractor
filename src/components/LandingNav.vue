@@ -108,4 +108,18 @@ const { t } = useI18n()
     display: none;
   }
 }
+
+@media (max-width: 480px) {
+  .nav-container {
+    padding: 10px 12px;
+  }
+
+  .nav-link {
+    padding: 8px 10px;
+    font-size: 12px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+  }
+}
 </style>
