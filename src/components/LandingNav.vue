@@ -7,16 +7,6 @@ const { t } = useI18n()
 <template>
   <nav class="landing-nav">
     <div class="nav-container">
-      <router-link to="/" class="nav-logo">
-        <span class="logo-icon">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <circle cx="12" cy="12" r="4" fill="var(--color-accent)"></circle>
-          </svg>
-        </span>
-        <span class="logo-text">Kodini</span>
-      </router-link>
-
       <div class="nav-links">
         <router-link to="/" class="nav-link">{{ t('navHome') }}</router-link>
         <router-link to="/app" class="nav-link">{{ t('navApp') }}</router-link>
@@ -41,27 +31,7 @@ const { t } = useI18n()
   padding: 16px 24px;
   display: flex;
   align-items: center;
-  justify-content: space-between;
-}
-
-.nav-logo {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  text-decoration: none;
-  color: var(--text-primary);
-  font-weight: 700;
-  font-size: 18px;
-  transition: color 0.2s ease;
-}
-
-.nav-logo:hover {
-  color: var(--color-accent);
-}
-
-.logo-icon {
-  display: flex;
-  align-items: center;
+  justify-content: center;
 }
 
 .nav-links {
@@ -104,9 +74,6 @@ const { t } = useI18n()
     font-size: 13px;
   }
 
-  .logo-text {
-    display: none;
-  }
 }
 
 @media (max-width: 480px) {
