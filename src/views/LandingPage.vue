@@ -26,40 +26,16 @@ const { t } = useI18n()
       <!-- Feature Cards Grid -->
       <div class="feature-cards">
         <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" y1="3" x2="12" y2="15"></line>
-            </svg>
-          </div>
           <h3 class="feature-title">{{ t('feature1Title') }}</h3>
           <p class="feature-description">{{ t('feature1Desc') }}</p>
         </div>
 
         <div class="feature-card feature-card-highlight">
-          <div class="feature-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <circle cx="12" cy="12" r="10"></circle>
-              <circle cx="12" cy="12" r="4"></circle>
-              <line x1="12" y1="2" x2="12" y2="4"></line>
-              <line x1="12" y1="20" x2="12" y2="22"></line>
-              <line x1="2" y1="12" x2="4" y2="12"></line>
-              <line x1="20" y1="12" x2="22" y2="12"></line>
-            </svg>
-          </div>
           <h3 class="feature-title">{{ t('feature2Title') }}</h3>
           <p class="feature-description">{{ t('feature2Desc') }}</p>
         </div>
 
         <div class="feature-card">
-          <div class="feature-icon">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path>
-              <polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline>
-              <line x1="12" y1="22.08" x2="12" y2="12"></line>
-            </svg>
-          </div>
           <h3 class="feature-title">{{ t('feature3Title') }}</h3>
           <p class="feature-description">{{ t('feature3Desc') }}</p>
         </div>
@@ -233,7 +209,7 @@ const { t } = useI18n()
 .feature-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 24px;
+  gap: 16px;
   max-width: 1000px;
   margin: 0 auto;
 }
@@ -242,7 +218,7 @@ const { t } = useI18n()
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   border-radius: 12px;
-  padding: 32px 24px;
+  padding: 20px 20px;
   text-align: center;
   transition: all 0.3s ease;
 }
@@ -257,10 +233,6 @@ const { t } = useI18n()
   border-color: var(--accent-bg);
 }
 
-.feature-card-highlight .feature-icon {
-  color: var(--accent-text);
-}
-
 .feature-card-highlight .feature-title {
   color: var(--accent-text);
 }
@@ -268,14 +240,6 @@ const { t } = useI18n()
 .feature-card-highlight .feature-description {
   color: var(--accent-text);
   opacity: 0.8;
-}
-
-.feature-icon {
-  display: flex;
-  justify-content: center;
-  margin-bottom: 16px;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
 }
 
 .feature-title {
@@ -467,7 +431,7 @@ const { t } = useI18n()
   }
 
   .feature-card {
-    padding: 20px 16px;
+    padding: 16px 14px;
   }
 
   .feature-title {
