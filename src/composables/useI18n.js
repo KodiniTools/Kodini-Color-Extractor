@@ -60,6 +60,13 @@ const translations = {
     after: 'After',
     closePreview: 'Close preview',
 
+    // Handoff
+    handoffTitle: '{count} image(s) received',
+    handoffFrom: 'from {tool}',
+    handoffAccept: 'Accept',
+    handoffDismiss: 'Dismiss',
+    handoffAccepted: 'Image loaded from handoff',
+
     // Navigation
     navHome: 'Home',
     navApp: 'Open App',
@@ -189,6 +196,13 @@ const translations = {
     before: 'Vorher',
     after: 'Nachher',
     closePreview: 'Vorschau schließen',
+
+    // Handoff
+    handoffTitle: '{count} Bild(er) empfangen',
+    handoffFrom: 'von {tool}',
+    handoffAccept: 'Übernehmen',
+    handoffDismiss: 'Verwerfen',
+    handoffAccepted: 'Bild aus Handoff geladen',
 
     // Navigation
     navHome: 'Start',

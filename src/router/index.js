@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { STORAGE_KEY } from '../lib/core/handoff'
 import LandingPage from '../views/LandingPage.vue'
 import AppPage from '../views/AppPage.vue'
 import FaqPage from '../views/FaqPage.vue'
@@ -37,6 +38,15 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
+  // Handoff: redirect to app page if handoff data is present
+  if (to.name !== 'app') {
+    const hasHandoffParam = to.query.handoff === 'kodinitools'
+    const hasHandoffData = !!localStorage.getItem(STORAGE_KEY)
+    if (hasHandoffParam || hasHandoffData) {
+      return next({ name: 'app', query: { ...to.query, handoff: 'kodinitools' } })
+    }
+  }
+
   document.title = to.meta.title || 'Kodini Color Extractor'
   next()
 })
