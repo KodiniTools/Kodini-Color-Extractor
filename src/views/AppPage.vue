@@ -10,7 +10,6 @@ import MainContent from '../components/MainContent.vue'
 import ImageEditPanel from '../components/ImageEditPanel.vue'
 import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
-import HandoffReceiver from '../components/features/HandoffReceiver.vue'
 
 const store = usePaletteStore()
 const { t } = useI18n()
@@ -64,18 +63,6 @@ function handleDownloadImage() {
   toast.show(t('downloadStarted'), 'success')
 }
 
-function handleHandoffAccept(images) {
-  if (images.length > 0) {
-    const img = images[0]
-    store.setImage(img.dataUrl)
-    store.extractColors(img.dataUrl)
-    toast.show(t('handoffAccepted'), 'success')
-  }
-}
-
-function handleHandoffDismiss() {
-  // Nothing to do — banner handles cleanup
-}
 </script>
 
 <template>
@@ -98,8 +85,6 @@ function handleHandoffDismiss() {
         <router-link to="/faq" class="header-link">{{ t('navFaq') }}</router-link>
       </div>
     </header>
-
-    <HandoffReceiver @accept="handleHandoffAccept" @dismiss="handleHandoffDismiss" />
 
     <div class="app-container">
       <aside class="sidebar">

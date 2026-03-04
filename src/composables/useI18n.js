@@ -67,6 +67,12 @@ const translations = {
     handoffDismiss: 'Dismiss',
     handoffAccepted: 'Image loaded from handoff',
 
+    // Gallery
+    galleryTitle: 'Image Gallery',
+    gallerySelectHint: 'Click to extract colors from this image',
+    galleryEmpty: 'No images in gallery',
+    galleryEmptyHint: 'Images from other Kodini tools will appear here.',
+
     // Navigation
     navHome: 'Home',
     navApp: 'Open App',
@@ -203,6 +209,12 @@ const translations = {
     handoffAccept: 'Übernehmen',
     handoffDismiss: 'Verwerfen',
     handoffAccepted: 'Bild aus Handoff geladen',
+
+    // Gallery
+    galleryTitle: 'Bildergalerie',
+    gallerySelectHint: 'Klicken um Farben aus diesem Bild zu extrahieren',
+    galleryEmpty: 'Keine Bilder in der Galerie',
+    galleryEmptyHint: 'Bilder von anderen Kodini Tools erscheinen hier.',
 
     // Navigation
     navHome: 'Start',
