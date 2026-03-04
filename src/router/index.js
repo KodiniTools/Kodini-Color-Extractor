@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { STORAGE_KEY } from '../lib/core/handoff'
 import LandingPage from '../views/LandingPage.vue'
 import AppPage from '../views/AppPage.vue'
+import GalleryView from '../views/GalleryView.vue'
 import FaqPage from '../views/FaqPage.vue'
 
 const routes = [
@@ -16,6 +17,12 @@ const routes = [
     name: 'app',
     component: AppPage,
     meta: { title: 'App - Kodini Color Extractor' }
+  },
+  {
+    path: '/app/gallery',
+    name: 'gallery',
+    component: GalleryView,
+    meta: { title: 'Gallery - Kodini Color Extractor' }
   },
   {
     path: '/faq',
@@ -38,12 +45,12 @@ const router = createRouter({
 })
 
 router.beforeEach((to, from, next) => {
-  // Handoff: redirect to app page if handoff data is present
-  if (to.name !== 'app') {
+  // Handoff: redirect to gallery if handoff data is present
+  if (to.name !== 'gallery') {
     const hasHandoffParam = to.query.handoff === 'kodinitools'
     const hasHandoffData = !!localStorage.getItem(STORAGE_KEY)
     if (hasHandoffParam || hasHandoffData) {
-      return next({ name: 'app', query: { ...to.query, handoff: 'kodinitools' } })
+      return next({ name: 'gallery', query: { ...to.query, handoff: 'kodinitools' } })
     }
   }
 
