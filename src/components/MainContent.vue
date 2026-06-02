@@ -3,38 +3,21 @@ import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import SampleImages from './SampleImages.vue'
+import PixelMagnifier from './PixelMagnifier.vue'
+import { useFileDrop } from '../composables/useFileDrop'
+import { useCanvasDrag } from '../composables/useCanvasDrag'
+import { useCanvasPan } from '../composables/useCanvasPan'
 
 const store = usePaletteStore()
 const { t } = useI18n()
 
-// Drag and drop for image upload
-const isFileDragging = ref(false)
+const imageContainer = ref(null)
+const displayImage = ref(null)
+const pixelMagnifierRef = ref(null)
+const imageRect = ref(null)
+const containerRect = ref(null)
 
-function handleFileDragOver(e) {
-  e.preventDefault()
-  isFileDragging.value = true
-}
-
-function handleFileDragLeave(e) {
-  e.preventDefault()
-  isFileDragging.value = false
-}
-
-async function handleFileDrop(e) {
-  e.preventDefault()
-  isFileDragging.value = false
-
-  const file = e.dataTransfer?.files?.[0]
-  if (file && file.type.startsWith('image/')) {
-    const reader = new FileReader()
-    reader.onload = async (event) => {
-      const imgSrc = event.target.result
-      store.setImage(imgSrc)
-      await store.extractColors(imgSrc)
-    }
-    reader.readAsDataURL(file)
-  }
-}
+const pixelZoomCanvas = computed(() => pixelMagnifierRef.value?.canvas)
 
 // Computed style for image filters and pan
 const imageFilterStyle = computed(() => {
@@ -50,25 +33,6 @@ const imageFilterStyle = computed(() => {
 // Check if zoomed in (pan should only work when zoomed)
 const isZoomed = computed(() => store.imageAdjustments.zoom > 100)
 
-const imageContainer = ref(null)
-const displayImage = ref(null)
-const pixelZoom = ref(null)
-const pixelZoomCanvas = ref(null)
-const imageRect = ref(null)
-const containerRect = ref(null)
-const isDragging = ref(false)
-const dragIndex = ref(-1)
-const showZoom = ref(false)
-const zoomPosition = ref({ x: 0, y: 0 })
-
-// Pan state
-const isPanning = ref(false)
-const panStart = ref({ x: 0, y: 0 })
-const panStartPosition = ref({ x: 0, y: 0 })
-
-// Performance optimization: track pending animation frame
-let animationFrameId = null
-
 function updateRects() {
   if (displayImage.value && imageContainer.value) {
     imageRect.value = displayImage.value.getBoundingClientRect()
@@ -76,204 +40,31 @@ function updateRects() {
   }
 }
 
-function getIndicatorStyle(color, index) {
-  if (!imageRect.value || !containerRect.value || !store.originalImageSize.width) {
-    return { display: 'none' }
-  }
+const { isFileDragging, handleFileDragOver, handleFileDragLeave, handleFileDrop } = useFileDrop(store)
 
-  const zoom = store.imageAdjustments.zoom / 100
-  const { x: panX, y: panY } = store.panPosition
+const { isDragging, dragIndex, showZoom, zoomPosition, startDrag, stopDrag, getIndicatorStyle, cleanup: cleanupDrag } = useCanvasDrag({
+  imageRect,
+  containerRect,
+  store,
+  pixelZoomCanvas
+})
 
-  const scaleX = imageRect.value.width / store.originalImageSize.width
-  const scaleY = imageRect.value.height / store.originalImageSize.height
-
-  const imageOffsetX = imageRect.value.left - containerRect.value.left
-  const imageOffsetY = imageRect.value.top - containerRect.value.top
-
-  // Calculate base position
-  const baseX = imageOffsetX + (color.position.x * scaleX) - 16
-  const baseY = imageOffsetY + (color.position.y * scaleY) - 16
-
-  // Apply zoom and pan transformation relative to container center
-  const containerCenterX = containerRect.value.width / 2
-  const containerCenterY = containerRect.value.height / 2
-
-  // Calculate position with zoom and pan
-  const x = containerCenterX + (baseX - containerCenterX + 16 + panX * scaleX) * zoom - 16
-  const y = containerCenterY + (baseY - containerCenterY + 16 + panY * scaleY) * zoom - 16
-
-  return {
-    left: `${x}px`,
-    top: `${y}px`,
-    backgroundColor: color.hex,
-    borderColor: store.selectedColorIndex === index ? 'var(--selection-color)' : 'white',
-    transform: `scale(${Math.min(zoom, 1.5)})`
-  }
-}
-
-// Get client coordinates from mouse or touch event
-function getEventCoords(e) {
-  if (e.touches && e.touches.length > 0) {
-    return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }
-  }
-  return { clientX: e.clientX, clientY: e.clientY }
-}
-
-function startDrag(e, index) {
-  e.preventDefault()
-  e.stopPropagation()
-
-  // Update rects at drag start for accuracy
+// Wrap startDrag to call updateRects first
+function startDragWithRects(e, index) {
   updateRects()
-
-  isDragging.value = true
-  dragIndex.value = index
-  store.setSelectedColor(index)
-  showZoom.value = true
-
-  // Mouse events
-  document.addEventListener('mousemove', handleDrag)
-  document.addEventListener('mouseup', stopDrag)
-  // Touch events
-  document.addEventListener('touchmove', handleDrag, { passive: false })
-  document.addEventListener('touchend', stopDrag)
-  document.addEventListener('touchcancel', stopDrag)
-  document.body.style.userSelect = 'none'
+  startDrag(e, index)
 }
 
-function handleDrag(e) {
-  if (!isDragging.value || dragIndex.value < 0) return
-  if (!imageRect.value || !containerRect.value) return
-
-  // Prevent scrolling on touch devices
-  if (e.cancelable) e.preventDefault()
-
-  // Use requestAnimationFrame for smooth updates
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
-  }
-
-  animationFrameId = requestAnimationFrame(() => {
-    const coords = getEventCoords(e)
-    processDrag(coords.clientX, coords.clientY)
-  })
-}
-
-function processDrag(clientX, clientY) {
-  if (!isDragging.value || dragIndex.value < 0) return
-  if (!imageRect.value || !containerRect.value) return
-
-  const zoom = store.imageAdjustments.zoom / 100
-  const { x: panX, y: panY } = store.panPosition
-
-  const scaleX = store.originalImageSize.width / imageRect.value.width
-  const scaleY = store.originalImageSize.height / imageRect.value.height
-
-  // Calculate mouse position relative to container center
-  const containerCenterX = containerRect.value.left + containerRect.value.width / 2
-  const containerCenterY = containerRect.value.top + containerRect.value.height / 2
-
-  // Reverse the zoom and pan transformation to get image coordinates
-  const relX = (clientX - containerCenterX) / zoom + containerRect.value.width / 2 - (imageRect.value.left - containerRect.value.left) - panX * (imageRect.value.width / store.originalImageSize.width)
-  const relY = (clientY - containerCenterY) / zoom + containerRect.value.height / 2 - (imageRect.value.top - containerRect.value.top) - panY * (imageRect.value.height / store.originalImageSize.height)
-
-  const imgX = Math.max(0, Math.min(store.originalImageSize.width - 1, relX * scaleX))
-  const imgY = Math.max(0, Math.min(store.originalImageSize.height - 1, relY * scaleY))
-
-  store.updateColorFromPosition(dragIndex.value, imgX, imgY)
-
-  // Update zoom position
-  zoomPosition.value = {
-    x: clientX - containerRect.value.left + 30,
-    y: clientY - containerRect.value.top - 60
-  }
-
-  // Draw zoom canvas
-  const zoomData = store.getPixelZoomData(imgX, imgY, 24)
-  if (zoomData && pixelZoomCanvas.value) {
-    const ctx = pixelZoomCanvas.value.getContext('2d')
-    ctx.putImageData(zoomData, 0, 0)
-  }
-}
-
-function stopDrag() {
-  // Cancel any pending animation frame
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
-    animationFrameId = null
-  }
-
-  isDragging.value = false
-  dragIndex.value = -1
-  showZoom.value = false
-
-  // Remove mouse events
-  document.removeEventListener('mousemove', handleDrag)
-  document.removeEventListener('mouseup', stopDrag)
-  // Remove touch events
-  document.removeEventListener('touchmove', handleDrag)
-  document.removeEventListener('touchend', stopDrag)
-  document.removeEventListener('touchcancel', stopDrag)
-  document.body.style.userSelect = ''
-}
+const { isPanning, startPan, cleanup: cleanupPan } = useCanvasPan({
+  imageRect,
+  containerRect,
+  store,
+  isDragging,
+  isZoomed
+})
 
 function selectColor(index) {
   store.setSelectedColor(index)
-}
-
-// Pan functionality
-function startPan(e) {
-  // Only pan when zoomed and not dragging a color indicator
-  if (!isZoomed.value || isDragging.value) return
-
-  e.preventDefault()
-  isPanning.value = true
-  panStart.value = { x: e.clientX, y: e.clientY }
-  panStartPosition.value = { ...store.panPosition }
-
-  document.addEventListener('mousemove', handlePan)
-  document.addEventListener('mouseup', stopPan)
-  document.body.style.cursor = 'grabbing'
-}
-
-function handlePan(e) {
-  if (!isPanning.value) return
-
-  const zoom = store.imageAdjustments.zoom / 100
-  const deltaX = (e.clientX - panStart.value.x) / zoom
-  const deltaY = (e.clientY - panStart.value.y) / zoom
-
-  // Calculate pan limits based on zoom level and image size
-  const maxPan = calculateMaxPan()
-
-  const newX = Math.max(-maxPan.x, Math.min(maxPan.x, panStartPosition.value.x + deltaX))
-  const newY = Math.max(-maxPan.y, Math.min(maxPan.y, panStartPosition.value.y + deltaY))
-
-  store.setPanPosition(newX, newY)
-}
-
-function calculateMaxPan() {
-  if (!imageRect.value || !containerRect.value) return { x: 0, y: 0 }
-
-  const zoom = store.imageAdjustments.zoom / 100
-  const scaledWidth = imageRect.value.width * zoom
-  const scaledHeight = imageRect.value.height * zoom
-
-  // Calculate how much the image exceeds the container
-  const excessX = Math.max(0, (scaledWidth - containerRect.value.width) / 2)
-  const excessY = Math.max(0, (scaledHeight - containerRect.value.height) / 2)
-
-  return {
-    x: excessX / zoom,
-    y: excessY / zoom
-  }
-}
-
-function stopPan() {
-  isPanning.value = false
-  document.removeEventListener('mousemove', handlePan)
-  document.removeEventListener('mouseup', stopPan)
-  document.body.style.cursor = ''
 }
 
 watch(() => store.currentImage, () => {
@@ -292,20 +83,9 @@ onMounted(() => {
 })
 
 onUnmounted(() => {
-  // Cancel any pending animation frame
-  if (animationFrameId) {
-    cancelAnimationFrame(animationFrameId)
-  }
   window.removeEventListener('resize', updateRects)
-  // Mouse events
-  document.removeEventListener('mousemove', handleDrag)
-  document.removeEventListener('mouseup', stopDrag)
-  document.removeEventListener('mousemove', handlePan)
-  document.removeEventListener('mouseup', stopPan)
-  // Touch events
-  document.removeEventListener('touchmove', handleDrag)
-  document.removeEventListener('touchend', stopDrag)
-  document.removeEventListener('touchcancel', stopDrag)
+  cleanupDrag()
+  cleanupPan()
 })
 </script>
 
@@ -343,20 +123,13 @@ onUnmounted(() => {
           class="color-indicator"
           :class="{ selected: store.selectedColorIndex === index, dragging: isDragging && dragIndex === index }"
           :style="getIndicatorStyle(color, index)"
-          @mousedown="startDrag($event, index)"
-          @touchstart.prevent="startDrag($event, index)"
+          @mousedown="startDragWithRects($event, index)"
+          @touchstart.prevent="startDragWithRects($event, index)"
           @click.stop="selectColor(index)"
         ></div>
 
         <!-- Pixel Zoom Magnifier -->
-        <div
-          v-show="showZoom"
-          ref="pixelZoom"
-          class="pixel-zoom"
-          :style="{ left: zoomPosition.x + 'px', top: zoomPosition.y + 'px' }"
-        >
-          <canvas ref="pixelZoomCanvas" width="24" height="24"></canvas>
-        </div>
+        <PixelMagnifier ref="pixelMagnifierRef" :show="showZoom" :x="zoomPosition.x" :y="zoomPosition.y" />
       </template>
 
       <div v-else class="placeholder">
@@ -490,40 +263,6 @@ onUnmounted(() => {
   animation: none;
 }
 
-.pixel-zoom {
-  position: absolute;
-  width: 120px;
-  height: 120px;
-  border: 3px solid white;
-  border-radius: 50%;
-  box-shadow: 0 4px 20px var(--shadow-medium);
-  pointer-events: none;
-  z-index: 1000;
-  overflow: hidden;
-  background: var(--bg-secondary);
-}
-
-.pixel-zoom canvas {
-  width: 100%;
-  height: 100%;
-  image-rendering: pixelated;
-  image-rendering: -moz-crisp-edges;
-  image-rendering: crisp-edges;
-}
-
-.pixel-zoom::after {
-  content: '';
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 4px;
-  height: 4px;
-  background: var(--text-primary);
-  border: 1px solid white;
-  transform: translate(-50%, -50%);
-  border-radius: 1px;
-}
-
 .placeholder {
   text-align: center;
   padding: 40px;
@@ -563,11 +302,6 @@ onUnmounted(() => {
 
   .image-container {
     border-radius: 8px;
-  }
-
-  .pixel-zoom {
-    width: 80px;
-    height: 80px;
   }
 
   .placeholder {
