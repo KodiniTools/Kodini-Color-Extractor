@@ -1,6 +1,8 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
 
+let filterDebounceTimer = null
+
 export const usePaletteStore = defineStore('palette', () => {
   const colors = ref([])
   const currentImage = ref(null)
@@ -75,11 +77,12 @@ export const usePaletteStore = defineStore('palette', () => {
 
   function setImageAdjustment(prop, value) {
     imageAdjustments.value[prop] = value
-    // Reset pan position when zoom is reset to 100%
     if (prop === 'zoom' && value === 100) {
       panPosition.value = { x: 0, y: 0 }
     }
-    applyFiltersToCanvas()
+    // Debounce canvas re-render to avoid blocking on every slider tick
+    clearTimeout(filterDebounceTimer)
+    filterDebounceTimer = setTimeout(applyFiltersToCanvas, 50)
   }
 
   function setPanPosition(x, y) {
@@ -205,45 +208,25 @@ export const usePaletteStore = defineStore('palette', () => {
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
         imageData.value = imgData
 
-        const pixels = imgData.data
-        const colorMap = new Map()
-
-        for (let i = 0; i < pixels.length; i += 4) {
-          const r = Math.round(pixels[i] / 16) * 16
-          const g = Math.round(pixels[i + 1] / 16) * 16
-          const b = Math.round(pixels[i + 2] / 16) * 16
-          const a = pixels[i + 3]
-          if (a < 128) continue
-
-          const pixelIndex = i / 4
-          const x = pixelIndex % canvas.width
-          const y = Math.floor(pixelIndex / canvas.width)
-
-          const key = `${r},${g},${b}`
-          const existing = colorMap.get(key)
-          if (existing) {
-            existing.count++
-            if (Math.random() < 0.01) {
-              existing.positions.push({ x, y })
-            }
-          } else {
-            colorMap.set(key, { count: 1, positions: [{ x, y }] })
-          }
+        // Transfer pixel buffer to worker for off-thread quantization
+        const pixelBuffer = imgData.data.buffer.slice(0)
+        const worker = new Worker(
+          new URL('../workers/colorExtractor.worker.js', import.meta.url),
+          { type: 'module' }
+        )
+        worker.postMessage(
+          { pixelBuffer, width: canvas.width, height: canvas.height, colorCount: colorCount.value },
+          [pixelBuffer]
+        )
+        worker.onmessage = ({ data: { sorted } }) => {
+          worker.terminate()
+          colors.value = sorted
+          resolve(sorted)
         }
-
-        const sorted = Array.from(colorMap.entries())
-          .sort((a, b) => b[1].count - a[1].count)
-          .slice(0, colorCount.value)
-          .map(([key, data]) => {
-            const [r, g, b] = key.split(',').map(Number)
-            const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
-            const hsl = rgbToHsl(r, g, b)
-            const pos = data.positions[Math.floor(Math.random() * data.positions.length)]
-            return { r, g, b, hex, hsl, position: pos }
-          })
-
-        colors.value = sorted
-        resolve(sorted)
+        worker.onerror = () => {
+          worker.terminate()
+          resolve([])
+        }
       }
       img.src = imgSrc
     })
