@@ -70,12 +70,12 @@ src/
 
 ### Technologie-Stack
 
-| Technologie | Version | Verwendung |
-|-------------|---------|------------|
-| Vue.js | 3.4.x | Reaktives Framework |
-| Pinia | 2.1.x | State Management |
-| Vue Router | 4.6.x | Client-Side Routing |
-| Vite | 5.2.x | Build Tool & Dev Server |
+| Technologie | Version | Verwendung              |
+| ----------- | ------- | ----------------------- |
+| Vue.js      | 3.4.x   | Reaktives Framework     |
+| Pinia       | 2.1.x   | State Management        |
+| Vue Router  | 4.6.x   | Client-Side Routing     |
+| Vite        | 5.2.x   | Build Tool & Dev Server |
 
 ### Komponentenhierarchie
 
@@ -182,11 +182,11 @@ const imageAdjustments = ref({
   brightness: 100,
   contrast: 100,
   saturation: 100,
-  hue: 0
+  hue: 0,
 })
 
 // Zugriff auf Werte
-console.log(colorCount.value)           // 5
+console.log(colorCount.value) // 5
 console.log(imageAdjustments.value.zoom) // 100
 
 // In Templates (automatisches Unwrapping)
@@ -203,10 +203,7 @@ const hasColors = computed(() => colors.value.length > 0)
 
 const hasActiveFilters = computed(() => {
   const adj = imageAdjustments.value
-  return adj.brightness !== 100 ||
-         adj.contrast !== 100 ||
-         adj.saturation !== 100 ||
-         adj.hue !== 0
+  return adj.brightness !== 100 || adj.contrast !== 100 || adj.saturation !== 100 || adj.hue !== 0
 })
 
 // Read-Write Computed (Two-Way Binding)
@@ -217,7 +214,7 @@ const count = computed({
     if (store.currentImage) {
       store.extractColors(store.currentImage)
     }
-  }
+  },
 })
 ```
 
@@ -227,11 +224,14 @@ Watchers reagieren auf Zustandsänderungen:
 
 ```javascript
 // Einfacher Watch
-watch(() => store.currentImage, (newImage) => {
-  if (newImage) {
-    setTimeout(updateIndicatorRects, 100)
+watch(
+  () => store.currentImage,
+  (newImage) => {
+    if (newImage) {
+      setTimeout(updateIndicatorRects, 100)
+    }
   }
-})
+)
 
 // Watch mit Options
 watch(
@@ -244,10 +244,7 @@ watch(
 
 // WatchEffect (automatische Dependency-Tracking)
 watchEffect(() => {
-  document.documentElement.setAttribute(
-    'data-theme',
-    currentTheme.value
-  )
+  document.documentElement.setAttribute('data-theme', currentTheme.value)
 })
 ```
 
@@ -314,18 +311,14 @@ canvas.height = image.naturalHeight
 
 ```javascript
 const img = new Image()
-img.crossOrigin = 'anonymous'  // CORS für externe Bilder
+img.crossOrigin = 'anonymous' // CORS für externe Bilder
 img.src = imageSrc
 
 img.onload = () => {
   ctx.drawImage(img, 0, 0)
 
   // Jetzt können Pixeldaten gelesen werden
-  const imageData = ctx.getImageData(
-    0, 0,
-    canvas.width,
-    canvas.height
-  )
+  const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height)
 }
 ```
 
@@ -342,10 +335,10 @@ const pixels = imageData.data
 const totalPixels = pixels.length / 4
 
 for (let i = 0; i < pixels.length; i += 4) {
-  const r = pixels[i]      // Rot
-  const g = pixels[i + 1]  // Grün
-  const b = pixels[i + 2]  // Blau
-  const a = pixels[i + 3]  // Alpha (Transparenz)
+  const r = pixels[i] // Rot
+  const g = pixels[i + 1] // Grün
+  const b = pixels[i + 2] // Blau
+  const a = pixels[i + 3] // Alpha (Transparenz)
 
   // Pixelkoordinaten berechnen
   const pixelIndex = i / 4
@@ -358,10 +351,10 @@ for (let i = 0; i < pixels.length; i += 4) {
 
 ```javascript
 // Einzelne Pixel modifizieren
-pixels[i] = 255      // R
-pixels[i + 1] = 0    // G
-pixels[i + 2] = 0    // B
-pixels[i + 3] = 255  // A
+pixels[i] = 255 // R
+pixels[i + 1] = 0 // G
+pixels[i + 2] = 0 // B
+pixels[i + 3] = 255 // A
 
 // Zurück auf Canvas schreiben
 ctx.putImageData(imageData, 0, 0)
@@ -392,7 +385,7 @@ ctx.filter = 'none'
 ```javascript
 // Als Data URL (Base64)
 const dataUrl = canvas.toDataURL('image/png')
-const jpegUrl = canvas.toDataURL('image/jpeg', 0.9)  // Qualität 0-1
+const jpegUrl = canvas.toDataURL('image/jpeg', 0.9) // Qualität 0-1
 const webpUrl = canvas.toDataURL('image/webp', 0.8)
 
 // Als Blob (für Downloads)
@@ -514,10 +507,12 @@ async extractColors(imgSrc) {
 ### Farbquantisierung erklärt
 
 #### Das Problem
+
 - Ein Bild hat bis zu **16,7 Millionen** mögliche Farben (256³)
 - Direkte Analyse wäre zu langsam und speicherintensiv
 
 #### Die Lösung: 16-Bit-Quantisierung
+
 ```javascript
 // Original: 256 Stufen pro Kanal
 // Nach Quantisierung: 16 Stufen pro Kanal (256/16)
@@ -533,6 +528,7 @@ const r = Math.round(pixels[i] / 16) * 16
 ```
 
 #### Vorteile
+
 1. **Dramatische Reduktion**: 16.7M → 4.096 Farben
 2. **Ähnliche Farben gruppiert**: Kleine Variationen werden zusammengefasst
 3. **Schnelle Map-Lookups**: O(1) für jeden Pixel
@@ -623,7 +619,7 @@ export const usePaletteStore = defineStore('palette', () => {
     brightness: 100,
     contrast: 100,
     saturation: 100,
-    hue: 0
+    hue: 0,
   })
 
   const panPosition = ref({ x: 0, y: 0 })
@@ -638,10 +634,7 @@ export const usePaletteStore = defineStore('palette', () => {
 
   const hasActiveFilters = computed(() => {
     const adj = imageAdjustments.value
-    return adj.brightness !== 100 ||
-           adj.contrast !== 100 ||
-           adj.saturation !== 100 ||
-           adj.hue !== 0
+    return adj.brightness !== 100 || adj.contrast !== 100 || adj.saturation !== 100 || adj.hue !== 0
   })
 
   // Actions
@@ -717,7 +710,7 @@ const colorCount = computed({
     if (store.currentImage) {
       store.extractColors(store.currentImage)
     }
-  }
+  },
 })
 ```
 
@@ -779,9 +772,7 @@ const currentTheme = ref('light')
 
 export function useTheme() {
   // System-Präferenz prüfen
-  const prefersDark = window.matchMedia(
-    '(prefers-color-scheme: dark)'
-  ).matches
+  const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
 
   // Gespeicherte Präferenz laden
   const saved = localStorage.getItem('kodini-color-theme')
@@ -794,16 +785,12 @@ export function useTheme() {
 
   // Reaktiv auf DOM anwenden
   watchEffect(() => {
-    document.documentElement.setAttribute(
-      'data-theme',
-      currentTheme.value
-    )
+    document.documentElement.setAttribute('data-theme', currentTheme.value)
   })
 
   // Toggle-Funktion
   function toggleTheme() {
-    currentTheme.value =
-      currentTheme.value === 'light' ? 'dark' : 'light'
+    currentTheme.value = currentTheme.value === 'light' ? 'dark' : 'light'
     localStorage.setItem('kodini-color-theme', currentTheme.value)
   }
 
@@ -813,7 +800,7 @@ export function useTheme() {
   return {
     currentTheme,
     isDark,
-    toggleTheme
+    toggleTheme,
   }
 }
 ```
@@ -839,7 +826,7 @@ const translations = {
     'colors.copy': 'Farbe kopieren',
     'export.download': 'Herunterladen',
     // ...
-  }
+  },
 }
 
 export function useI18n() {
@@ -851,9 +838,7 @@ export function useI18n() {
 
   // Übersetzungsfunktion
   function t(key, params = {}) {
-    let text = translations[locale.value]?.[key]
-             || translations['en'][key]
-             || key
+    let text = translations[locale.value]?.[key] || translations['en'][key] || key
 
     // Parameter ersetzen: {name} → params.name
     Object.entries(params).forEach(([k, v]) => {
@@ -874,7 +859,7 @@ export function useI18n() {
     locale,
     t,
     setLocale,
-    availableLocales: Object.keys(translations)
+    availableLocales: Object.keys(translations),
   }
 }
 ```
@@ -885,13 +870,7 @@ export function useI18n() {
 import { onMounted, onUnmounted } from 'vue'
 
 export function useKeyboard(options = {}) {
-  const {
-    onCopy,
-    onPaste,
-    onNavigateUp,
-    onNavigateDown,
-    onEnter
-  } = options
+  const { onCopy, onPaste, onNavigateUp, onNavigateDown, onEnter } = options
 
   // Plattform-Erkennung
   const isMac = navigator.platform.toLowerCase().includes('mac')
@@ -943,7 +922,7 @@ export function useKeyboard(options = {}) {
 
   return {
     isMac,
-    modifierKeyLabel: isMac ? '⌘' : 'Ctrl'
+    modifierKeyLabel: isMac ? '⌘' : 'Ctrl',
   }
 }
 ```
@@ -964,7 +943,7 @@ export function useToast() {
     toasts.value.push({
       id,
       message,
-      type  // 'success' | 'error' | 'info'
+      type, // 'success' | 'error' | 'info'
     })
 
     // Auto-Entfernung
@@ -976,7 +955,7 @@ export function useToast() {
   }
 
   function removeToast(id) {
-    const index = toasts.value.findIndex(t => t.id === id)
+    const index = toasts.value.findIndex((t) => t.id === id)
     if (index > -1) {
       toasts.value.splice(index, 1)
     }
@@ -993,7 +972,7 @@ export function useToast() {
     removeToast,
     success,
     error,
-    info
+    info,
   }
 }
 ```
@@ -1156,21 +1135,25 @@ function downloadCanvasAsImage(canvas, format, filename) {
   const mimeType = {
     png: 'image/png',
     jpeg: 'image/jpeg',
-    webp: 'image/webp'
+    webp: 'image/webp',
   }[format]
 
   const quality = format === 'png' ? undefined : 0.9
 
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob)
+  canvas.toBlob(
+    (blob) => {
+      const url = URL.createObjectURL(blob)
 
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${filename}.${format}`
-    link.click()
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `${filename}.${format}`
+      link.click()
 
-    URL.revokeObjectURL(url)
-  }, mimeType, quality)
+      URL.revokeObjectURL(url)
+    },
+    mimeType,
+    quality
+  )
 }
 ```
 
@@ -1178,9 +1161,7 @@ function downloadCanvasAsImage(canvas, format, filename) {
 
 ```javascript
 // System-Farbschema erkennen
-const prefersDark = window.matchMedia(
-  '(prefers-color-scheme: dark)'
-)
+const prefersDark = window.matchMedia('(prefers-color-scheme: dark)')
 
 // Initial prüfen
 if (prefersDark.matches) {
@@ -1211,9 +1192,7 @@ localStorage.removeItem('kodini-color-theme')
 const settings = { zoom: 150, format: 'hex' }
 localStorage.setItem('settings', JSON.stringify(settings))
 
-const loaded = JSON.parse(
-  localStorage.getItem('settings') || '{}'
-)
+const loaded = JSON.parse(localStorage.getItem('settings') || '{}')
 ```
 
 ---
@@ -1310,11 +1289,7 @@ function endDrag() {
   if (!isDragging.value) return
 
   // Farbe final aktualisieren
-  store.updateColorFromPosition(
-    dragIndex.value,
-    dragPosition.value.x,
-    dragPosition.value.y
-  )
+  store.updateColorFromPosition(dragIndex.value, dragPosition.value.x, dragPosition.value.y)
 
   isDragging.value = false
   dragIndex.value = -1
@@ -1344,10 +1319,7 @@ function getPixelZoomData(x, y, size = 12) {
   const startY = Math.floor(y) - halfSize
 
   // Pixeldaten extrahieren
-  const imageData = ctx.getImageData(
-    startX, startY,
-    size, size
-  )
+  const imageData = ctx.getImageData(startX, startY, size, size)
 
   // In Array von Farbwerten konvertieren
   const pixels = []
@@ -1355,13 +1327,13 @@ function getPixelZoomData(x, y, size = 12) {
     pixels.push({
       r: imageData.data[i],
       g: imageData.data[i + 1],
-      b: imageData.data[i + 2]
+      b: imageData.data[i + 2],
     })
   }
 
   return {
     pixels,
-    centerColor: pixels[Math.floor(pixels.length / 2)]
+    centerColor: pixels[Math.floor(pixels.length / 2)],
   }
 }
 ```
@@ -1372,13 +1344,13 @@ function getPixelZoomData(x, y, size = 12) {
 
 ### Anpassungsparameter
 
-| Parameter | Bereich | Standard | Beschreibung |
-|-----------|---------|----------|--------------|
-| Zoom | 25-400% | 100% | Bildvergrößerung |
-| Helligkeit | 0-200% | 100% | Brightness-Filter |
-| Kontrast | 0-200% | 100% | Contrast-Filter |
-| Sättigung | 0-200% | 100% | Saturation-Filter |
-| Farbton | -180° bis +180° | 0° | Hue-Rotation |
+| Parameter  | Bereich         | Standard | Beschreibung      |
+| ---------- | --------------- | -------- | ----------------- |
+| Zoom       | 25-400%         | 100%     | Bildvergrößerung  |
+| Helligkeit | 0-200%          | 100%     | Brightness-Filter |
+| Kontrast   | 0-200%          | 100%     | Contrast-Filter   |
+| Sättigung  | 0-200%          | 100%     | Saturation-Filter |
+| Farbton    | -180° bis +180° | 0°       | Hue-Rotation      |
 
 ### Filter anwenden
 
@@ -1401,7 +1373,7 @@ function applyFiltersToCanvas() {
     `brightness(${adj.brightness}%)`,
     `contrast(${adj.contrast}%)`,
     `saturate(${adj.saturation}%)`,
-    `hue-rotate(${adj.hue}deg)`
+    `hue-rotate(${adj.hue}deg)`,
   ].join(' ')
 
   // Original mit Filtern zeichnen
@@ -1423,7 +1395,7 @@ const brightness = computed({
     store.setImageAdjustment('brightness', value)
     // Echtzeit-Update
     applyFiltersToCanvas()
-  }
+  },
 })
 
 // Template
@@ -1441,16 +1413,16 @@ const brightness = computed({
 // ImagePreviewModal.vue
 // Verwendet clip-path für den Vergleich
 
-const sliderPosition = ref(50)  // Prozent
+const sliderPosition = ref(50) // Prozent
 
 // Linke Seite (Original)
 const originalStyle = computed(() => ({
-  clipPath: `inset(0 ${100 - sliderPosition.value}% 0 0)`
+  clipPath: `inset(0 ${100 - sliderPosition.value}% 0 0)`,
 }))
 
 // Rechte Seite (Gefiltert)
 const filteredStyle = computed(() => ({
-  clipPath: `inset(0 0 0 ${sliderPosition.value}%)`
+  clipPath: `inset(0 0 0 ${sliderPosition.value}%)`,
 }))
 
 // Template:
@@ -1509,9 +1481,7 @@ function downloadTxt() {
   // CSS-Variante braucht spezielle Formatierung
   let content
   if (store.downloadFormat === 'css') {
-    const vars = store.colors
-      .map((c, i) => `  --color-${i + 1}: ${c.hex};`)
-      .join('\n')
+    const vars = store.colors.map((c, i) => `  --color-${i + 1}: ${c.hex};`).join('\n')
     content = `:root {\n${vars}\n}`
   } else {
     content = lines.join('\n')
@@ -1537,7 +1507,7 @@ function downloadImage() {
     small: 400,
     medium: 800,
     large: 1200,
-    xlarge: 1600
+    xlarge: 1600,
   }
 
   const width = sizes[store.imageExportSize]
@@ -1568,28 +1538,28 @@ function downloadImage() {
     ctx.fillStyle = '#333333'
     ctx.font = '12px monospace'
     ctx.textAlign = 'center'
-    ctx.fillText(
-      color.hex.toUpperCase(),
-      x + colorWidth / 2,
-      colorHeight + 20
-    )
+    ctx.fillText(color.hex.toUpperCase(), x + colorWidth / 2, colorHeight + 20)
   })
 
   // Download
   const mimeTypes = {
     png: 'image/png',
     jpeg: 'image/jpeg',
-    webp: 'image/webp'
+    webp: 'image/webp',
   }
 
-  canvas.toBlob((blob) => {
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `palette.${store.imageExportFormat}`
-    link.click()
-    URL.revokeObjectURL(url)
-  }, mimeTypes[store.imageExportFormat], 0.9)
+  canvas.toBlob(
+    (blob) => {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      link.download = `palette.${store.imageExportFormat}`
+      link.click()
+      URL.revokeObjectURL(url)
+    },
+    mimeTypes[store.imageExportFormat],
+    0.9
+  )
 }
 ```
 
@@ -1600,6 +1570,7 @@ function downloadImage() {
 ### Memory Management
 
 #### 1. Position-Sampling
+
 ```javascript
 // Problem: Alle Positionen speichern = massiver Speicherverbrauch
 // Lösung: Nur 1% samplen
@@ -1615,6 +1586,7 @@ if (Math.random() < 0.01) {
 ```
 
 #### 2. Canvas-Referenz-Management
+
 ```javascript
 // Lazy Creation
 if (!filteredCanvasRef.value) {
@@ -1629,6 +1601,7 @@ function clearImage() {
 ```
 
 #### 3. URL.revokeObjectURL()
+
 ```javascript
 function downloadFile(blob, filename) {
   const url = URL.createObjectURL(blob)
@@ -1646,6 +1619,7 @@ function downloadFile(blob, filename) {
 ### Rendering-Optimierungen
 
 #### 1. requestAnimationFrame
+
 ```javascript
 function onDrag(event) {
   // Ohne RAF: Potentiell 60+ Updates pro Sekunde
@@ -1659,6 +1633,7 @@ function onDrag(event) {
 ```
 
 #### 2. Computed Property Caching
+
 ```javascript
 // ✅ Gut: Wird gecached bis Abhängigkeiten ändern
 const hasActiveFilters = computed(() => {
@@ -1673,6 +1648,7 @@ const hasActiveFilters = () => {
 ```
 
 #### 3. Touch-Action CSS
+
 ```css
 .drag-target {
   touch-action: none;
@@ -1683,6 +1659,7 @@ const hasActiveFilters = () => {
 ### Algorithmus-Effizienz
 
 #### Map-basierte Lookups
+
 ```javascript
 // ✅ O(1) Lookup mit Map
 const colorMap = new Map()
@@ -1693,12 +1670,11 @@ if (colorMap.has(key)) {
 }
 
 // ❌ O(n) Lookup mit Array.find
-const existing = colors.find(c =>
-  c.r === r && c.g === g && c.b === b
-)
+const existing = colors.find((c) => c.r === r && c.g === g && c.b === b)
 ```
 
 #### Single-Pass Pixel-Verarbeitung
+
 ```javascript
 // Ein einziger Durchlauf durch alle Pixel
 for (let i = 0; i < pixels.length; i += 4) {
@@ -1720,50 +1696,42 @@ for (let i = 0; i < pixels.length; i += 4) {
 
 /* Basis-Farbpalette */
 :root {
-  --color-accent: #F2E28E;    /* Gelb */
-  --color-secondary: #A28680;  /* Braun */
-  --color-neutral: #5E5F69;    /* Grau */
-  --color-tertiary: #AEAFB7;   /* Hellgrau */
-  --color-dark: #0C0C10;       /* Fast Schwarz */
+  --color-accent: #f2e28e; /* Gelb */
+  --color-secondary: #a28680; /* Braun */
+  --color-neutral: #5e5f69; /* Grau */
+  --color-tertiary: #aeafb7; /* Hellgrau */
+  --color-dark: #0c0c10; /* Fast Schwarz */
 }
 
 /* Light Theme (Standard) */
 :root {
   --bg-primary: #f8f9fa;
   --bg-secondary: #ffffff;
-  --bg-sidebar: linear-gradient(
-    135deg,
-    rgba(248,249,250,0.95),
-    rgba(255,255,255,0.98)
-  );
+  --bg-sidebar: linear-gradient(135deg, rgba(248, 249, 250, 0.95), rgba(255, 255, 255, 0.98));
 
-  --text-primary: #0C0C10;
-  --text-secondary: #5E5F69;
-  --text-tertiary: #AEAFB7;
+  --text-primary: #0c0c10;
+  --text-secondary: #5e5f69;
+  --text-tertiary: #aeafb7;
 
-  --border-color: #AEAFB7;
-  --selection-color: #5E5F69;
+  --border-color: #aeafb7;
+  --selection-color: #5e5f69;
 
   --shadow-soft: rgba(0, 0, 0, 0.08);
   --shadow-medium: rgba(0, 0, 0, 0.12);
 }
 
 /* Dark Theme */
-[data-theme="dark"] {
-  --bg-primary: #0C0C10;
+[data-theme='dark'] {
+  --bg-primary: #0c0c10;
   --bg-secondary: #1a1a20;
-  --bg-sidebar: linear-gradient(
-    135deg,
-    rgba(12,12,16,0.95),
-    rgba(26,26,32,0.98)
-  );
+  --bg-sidebar: linear-gradient(135deg, rgba(12, 12, 16, 0.95), rgba(26, 26, 32, 0.98));
 
   --text-primary: #f8f9fa;
-  --text-secondary: #AEAFB7;
-  --text-tertiary: #5E5F69;
+  --text-secondary: #aeafb7;
+  --text-tertiary: #5e5f69;
 
   --border-color: #3a3a45;
-  --selection-color: #F2E28E;
+  --selection-color: #f2e28e;
 
   --shadow-soft: rgba(0, 0, 0, 0.3);
   --shadow-medium: rgba(0, 0, 0, 0.4);
@@ -1804,10 +1772,7 @@ function toggleTheme() {
 
 // WatchEffect aktualisiert automatisch das DOM
 watchEffect(() => {
-  document.documentElement.setAttribute(
-    'data-theme',
-    currentTheme.value
-  )
+  document.documentElement.setAttribute('data-theme', currentTheme.value)
 })
 ```
 
@@ -1871,7 +1836,9 @@ watchEffect(() => {
 
 /* Button Hover */
 .button {
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 .button:hover {
@@ -1881,8 +1848,13 @@ watchEffect(() => {
 
 /* Farbindikator Pulse */
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .color-indicator {
@@ -1901,10 +1873,10 @@ watchEffect(() => {
 
 ### Unterstützte Sprachen
 
-| Sprache | Code | Übersetzungen |
-|---------|------|---------------|
-| Englisch | en | 260+ Keys |
-| Deutsch | de | 260+ Keys |
+| Sprache  | Code | Übersetzungen |
+| -------- | ---- | ------------- |
+| Englisch | en   | 260+ Keys     |
+| Deutsch  | de   | 260+ Keys     |
 
 ### Übersetzungsstruktur
 
@@ -1996,7 +1968,7 @@ const translations = {
     // Fehler
     'error.invalidFile': 'Bitte laden Sie eine gültige Bilddatei hoch',
     'error.loadFailed': 'Bild konnte nicht geladen werden',
-  }
+  },
 }
 ```
 
@@ -2046,13 +2018,13 @@ export function useI18n() {
 
 ### Keyboard-Navigation
 
-| Tastenkombination | Aktion |
-|-------------------|--------|
-| `Ctrl/Cmd + C` | Ausgewählte Farbe kopieren |
-| `Ctrl/Cmd + V` | Bild aus Zwischenablage einfügen |
-| `↑` / `↓` | Durch Farben navigieren |
-| `Enter` | Aktuelle Farbe kopieren |
-| `Escape` | Modal schließen |
+| Tastenkombination | Aktion                           |
+| ----------------- | -------------------------------- |
+| `Ctrl/Cmd + C`    | Ausgewählte Farbe kopieren       |
+| `Ctrl/Cmd + V`    | Bild aus Zwischenablage einfügen |
+| `↑` / `↓`         | Durch Farben navigieren          |
+| `Enter`           | Aktuelle Farbe kopieren          |
+| `Escape`          | Modal schließen                  |
 
 ### Fokus-Management
 
@@ -2093,12 +2065,12 @@ export function useI18n() {
 ```css
 /* Mindestkontrast 4.5:1 für normalen Text */
 .text-primary {
-  color: var(--text-primary);  /* #0C0C10 auf #f8f9fa = 18:1 */
+  color: var(--text-primary); /* #0C0C10 auf #f8f9fa = 18:1 */
 }
 
 /* Mindestkontrast 3:1 für großen Text */
 .heading {
-  color: var(--text-secondary);  /* #5E5F69 auf #f8f9fa = 5.7:1 */
+  color: var(--text-secondary); /* #5E5F69 auf #f8f9fa = 5.7:1 */
 }
 ```
 
@@ -2201,8 +2173,8 @@ export default defineConfig({
 
   resolve: {
     alias: {
-      '@': fileURLToPath(new URL('./src', import.meta.url))
-    }
+      '@': fileURLToPath(new URL('./src', import.meta.url)),
+    },
   },
 
   build: {
@@ -2217,16 +2189,16 @@ export default defineConfig({
       output: {
         // Chunk-Splitting
         manualChunks: {
-          'vue-vendor': ['vue', 'vue-router', 'pinia']
-        }
-      }
-    }
+          'vue-vendor': ['vue', 'vue-router', 'pinia'],
+        },
+      },
+    },
   },
 
   server: {
     port: 5173,
-    open: true
-  }
+    open: true,
+  },
 })
 ```
 
@@ -2276,12 +2248,12 @@ npm run preview
 
 ### Bundle-Größen (Approximate)
 
-| Bundle | Größe (gzip) |
-|--------|--------------|
-| Vue + Router + Pinia | ~47 KB |
-| App-Code | ~25 KB |
-| CSS | ~8 KB |
-| **Total** | **~80 KB** |
+| Bundle               | Größe (gzip) |
+| -------------------- | ------------ |
+| Vue + Router + Pinia | ~47 KB       |
+| App-Code             | ~25 KB       |
+| CSS                  | ~8 KB        |
+| **Total**            | **~80 KB**   |
 
 ---
 
@@ -2289,15 +2261,15 @@ npm run preview
 
 ### Architektur-Entscheidungen
 
-| Entscheidung | Begründung |
-|--------------|------------|
-| **Canvas-basiert** | Einzige Möglichkeit, Pixeldaten von Bildern zu lesen |
-| **Quantisierung** | Performance: 16.7M → 4.096 Farben |
-| **Composition API** | Bessere Code-Organisation und TypeScript-Support |
-| **Pinia statt Vuex** | Moderner, einfacher, volle TypeScript-Unterstützung |
-| **CSS Variables** | Einfaches Theme-Switching ohne JavaScript |
-| **Keine Web Workers** | Bildgrößen erfordern kein Multi-Threading |
-| **Base64 Storage** | In-Memory Persistenz, funktioniert über Routen hinweg |
+| Entscheidung          | Begründung                                            |
+| --------------------- | ----------------------------------------------------- |
+| **Canvas-basiert**    | Einzige Möglichkeit, Pixeldaten von Bildern zu lesen  |
+| **Quantisierung**     | Performance: 16.7M → 4.096 Farben                     |
+| **Composition API**   | Bessere Code-Organisation und TypeScript-Support      |
+| **Pinia statt Vuex**  | Moderner, einfacher, volle TypeScript-Unterstützung   |
+| **CSS Variables**     | Einfaches Theme-Switching ohne JavaScript             |
+| **Keine Web Workers** | Bildgrößen erfordern kein Multi-Threading             |
+| **Base64 Storage**    | In-Memory Persistenz, funktioniert über Routen hinweg |
 
 ### Best Practices
 
@@ -2324,6 +2296,7 @@ npm run preview
 ### Erweiterungsmöglichkeiten
 
 1. **Web Workers für große Bilder**
+
    ```javascript
    // Farbextraktion in Worker auslagern
    const worker = new Worker('color-worker.js')
@@ -2334,23 +2307,25 @@ npm run preview
    ```
 
 2. **IndexedDB für Bildhistorie**
+
    ```javascript
    // Bilder persistent speichern
    const db = await openDB('color-extractor', 1)
    await db.add('images', {
      dataUrl,
      colors,
-     timestamp: Date.now()
+     timestamp: Date.now(),
    })
    ```
 
 3. **Color Harmony Suggestions**
+
    ```javascript
    // Komplementärfarben berechnen
    function getComplementary(hsl) {
      return {
        ...hsl,
-       h: (hsl.h + 180) % 360
+       h: (hsl.h + 180) % 360,
      }
    }
    ```
@@ -2365,16 +2340,16 @@ npm run preview
 
 ### Statistiken
 
-| Metrik | Wert |
-|--------|------|
-| **Dateien** | 20 |
-| **Codezeilen** | ~4.587 |
-| **Vue-Komponenten** | 12 |
-| **Composables** | 4 |
-| **Abhängigkeiten** | 3 |
-| **Sprachen** | 2 (EN, DE) |
-| **Export-Formate** | 6 |
-| **Bildformate** | 3 |
+| Metrik              | Wert       |
+| ------------------- | ---------- |
+| **Dateien**         | 20         |
+| **Codezeilen**      | ~4.587     |
+| **Vue-Komponenten** | 12         |
+| **Composables**     | 4          |
+| **Abhängigkeiten**  | 3          |
+| **Sprachen**        | 2 (EN, DE) |
+| **Export-Formate**  | 6          |
+| **Bildformate**     | 3          |
 
 ---
 
@@ -2397,4 +2372,4 @@ npm run preview
 
 ---
 
-*Diese Dokumentation wurde für den Kodini Color Extractor erstellt. Stand: Januar 2026.*
+_Diese Dokumentation wurde für den Kodini Color Extractor erstellt. Stand: Januar 2026._

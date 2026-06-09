@@ -22,9 +22,9 @@
   --color-5: #f9f2d5;
 
   /* Light Theme */
-  --bg-primary: #F5F4D6;
+  --bg-primary: #f5f4d6;
   --bg-secondary: #ffffff;
-  --bg-sidebar: linear-gradient(180deg, #F5F4D6 0%, #ece6b5 100%);
+  --bg-sidebar: linear-gradient(180deg, #f5f4d6 0%, #ece6b5 100%);
   --bg-input: #ffffff;
   --bg-hover: #ece8c0;
 
@@ -39,7 +39,7 @@
 
   --btn-primary-bg: #014f99;
   --btn-primary-hover: #003971;
-  --btn-primary-text: #F5F4D6;
+  --btn-primary-text: #f5f4d6;
   --btn-secondary-bg: #f8e1a9;
   --btn-secondary-hover: #c9984d;
   --btn-secondary-text: #003971;
@@ -55,7 +55,7 @@
   --shadow-medium: rgba(0, 57, 113, 0.12);
 }
 
-[data-theme="dark"] {
+[data-theme='dark'] {
   --bg-primary: #1a1a2e;
   --bg-secondary: #16213e;
   --bg-sidebar: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
@@ -89,14 +89,17 @@
   --shadow-medium: rgba(0, 0, 0, 0.4);
 }
 
-html, body {
+html,
+body {
   font-family: 'Supreme', sans-serif;
   background: var(--bg-primary);
   color: var(--text-primary);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  transition: background 0.3s ease, color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
 }
 
 #app {
@@ -117,4 +120,3 @@ select {
     padding-top: 50px;
   }
 }
-

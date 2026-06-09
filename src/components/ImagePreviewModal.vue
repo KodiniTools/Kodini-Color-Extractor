@@ -4,7 +4,7 @@ import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 
 const props = defineProps({
-  show: Boolean
+  show: Boolean,
 })
 
 const emit = defineEmits(['close'])
@@ -19,7 +19,7 @@ const containerRef = ref(null)
 const imageFilterStyle = computed(() => {
   const { brightness, contrast, saturation, hue } = store.imageAdjustments
   return {
-    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
   }
 })
 
@@ -83,7 +83,14 @@ onUnmounted(() => {
           <div class="modal-header">
             <h2 class="modal-title">{{ t('previewTitle') }}</h2>
             <button class="close-btn" @click="emit('close')" :title="t('closePreview')">
-              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <svg
+                width="20"
+                height="20"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
               </svg>
@@ -113,24 +120,31 @@ onUnmounted(() => {
                 class="image-wrapper before-image"
                 :style="{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }"
               >
-                <img
-                  :src="store.currentImage"
-                  alt="Before"
-                  draggable="false"
-                />
+                <img :src="store.currentImage" alt="Before" draggable="false" />
                 <span class="image-label before-label">{{ t('before') }}</span>
               </div>
 
               <!-- Slider handle -->
-              <div
-                class="slider-line"
-                :style="{ left: `${sliderPosition}%` }"
-              >
+              <div class="slider-line" :style="{ left: `${sliderPosition}%` }">
                 <div class="slider-handle">
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <polyline points="15 18 9 12 15 6"></polyline>
                   </svg>
-                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <svg
+                    width="24"
+                    height="24"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
                 </div>

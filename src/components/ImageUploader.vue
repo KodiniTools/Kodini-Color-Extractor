@@ -54,23 +54,33 @@ async function processFile(file) {
     @dragleave="isDragging = false"
     @drop.prevent="handleDrop"
   >
-    <input
-      ref="fileInput"
-      type="file"
-      accept="image/*"
-      class="file-input"
-      @change="handleFile"
-    >
+    <input ref="fileInput" type="file" accept="image/*" class="file-input" @change="handleFile" />
     <span v-if="isProcessing" class="upload-content">
-      <svg class="upload-icon spinning" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 12a9 9 0 1 1-6.219-8.56"/>
+      <svg
+        class="upload-icon spinning"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
     </span>
     <span v-else class="upload-content">
-      <svg class="upload-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-        <polyline points="17 8 12 3 7 8"/>
-        <line x1="12" y1="3" x2="12" y2="15"/>
+      <svg
+        class="upload-icon"
+        width="24"
+        height="24"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+        <polyline points="17 8 12 3 7 8" />
+        <line x1="12" y1="3" x2="12" y2="15" />
       </svg>
     </span>
   </div>

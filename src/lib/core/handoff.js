@@ -16,9 +16,9 @@ const MAX_WIDTH = 1200
 const JPEG_QUALITY = 0.7
 
 const TARGET_URLS = {
-  'bildkonverter': '/bildkonverter/gallery',
-  'collagemaker': '/collagemaker/editor',
-  'color-extractor': '/kodini-color-extractor/app'
+  bildkonverter: '/bildkonverter/gallery',
+  collagemaker: '/collagemaker/editor',
+  'color-extractor': '/kodini-color-extractor/app',
 }
 
 // ── Sender ──────────────────────────────────────────────────
@@ -63,7 +63,7 @@ export function prepareHandoff(canvases, targetKey, sourceTool) {
         name: item.name || 'image',
         dataUrl,
         width: item.canvas.width,
-        height: item.canvas.height
+        height: item.canvas.height,
       }
     })
 
@@ -71,7 +71,7 @@ export function prepareHandoff(canvases, targetKey, sourceTool) {
       version: 1,
       source: sourceTool,
       timestamp: Date.now(),
-      images
+      images,
     }
 
     localStorage.setItem(STORAGE_KEY, JSON.stringify(payload))
@@ -104,7 +104,7 @@ export function checkHandoff() {
     return {
       source: payload.source || 'unknown',
       images: payload.images,
-      timestamp: payload.timestamp || 0
+      timestamp: payload.timestamp || 0,
     }
   } catch {
     return null

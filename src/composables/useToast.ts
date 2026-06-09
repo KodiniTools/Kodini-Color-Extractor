@@ -24,7 +24,7 @@ export function useToast() {
   }
 
   function remove(id: number) {
-    const index = toasts.value.findIndex(t => t.id === id)
+    const index = toasts.value.findIndex((t) => t.id === id)
     if (index > -1) {
       toasts.value.splice(index, 1)
     }
@@ -48,6 +48,6 @@ export function useToast() {
     remove,
     success,
     error,
-    info
+    info,
   }
 }

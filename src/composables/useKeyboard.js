@@ -37,18 +37,16 @@ export function useKeyboard() {
     // Arrow Up - Select previous color
     if (e.key === 'ArrowUp' && store.hasColors) {
       e.preventDefault()
-      const newIndex = store.selectedColorIndex > 0
-        ? store.selectedColorIndex - 1
-        : store.colors.length - 1
+      const newIndex =
+        store.selectedColorIndex > 0 ? store.selectedColorIndex - 1 : store.colors.length - 1
       store.setSelectedColor(newIndex)
     }
 
     // Arrow Down - Select next color
     if (e.key === 'ArrowDown' && store.hasColors) {
       e.preventDefault()
-      const newIndex = store.selectedColorIndex < store.colors.length - 1
-        ? store.selectedColorIndex + 1
-        : 0
+      const newIndex =
+        store.selectedColorIndex < store.colors.length - 1 ? store.selectedColorIndex + 1 : 0
       store.setSelectedColor(newIndex)
     }
 
@@ -116,6 +114,6 @@ export function useKeyboard() {
 
   return {
     init,
-    destroy
+    destroy,
   }
 }

@@ -23,7 +23,7 @@ export const usePaletteStore = defineStore('palette', () => {
     small: { label: 'Small (400px)', width: 400 },
     medium: { label: 'Medium (800px)', width: 800 },
     large: { label: 'Large (1200px)', width: 1200 },
-    xlarge: { label: 'XL (1600px)', width: 1600 }
+    xlarge: { label: 'XL (1600px)', width: 1600 },
   }
 
   // Image adjustment settings
@@ -32,7 +32,7 @@ export const usePaletteStore = defineStore('palette', () => {
     brightness: 100,
     contrast: 100,
     saturation: 100,
-    hue: 0
+    hue: 0,
   })
 
   // Pan position for zoomed image
@@ -99,7 +99,7 @@ export const usePaletteStore = defineStore('palette', () => {
       brightness: 100,
       contrast: 100,
       saturation: 100,
-      hue: 0
+      hue: 0,
     }
     panPosition.value = { x: 0, y: 0 }
     applyFiltersToCanvas()
@@ -142,14 +142,20 @@ export const usePaletteStore = defineStore('palette', () => {
     colors.value = colors.value.map((color, index) => {
       if (!color.position) return color
 
-      const imgX = Math.max(0, Math.min(originalImageSize.value.width - 1, Math.round(color.position.x)))
-      const imgY = Math.max(0, Math.min(originalImageSize.value.height - 1, Math.round(color.position.y)))
+      const imgX = Math.max(
+        0,
+        Math.min(originalImageSize.value.width - 1, Math.round(color.position.x))
+      )
+      const imgY = Math.max(
+        0,
+        Math.min(originalImageSize.value.height - 1, Math.round(color.position.y))
+      )
 
       const pixel = ctx.getImageData(imgX, imgY, 1, 1).data
       const r = pixel[0]
       const g = pixel[1]
       const b = pixel[2]
-      const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
+      const hex = '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
       const hsl = rgbToHsl(r, g, b)
 
       return { r, g, b, hex, hsl, position: color.position }
@@ -171,15 +177,21 @@ export const usePaletteStore = defineStore('palette', () => {
       const d = max - min
       s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
       switch (max) {
-        case r: h = ((g - b) / d + (g < b ? 6 : 0)) / 6; break
-        case g: h = ((b - r) / d + 2) / 6; break
-        case b: h = ((r - g) / d + 4) / 6; break
+        case r:
+          h = ((g - b) / d + (g < b ? 6 : 0)) / 6
+          break
+        case g:
+          h = ((b - r) / d + 2) / 6
+          break
+        case b:
+          h = ((r - g) / d + 4) / 6
+          break
       }
     }
     return {
       h: Math.round(h * 360),
       s: Math.round(s * 100),
-      l: Math.round(l * 100)
+      l: Math.round(l * 100),
     }
   }
 
@@ -210,10 +222,9 @@ export const usePaletteStore = defineStore('palette', () => {
 
         // Transfer pixel buffer to worker for off-thread quantization
         const pixelBuffer = imgData.data.buffer.slice(0)
-        const worker = new Worker(
-          new URL('../workers/colorExtractor.worker.js', import.meta.url),
-          { type: 'module' }
-        )
+        const worker = new Worker(new URL('../workers/colorExtractor.worker.js', import.meta.url), {
+          type: 'module',
+        })
         worker.postMessage(
           { pixelBuffer, width: canvas.width, height: canvas.height, colorCount: colorCount.value },
           [pixelBuffer]
@@ -245,12 +256,16 @@ export const usePaletteStore = defineStore('palette', () => {
     const r = pixel[0]
     const g = pixel[1]
     const b = pixel[2]
-    const hex = '#' + [r, g, b].map(x => x.toString(16).padStart(2, '0')).join('')
+    const hex = '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
     const hsl = rgbToHsl(r, g, b)
 
     colors.value[index] = {
-      r, g, b, hex, hsl,
-      position: { x: imgX, y: imgY }
+      r,
+      g,
+      b,
+      hex,
+      hsl,
+      position: { x: imgX, y: imgY },
     }
   }
 
@@ -260,8 +275,14 @@ export const usePaletteStore = defineStore('palette', () => {
     if (!canvas) return null
 
     const ctx = canvas.getContext('2d')
-    const imgX = Math.max(0, Math.min(originalImageSize.value.width - size, Math.round(x - size / 2)))
-    const imgY = Math.max(0, Math.min(originalImageSize.value.height - size, Math.round(y - size / 2)))
+    const imgX = Math.max(
+      0,
+      Math.min(originalImageSize.value.width - size, Math.round(x - size / 2))
+    )
+    const imgY = Math.max(
+      0,
+      Math.min(originalImageSize.value.height - size, Math.round(y - size / 2))
+    )
 
     try {
       return ctx.getImageData(imgX, imgY, size, size)
@@ -284,13 +305,20 @@ export const usePaletteStore = defineStore('palette', () => {
     const f = downloadFormat.value
     const { r, g, b, hex, hsl } = color
     switch (f) {
-      case 'hex': return hex.toUpperCase()
-      case 'rgb': return `rgb(${r}, ${g}, ${b})`
-      case 'rgba': return `rgba(${r}, ${g}, ${b}, 1)`
-      case 'hsl': return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
-      case 'hsla': return `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 1)`
-      case 'css': return `--color-${index + 1}: ${hex};`
-      default: return hex.toUpperCase()
+      case 'hex':
+        return hex.toUpperCase()
+      case 'rgb':
+        return `rgb(${r}, ${g}, ${b})`
+      case 'rgba':
+        return `rgba(${r}, ${g}, ${b}, 1)`
+      case 'hsl':
+        return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
+      case 'hsla':
+        return `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 1)`
+      case 'css':
+        return `--color-${index + 1}: ${hex};`
+      default:
+        return hex.toUpperCase()
     }
   }
 
@@ -338,7 +366,7 @@ export const usePaletteStore = defineStore('palette', () => {
       rgba: 130,
       hsl: 130,
       hsla: 145,
-      css: 150
+      css: 150,
     }
     const baseSwatchSize = formatWidths[f] || 80
     const basePadding = 20
@@ -373,7 +401,7 @@ export const usePaletteStore = defineStore('palette', () => {
       rgba: 10,
       hsl: 10,
       hsla: 9,
-      css: 9
+      css: 9,
     }
     const mainFontSize = Math.round((baseFontSizes[f] || 11) * scale)
     const subFontSize = Math.round(10 * scale)
@@ -398,7 +426,11 @@ export const usePaletteStore = defineStore('palette', () => {
       if (f !== 'hex') {
         pCtx.fillStyle = '#718096'
         pCtx.font = `500 ${subFontSize}px -apple-system, BlinkMacSystemFont, sans-serif`
-        pCtx.fillText(c.hex.toUpperCase(), x + swatchSize / 2, y + swatchSize + Math.round(35 * scale))
+        pCtx.fillText(
+          c.hex.toUpperCase(),
+          x + swatchSize / 2,
+          y + swatchSize + Math.round(35 * scale)
+        )
       }
     })
 
@@ -467,6 +499,6 @@ export const usePaletteStore = defineStore('palette', () => {
     downloadImage,
     downloadPng,
     copyPalette,
-    rgbToHsl
+    rgbToHsl,
   }
 })
