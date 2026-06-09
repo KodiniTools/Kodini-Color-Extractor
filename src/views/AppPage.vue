@@ -107,7 +107,10 @@ function handleDownloadImage() {
     </header>
 
     <div class="app-container">
-      <aside class="sidebar">
+      <aside
+        class="sidebar"
+        :style="store.currentImage ? { marginTop: editPanelMarginTop + 'px' } : {}"
+      >
         <div class="sidebar-header">
           <p class="subtitle">{{ t('subtitle') }}</p>
         </div>
@@ -343,9 +346,11 @@ function handleDownloadImage() {
   border-right: 1px solid var(--border-light);
   overflow-y: auto;
   max-height: calc(100vh - 53px);
+  align-self: flex-start;
   transition:
     background 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease,
+    margin-top 0.3s ease;
 }
 
 .sidebar-header {
