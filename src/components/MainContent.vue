@@ -16,6 +16,7 @@ const displayImage = ref(null)
 const pixelMagnifierRef = ref(null)
 const imageRect = ref(null)
 const containerRect = ref(null)
+const imageAspectRatio = ref(null)
 
 const pixelZoomCanvas = computed(() => pixelMagnifierRef.value?.canvas)
 
@@ -39,6 +40,21 @@ function updateRects() {
     containerRect.value = imageContainer.value.getBoundingClientRect()
   }
 }
+
+function onImageLoad() {
+  const img = displayImage.value
+  if (img) {
+    imageAspectRatio.value = img.naturalWidth / img.naturalHeight
+  }
+  updateRects()
+}
+
+const containerAspectStyle = computed(() => {
+  if (imageAspectRatio.value) {
+    return { aspectRatio: String(imageAspectRatio.value) }
+  }
+  return { aspectRatio: '4/3' }
+})
 
 const { isFileDragging, handleFileDragOver, handleFileDragLeave, handleFileDrop } =
   useFileDrop(store)
@@ -84,6 +100,7 @@ function selectColor(index) {
 watch(
   () => store.currentImage,
   () => {
+    imageAspectRatio.value = null
     setTimeout(updateRects, 100)
   }
 )
@@ -123,6 +140,7 @@ onUnmounted(() => {
         ref="imageContainer"
         class="image-container"
         :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning, 'file-dragging': isFileDragging }"
+        :style="containerAspectStyle"
         @mousedown="startPan"
       >
         <template v-if="store.currentImage">
@@ -132,7 +150,7 @@ onUnmounted(() => {
             alt="Uploaded"
             class="preview-image"
             :style="imageFilterStyle"
-            @load="updateRects"
+            @load="onImageLoad"
             draggable="false"
           />
 
@@ -210,7 +228,7 @@ onUnmounted(() => {
   position: relative;
   width: 100%;
   max-width: 800px;
-  aspect-ratio: 4/3;
+  /* aspect-ratio is set dynamically via :style binding */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,9 +256,9 @@ onUnmounted(() => {
 }
 
 .preview-image {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   border-radius: 8px;
   user-select: none;
   -webkit-user-drag: none;
