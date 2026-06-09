@@ -6,12 +6,12 @@ export default defineConfig({
   base: '/kodini-color-extractor/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
+    assetsDir: 'assets',
   },
   test: {
     environment: 'jsdom',
     globals: true,
     include: ['src/__tests__/**/*.test.ts'],
     exclude: ['e2e/**', 'node_modules/**'],
-  }
+  },
 })

@@ -23,8 +23,8 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     const imageOffsetY = imageRect.value.top - containerRect.value.top
 
     // Calculate base position
-    const baseX = imageOffsetX + (color.position.x * scaleX) - 16
-    const baseY = imageOffsetY + (color.position.y * scaleY) - 16
+    const baseX = imageOffsetX + color.position.x * scaleX - 16
+    const baseY = imageOffsetY + color.position.y * scaleY - 16
 
     // Apply zoom and pan transformation relative to container center
     const containerCenterX = containerRect.value.width / 2
@@ -39,7 +39,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
       top: `${y}px`,
       backgroundColor: color.hex,
       borderColor: store.selectedColorIndex === index ? 'var(--selection-color)' : 'white',
-      transform: `scale(${Math.min(zoom, 1.5)})`
+      transform: `scale(${Math.min(zoom, 1.5)})`,
     }
   }
 
@@ -103,8 +103,16 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     const containerCenterY = containerRect.value.top + containerRect.value.height / 2
 
     // Reverse the zoom and pan transformation to get image coordinates
-    const relX = (clientX - containerCenterX) / zoom + containerRect.value.width / 2 - (imageRect.value.left - containerRect.value.left) - panX * (imageRect.value.width / store.originalImageSize.width)
-    const relY = (clientY - containerCenterY) / zoom + containerRect.value.height / 2 - (imageRect.value.top - containerRect.value.top) - panY * (imageRect.value.height / store.originalImageSize.height)
+    const relX =
+      (clientX - containerCenterX) / zoom +
+      containerRect.value.width / 2 -
+      (imageRect.value.left - containerRect.value.left) -
+      panX * (imageRect.value.width / store.originalImageSize.width)
+    const relY =
+      (clientY - containerCenterY) / zoom +
+      containerRect.value.height / 2 -
+      (imageRect.value.top - containerRect.value.top) -
+      panY * (imageRect.value.height / store.originalImageSize.height)
 
     const imgX = Math.max(0, Math.min(store.originalImageSize.width - 1, relX * scaleX))
     const imgY = Math.max(0, Math.min(store.originalImageSize.height - 1, relY * scaleY))
@@ -114,7 +122,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     // Update zoom position
     zoomPosition.value = {
       x: clientX - containerRect.value.left + 30,
-      y: clientY - containerRect.value.top - 60
+      y: clientY - containerRect.value.top - 60,
     }
 
     // Draw zoom canvas
@@ -157,5 +165,14 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     document.removeEventListener('touchcancel', stopDrag)
   }
 
-  return { isDragging, dragIndex, showZoom, zoomPosition, startDrag, stopDrag, getIndicatorStyle, cleanup }
+  return {
+    isDragging,
+    dragIndex,
+    showZoom,
+    zoomPosition,
+    startDrag,
+    stopDrag,
+    getIndicatorStyle,
+    cleanup,
+  }
 }

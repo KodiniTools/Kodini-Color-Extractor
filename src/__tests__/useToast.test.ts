@@ -12,7 +12,7 @@ describe('useToast', () => {
     const initialCount = toast.toasts.value.length
     toast.show('Hello', 'success', 9999)
     expect(toast.toasts.value.length).toBe(initialCount + 1)
-    const t = toast.toasts.value.find(t => t.message === 'Hello')
+    const t = toast.toasts.value.find((t) => t.message === 'Hello')
     expect(t).toBeDefined()
     expect(t!.type).toBe('success')
   })
@@ -21,25 +21,25 @@ describe('useToast', () => {
     const { useToast } = await import('../composables/useToast')
     const toast = useToast()
     toast.show('Temp', 'info', 1000)
-    expect(toast.toasts.value.some(t => t.message === 'Temp')).toBe(true)
+    expect(toast.toasts.value.some((t) => t.message === 'Temp')).toBe(true)
     vi.advanceTimersByTime(1100)
-    expect(toast.toasts.value.some(t => t.message === 'Temp')).toBe(false)
+    expect(toast.toasts.value.some((t) => t.message === 'Temp')).toBe(false)
   })
 
   it('removes toast by id', async () => {
     const { useToast } = await import('../composables/useToast')
     const toast = useToast()
     const id = toast.show('Removable', 'error', 9999)
-    expect(toast.toasts.value.some(t => t.id === id)).toBe(true)
+    expect(toast.toasts.value.some((t) => t.id === id)).toBe(true)
     toast.remove(id)
-    expect(toast.toasts.value.some(t => t.id === id)).toBe(false)
+    expect(toast.toasts.value.some((t) => t.id === id)).toBe(false)
   })
 
   it('success() creates success toast', async () => {
     const { useToast } = await import('../composables/useToast')
     const toast = useToast()
     toast.success('All good', 9999)
-    const t = toast.toasts.value.find(t => t.message === 'All good')
+    const t = toast.toasts.value.find((t) => t.message === 'All good')
     expect(t?.type).toBe('success')
   })
 
@@ -47,7 +47,7 @@ describe('useToast', () => {
     const { useToast } = await import('../composables/useToast')
     const toast = useToast()
     toast.error('Oops', 9999)
-    const t = toast.toasts.value.find(t => t.message === 'Oops')
+    const t = toast.toasts.value.find((t) => t.message === 'Oops')
     expect(t?.type).toBe('error')
   })
 
@@ -55,7 +55,7 @@ describe('useToast', () => {
     const { useToast } = await import('../composables/useToast')
     const toast = useToast()
     toast.info('FYI', 9999)
-    const t = toast.toasts.value.find(t => t.message === 'FYI')
+    const t = toast.toasts.value.find((t) => t.message === 'FYI')
     expect(t?.type).toBe('info')
   })
 

@@ -45,7 +45,7 @@ function updateTooltipPosition(event) {
   const rect = event.currentTarget.getBoundingClientRect()
   tooltipPosition.value = {
     x: rect.left + rect.width / 2,
-    y: rect.top - 8
+    y: rect.top - 8,
   }
 }
 
@@ -68,16 +68,21 @@ function hideTooltip() {
         @mousemove="updateTooltipPosition"
         @mouseleave="hideTooltip"
       >
-        <div
-          class="color-swatch"
-          :style="{ backgroundColor: color.hex }"
-        ></div>
+        <div class="color-swatch" :style="{ backgroundColor: color.hex }"></div>
         <div class="color-info">
           <div class="color-primary">{{ store.getFormatted(color, index) }}</div>
           <div class="color-secondary">{{ getSecondaryText(color) }}</div>
         </div>
         <button class="copy-btn" @click.stop="copyColor(color, index)" :title="t('clickToCopy')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
           </svg>
@@ -85,11 +90,7 @@ function hideTooltip() {
       </div>
     </template>
     <template v-else>
-      <div
-        v-for="n in store.colorCount"
-        :key="n"
-        class="color-item placeholder"
-      >
+      <div v-for="n in store.colorCount" :key="n" class="color-item placeholder">
         <div class="color-swatch"></div>
         <div class="color-info">
           <div class="color-primary">#------</div>
@@ -106,7 +107,7 @@ function hideTooltip() {
           class="color-tooltip"
           :style="{
             left: tooltipPosition.x + 'px',
-            top: tooltipPosition.y + 'px'
+            top: tooltipPosition.y + 'px',
           }"
         >
           <div

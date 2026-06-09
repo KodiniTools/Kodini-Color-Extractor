@@ -10,26 +10,26 @@ const routes = [
     path: '/',
     name: 'landing',
     component: LandingPage,
-    meta: { title: 'Kodini Color Extractor' }
+    meta: { title: 'Kodini Color Extractor' },
   },
   {
     path: '/app',
     name: 'app',
     component: AppPage,
-    meta: { title: 'App - Kodini Color Extractor' }
+    meta: { title: 'App - Kodini Color Extractor' },
   },
   {
     path: '/app/gallery',
     name: 'gallery',
     component: GalleryView,
-    meta: { title: 'Gallery - Kodini Color Extractor' }
+    meta: { title: 'Gallery - Kodini Color Extractor' },
   },
   {
     path: '/faq',
     name: 'faq',
     component: FaqPage,
-    meta: { title: 'FAQ - Kodini Color Extractor' }
-  }
+    meta: { title: 'FAQ - Kodini Color Extractor' },
+  },
 ]
 
 const router = createRouter({
@@ -41,7 +41,7 @@ const router = createRouter({
     } else {
       return { top: 0 }
     }
-  }
+  },
 })
 
 router.beforeEach((to, from, next) => {

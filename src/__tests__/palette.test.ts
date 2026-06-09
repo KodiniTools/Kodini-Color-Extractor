@@ -153,7 +153,7 @@ describe('palette store - getPaletteText (via getFormatted)', () => {
     const c1 = { r: 255, g: 0, b: 0, hex: '#ff0000', hsl: { h: 0, s: 100, l: 50 } }
     const c2 = { r: 0, g: 0, b: 255, hex: '#0000ff', hsl: { h: 240, s: 100, l: 50 } }
     const lines = [c1, c2].map((c, i) => store.getFormatted(c, i))
-    const cssBlock = ':root {\n' + lines.map(l => '  ' + l).join('\n') + '\n}'
+    const cssBlock = ':root {\n' + lines.map((l) => '  ' + l).join('\n') + '\n}'
     expect(cssBlock.startsWith(':root {')).toBe(true)
     expect(cssBlock).toContain('--color-1:')
     expect(cssBlock).toContain('--color-2:')

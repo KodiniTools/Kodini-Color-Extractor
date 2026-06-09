@@ -6,6 +6,6 @@ export default defineConfig({
   base: '/kodini-color-extractor/',
   build: {
     outDir: 'dist',
-    assetsDir: 'assets'
-  }
+    assetsDir: 'assets',
+  },
 })

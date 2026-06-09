@@ -48,7 +48,7 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
 
     return {
       x: excessX / zoom,
-      y: excessY / zoom
+      y: excessY / zoom,
     }
   }
 

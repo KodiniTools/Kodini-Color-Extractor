@@ -11,9 +11,20 @@ describe('useI18n', () => {
     const { useI18n } = await import('../composables/useI18n')
     const { t } = useI18n()
     const requiredKeys = [
-      'title', 'subtitle', 'uploadText', 'formatLabel', 'paletteTitle',
-      'copiedToClipboard', 'imagePasted', 'noImageInClipboard', 'clipboardError',
-      'navHome', 'navApp', 'navFaq', 'heroTitle', 'faqTitle',
+      'title',
+      'subtitle',
+      'uploadText',
+      'formatLabel',
+      'paletteTitle',
+      'copiedToClipboard',
+      'imagePasted',
+      'noImageInClipboard',
+      'clipboardError',
+      'navHome',
+      'navApp',
+      'navFaq',
+      'heroTitle',
+      'faqTitle',
     ]
     for (const key of requiredKeys) {
       const result = t(key)

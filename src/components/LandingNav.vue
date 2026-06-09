@@ -73,7 +73,6 @@ const { t } = useI18n()
     padding: 6px 10px;
     font-size: 13px;
   }
-
 }
 
 @media (max-width: 480px) {

@@ -1,6 +1,7 @@
 # Sample Images
 
 Place your sample images here with the following names:
+
 - sample-1.jpg
 - sample-2.jpg
 - sample-3.jpg
@@ -11,6 +12,7 @@ Place your sample images here with the following names:
 - sample-8.jpg
 
 Recommended specifications:
+
 - Format: JPG or PNG
 - Size: 400x400px or similar square aspect ratio (thumbnails will crop to square)
 - File size: Keep under 100KB for fast loading

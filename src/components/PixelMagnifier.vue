@@ -4,7 +4,7 @@ import { ref } from 'vue'
 defineProps({
   show: Boolean,
   x: Number,
-  y: Number
+  y: Number,
 })
 
 const canvas = ref(null)
@@ -13,11 +13,7 @@ defineExpose({ canvas })
 </script>
 
 <template>
-  <div
-    v-show="show"
-    class="pixel-zoom"
-    :style="{ left: x + 'px', top: y + 'px' }"
-  >
+  <div v-show="show" class="pixel-zoom" :style="{ left: x + 'px', top: y + 'px' }">
     <canvas ref="canvas" width="24" height="24"></canvas>
   </div>
 </template>

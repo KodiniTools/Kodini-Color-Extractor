@@ -26,7 +26,7 @@ const imageFilterStyle = computed(() => {
   return {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
     transform: `scale(${zoom / 100}) translate(${panX}px, ${panY}px)`,
-    transformOrigin: 'center center'
+    transformOrigin: 'center center',
   }
 })
 
@@ -40,13 +40,23 @@ function updateRects() {
   }
 }
 
-const { isFileDragging, handleFileDragOver, handleFileDragLeave, handleFileDrop } = useFileDrop(store)
+const { isFileDragging, handleFileDragOver, handleFileDragLeave, handleFileDrop } =
+  useFileDrop(store)
 
-const { isDragging, dragIndex, showZoom, zoomPosition, startDrag, stopDrag, getIndicatorStyle, cleanup: cleanupDrag } = useCanvasDrag({
+const {
+  isDragging,
+  dragIndex,
+  showZoom,
+  zoomPosition,
+  startDrag,
+  stopDrag,
+  getIndicatorStyle,
+  cleanup: cleanupDrag,
+} = useCanvasDrag({
   imageRect,
   containerRect,
   store,
-  pixelZoomCanvas
+  pixelZoomCanvas,
 })
 
 // Wrap startDrag to call updateRects first
@@ -55,28 +65,38 @@ function startDragWithRects(e, index) {
   startDrag(e, index)
 }
 
-const { isPanning, startPan, cleanup: cleanupPan } = useCanvasPan({
+const {
+  isPanning,
+  startPan,
+  cleanup: cleanupPan,
+} = useCanvasPan({
   imageRect,
   containerRect,
   store,
   isDragging,
-  isZoomed
+  isZoomed,
 })
 
 function selectColor(index) {
   store.setSelectedColor(index)
 }
 
-watch(() => store.currentImage, () => {
-  setTimeout(updateRects, 100)
-})
+watch(
+  () => store.currentImage,
+  () => {
+    setTimeout(updateRects, 100)
+  }
+)
 
 // Reset pan when zoom changes to 100%
-watch(() => store.imageAdjustments.zoom, (newZoom) => {
-  if (newZoom <= 100) {
-    store.resetPanPosition()
+watch(
+  () => store.imageAdjustments.zoom,
+  (newZoom) => {
+    if (newZoom <= 100) {
+      store.resetPanPosition()
+    }
   }
-})
+)
 
 onMounted(() => {
   window.addEventListener('resize', updateRects)
@@ -105,45 +125,60 @@ onUnmounted(() => {
         :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning, 'file-dragging': isFileDragging }"
         @mousedown="startPan"
       >
-      <template v-if="store.currentImage">
-        <img
-          ref="displayImage"
-          :src="store.currentImage"
-          alt="Uploaded"
-          class="preview-image"
-          :style="imageFilterStyle"
-          @load="updateRects"
-          draggable="false"
-        >
+        <template v-if="store.currentImage">
+          <img
+            ref="displayImage"
+            :src="store.currentImage"
+            alt="Uploaded"
+            class="preview-image"
+            :style="imageFilterStyle"
+            @load="updateRects"
+            draggable="false"
+          />
 
-        <!-- Color Indicators -->
-        <div
-          v-for="(color, index) in store.colors"
-          :key="index"
-          class="color-indicator"
-          :class="{ selected: store.selectedColorIndex === index, dragging: isDragging && dragIndex === index }"
-          :style="getIndicatorStyle(color, index)"
-          @mousedown="startDragWithRects($event, index)"
-          @touchstart.prevent="startDragWithRects($event, index)"
-          @click.stop="selectColor(index)"
-        ></div>
+          <!-- Color Indicators -->
+          <div
+            v-for="(color, index) in store.colors"
+            :key="index"
+            class="color-indicator"
+            :class="{
+              selected: store.selectedColorIndex === index,
+              dragging: isDragging && dragIndex === index,
+            }"
+            :style="getIndicatorStyle(color, index)"
+            @mousedown="startDragWithRects($event, index)"
+            @touchstart.prevent="startDragWithRects($event, index)"
+            @click.stop="selectColor(index)"
+          ></div>
 
-        <!-- Pixel Zoom Magnifier -->
-        <PixelMagnifier ref="pixelMagnifierRef" :show="showZoom" :x="zoomPosition.x" :y="zoomPosition.y" />
-      </template>
+          <!-- Pixel Zoom Magnifier -->
+          <PixelMagnifier
+            ref="pixelMagnifierRef"
+            :show="showZoom"
+            :x="zoomPosition.x"
+            :y="zoomPosition.y"
+          />
+        </template>
 
-      <div v-else class="placeholder">
-        <div class="placeholder-icon">
-          <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
-          </svg>
+        <div v-else class="placeholder">
+          <div class="placeholder-icon">
+            <svg
+              width="64"
+              height="64"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <circle cx="8.5" cy="8.5" r="1.5" />
+              <polyline points="21 15 16 10 5 21" />
+            </svg>
+          </div>
+          <p class="placeholder-text">{{ t('placeholderText') }}</p>
+          <p class="placeholder-hint">{{ t('placeholderHint') }}</p>
         </div>
-        <p class="placeholder-text">{{ t('placeholderText') }}</p>
-        <p class="placeholder-hint">{{ t('placeholderHint') }}</p>
       </div>
-    </div>
     </div>
   </main>
 </template>
@@ -183,7 +218,9 @@ onUnmounted(() => {
   border-radius: 12px;
   border: 2px dashed var(--border-color);
   overflow: hidden;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .image-container.file-dragging {
@@ -215,10 +252,14 @@ onUnmounted(() => {
   height: 32px;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft);
+  box-shadow:
+    0 2px 8px var(--shadow-medium),
+    0 0 0 1px var(--shadow-soft);
   cursor: grab;
   z-index: 10;
-  transition: transform 0.15s ease, border-color 0.15s ease;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
   animation: pulse 2s ease-in-out infinite;
   /* Touch optimization */
   touch-action: none;
@@ -227,17 +268,26 @@ onUnmounted(() => {
 }
 
 @keyframes pulse {
-  0%, 100% {
-    box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft), 0 0 0 0 rgba(255, 255, 255, 0.4);
+  0%,
+  100% {
+    box-shadow:
+      0 2px 8px var(--shadow-medium),
+      0 0 0 1px var(--shadow-soft),
+      0 0 0 0 rgba(255, 255, 255, 0.4);
   }
   50% {
-    box-shadow: 0 2px 8px var(--shadow-medium), 0 0 0 1px var(--shadow-soft), 0 0 0 8px rgba(255, 255, 255, 0);
+    box-shadow:
+      0 2px 8px var(--shadow-medium),
+      0 0 0 1px var(--shadow-soft),
+      0 0 0 8px rgba(255, 255, 255, 0);
   }
 }
 
 .color-indicator:hover {
   transform: scale(1.15);
-  box-shadow: 0 4px 12px var(--shadow-medium), 0 0 0 1px var(--shadow-soft);
+  box-shadow:
+    0 4px 12px var(--shadow-medium),
+    0 0 0 1px var(--shadow-soft);
 }
 
 .color-indicator.selected {
@@ -248,11 +298,18 @@ onUnmounted(() => {
 }
 
 @keyframes pulse-selected {
-  0%, 100% {
-    box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium), 0 0 0 0 var(--selection-glow);
+  0%,
+  100% {
+    box-shadow:
+      0 0 0 3px var(--selection-glow),
+      0 4px 12px var(--shadow-medium),
+      0 0 0 0 var(--selection-glow);
   }
   50% {
-    box-shadow: 0 0 0 3px var(--selection-glow), 0 4px 12px var(--shadow-medium), 0 0 0 10px transparent;
+    box-shadow:
+      0 0 0 3px var(--selection-glow),
+      0 4px 12px var(--shadow-medium),
+      0 0 0 10px transparent;
   }
 }
 

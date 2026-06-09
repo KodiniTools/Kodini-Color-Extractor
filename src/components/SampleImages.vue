@@ -15,7 +15,7 @@ const sampleImages = ref([
   { id: 5, src: './samples/sample-5.jpg', alt: 'Sample 5' },
   { id: 6, src: './samples/sample-6.jpg', alt: 'Sample 6' },
   { id: 7, src: './samples/sample-7.jpg', alt: 'Sample 7' },
-  { id: 8, src: './samples/sample-8.jpg', alt: 'Sample 8' }
+  { id: 8, src: './samples/sample-8.jpg', alt: 'Sample 8' },
 ])
 
 const selectedSampleId = ref(null)
@@ -55,7 +55,7 @@ async function loadSampleImage(sample) {
         :class="{
           selected: selectedSampleId === sample.id,
           loaded: loadedImages[sample.id] === true,
-          'not-available': loadedImages[sample.id] === false
+          'not-available': loadedImages[sample.id] === false,
         }"
         @click="loadSampleImage(sample)"
         :title="loadedImages[sample.id] === true ? t('sampleImageHint') : ''"
@@ -68,10 +68,17 @@ async function loadSampleImage(sample) {
           @error="onImageError(sample.id)"
         />
         <div class="placeholder-overlay">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"/>
-            <circle cx="8.5" cy="8.5" r="1.5"/>
-            <polyline points="21 15 16 10 5 21"/>
+          <svg
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+            <circle cx="8.5" cy="8.5" r="1.5" />
+            <polyline points="21 15 16 10 5 21" />
           </svg>
         </div>
       </button>
@@ -174,7 +181,7 @@ async function loadSampleImage(sample) {
   }
 
   /* Hide last 2 thumbnails on smaller screens */
-  .sample-thumbnail:nth-child(n+7) {
+  .sample-thumbnail:nth-child(n + 7) {
     display: none;
   }
 }
@@ -186,7 +193,7 @@ async function loadSampleImage(sample) {
   }
 
   /* Show only 4 thumbnails on mobile */
-  .sample-thumbnail:nth-child(n+5) {
+  .sample-thumbnail:nth-child(n + 5) {
     display: none;
   }
 }

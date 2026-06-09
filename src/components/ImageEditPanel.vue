@@ -10,27 +10,27 @@ const emit = defineEmits(['open-preview'])
 
 const zoom = computed({
   get: () => store.imageAdjustments.zoom,
-  set: (val) => store.setImageAdjustment('zoom', val)
+  set: (val) => store.setImageAdjustment('zoom', val),
 })
 
 const brightness = computed({
   get: () => store.imageAdjustments.brightness,
-  set: (val) => store.setImageAdjustment('brightness', val)
+  set: (val) => store.setImageAdjustment('brightness', val),
 })
 
 const contrast = computed({
   get: () => store.imageAdjustments.contrast,
-  set: (val) => store.setImageAdjustment('contrast', val)
+  set: (val) => store.setImageAdjustment('contrast', val),
 })
 
 const saturation = computed({
   get: () => store.imageAdjustments.saturation,
-  set: (val) => store.setImageAdjustment('saturation', val)
+  set: (val) => store.setImageAdjustment('saturation', val),
 })
 
 const hue = computed({
   get: () => store.imageAdjustments.hue,
-  set: (val) => store.setImageAdjustment('hue', val)
+  set: (val) => store.setImageAdjustment('hue', val),
 })
 
 const defaults = { zoom: 100, brightness: 100, contrast: 100, saturation: 100, hue: 0 }
@@ -40,7 +40,7 @@ const isModified = computed(() => ({
   brightness: brightness.value !== defaults.brightness,
   contrast: contrast.value !== defaults.contrast,
   saturation: saturation.value !== defaults.saturation,
-  hue: hue.value !== defaults.hue
+  hue: hue.value !== defaults.hue,
 }))
 
 function resetAll() {
@@ -62,23 +62,46 @@ function clearImage() {
       <h2 class="panel-title">{{ t('editPanelTitle') }}</h2>
       <div class="header-buttons">
         <button class="preview-btn" @click="emit('open-preview')" :title="t('preview')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
-            <circle cx="12" cy="12" r="3"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+            <circle cx="12" cy="12" r="3" />
           </svg>
         </button>
         <button class="reset-all-btn" @click="resetAll" :title="t('resetAll')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-            <path d="M3 3v5h5"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
           </svg>
         </button>
         <button class="delete-btn" @click="clearImage" :title="t('deleteImage')">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <polyline points="3 6 5 6 21 6"/>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
-            <line x1="10" y1="11" x2="10" y2="17"/>
-            <line x1="14" y1="11" x2="14" y2="17"/>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" />
           </svg>
         </button>
       </div>
@@ -89,22 +112,27 @@ function clearImage() {
         <label>{{ t('zoom') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ zoom }}%</span>
-          <button class="reset-btn" :class="{ active: isModified.zoom }" @click="resetSlider('zoom')" :title="t('reset')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.zoom }"
+            @click="resetSlider('zoom')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
       </div>
-      <input
-        type="range"
-        v-model.number="zoom"
-        min="25"
-        max="400"
-        step="5"
-        class="slider"
-      >
+      <input type="range" v-model.number="zoom" min="25" max="400" step="5" class="slider" />
     </div>
 
     <div class="slider-group">
@@ -112,22 +140,27 @@ function clearImage() {
         <label>{{ t('brightness') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ brightness }}%</span>
-          <button class="reset-btn" :class="{ active: isModified.brightness }" @click="resetSlider('brightness')" :title="t('reset')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.brightness }"
+            @click="resetSlider('brightness')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
       </div>
-      <input
-        type="range"
-        v-model.number="brightness"
-        min="0"
-        max="200"
-        step="1"
-        class="slider"
-      >
+      <input type="range" v-model.number="brightness" min="0" max="200" step="1" class="slider" />
     </div>
 
     <div class="slider-group">
@@ -135,22 +168,27 @@ function clearImage() {
         <label>{{ t('contrast') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ contrast }}%</span>
-          <button class="reset-btn" :class="{ active: isModified.contrast }" @click="resetSlider('contrast')" :title="t('reset')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.contrast }"
+            @click="resetSlider('contrast')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
       </div>
-      <input
-        type="range"
-        v-model.number="contrast"
-        min="0"
-        max="200"
-        step="1"
-        class="slider"
-      >
+      <input type="range" v-model.number="contrast" min="0" max="200" step="1" class="slider" />
     </div>
 
     <div class="slider-group">
@@ -158,22 +196,27 @@ function clearImage() {
         <label>{{ t('saturation') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ saturation }}%</span>
-          <button class="reset-btn" :class="{ active: isModified.saturation }" @click="resetSlider('saturation')" :title="t('reset')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.saturation }"
+            @click="resetSlider('saturation')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
       </div>
-      <input
-        type="range"
-        v-model.number="saturation"
-        min="0"
-        max="200"
-        step="1"
-        class="slider"
-      >
+      <input type="range" v-model.number="saturation" min="0" max="200" step="1" class="slider" />
     </div>
 
     <div class="slider-group">
@@ -181,10 +224,22 @@ function clearImage() {
         <label>{{ t('hue') }}</label>
         <div class="slider-value-group">
           <span class="slider-value">{{ hue }}°</span>
-          <button class="reset-btn" :class="{ active: isModified.hue }" @click="resetSlider('hue')" :title="t('reset')">
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
-              <path d="M3 3v5h5"/>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.hue }"
+            @click="resetSlider('hue')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
             </svg>
           </button>
         </div>
@@ -196,7 +251,7 @@ function clearImage() {
         max="180"
         step="1"
         class="slider slider-hue"
-      >
+      />
     </div>
   </aside>
 </template>
@@ -212,7 +267,9 @@ function clearImage() {
   border-left: 1px solid var(--border-light);
   overflow-y: auto;
   max-height: 100vh;
-  transition: background 0.3s ease, border-color 0.3s ease;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .panel-header {
