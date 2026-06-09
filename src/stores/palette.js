@@ -263,7 +263,9 @@ export const usePaletteStore = defineStore('palette', () => {
             canvas.width,
             canvas.height
           )
+          // Assign grid positions, then re-sample pixel colors at those positions
           colors.value = sorted.map((c, i) => ({ ...c, position: positions[i] }))
+          updateAllColorsFromFilteredCanvas()
           resolve(colors.value)
         }
         worker.onerror = () => {
