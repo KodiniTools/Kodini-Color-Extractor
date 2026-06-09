@@ -198,6 +198,30 @@ export const usePaletteStore = defineStore('palette', () => {
     }
   }
 
+  /**
+   * Returns pixel coordinates for `count` dots arranged in centred horizontal
+   * rows of up to 5 dots each, aligned to the middle of the image.
+   */
+  function getCenteredGridPositions(count, width, height) {
+    const COLS = 5
+    const numRows = Math.ceil(count / COLS)
+    const colGap = width / (COLS + 1)
+    const rowGap = numRows === 1 ? 0 : Math.min(height * 0.12, 70)
+    const startY = height / 2 - ((numRows - 1) * rowGap) / 2
+
+    return Array.from({ length: count }, (_, i) => {
+      const row = Math.floor(i / COLS)
+      const col = i % COLS
+      const dotsInRow = Math.min(COLS, count - row * COLS)
+      const rowWidth = (dotsInRow - 1) * colGap
+      const rowStartX = (width - rowWidth) / 2
+      return {
+        x: Math.round(rowStartX + col * colGap),
+        y: Math.round(startY + row * rowGap),
+      }
+    })
+  }
+
   function extractColors(imgSrc) {
     return new Promise((resolve) => {
       const img = new Image()
@@ -234,8 +258,13 @@ export const usePaletteStore = defineStore('palette', () => {
         )
         worker.onmessage = ({ data: { sorted } }) => {
           worker.terminate()
-          colors.value = sorted
-          resolve(sorted)
+          const positions = getCenteredGridPositions(
+            sorted.length,
+            canvas.width,
+            canvas.height
+          )
+          colors.value = sorted.map((c, i) => ({ ...c, position: positions[i] }))
+          resolve(colors.value)
         }
         worker.onerror = () => {
           worker.terminate()
