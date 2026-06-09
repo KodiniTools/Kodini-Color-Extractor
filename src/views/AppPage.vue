@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useKeyboard } from '../composables/useKeyboard'
@@ -20,6 +20,20 @@ useKeyboard()
 
 // Preview modal state
 const showPreviewModal = ref(false)
+
+// Align edit panel's vertical center to the image's vertical center
+const editPanelEl = ref(null)
+const editPanelMarginTop = ref(0)
+
+function alignEditPanel() {
+  if (!editPanelEl.value || !store.imageCenterY) return
+  const panelHeight = editPanelEl.value.$el?.offsetHeight ?? editPanelEl.value.offsetHeight ?? 0
+  editPanelMarginTop.value = Math.max(0, store.imageCenterY - panelHeight / 2)
+}
+
+watch(() => store.imageCenterY, alignEditPanel)
+onMounted(() => window.addEventListener('resize', alignEditPanel))
+onUnmounted(() => window.removeEventListener('resize', alignEditPanel))
 
 const count = computed({
   get: () => store.colorCount,
@@ -223,7 +237,11 @@ function handleDownloadImage() {
       </aside>
 
       <MainContent />
-      <ImageEditPanel @open-preview="showPreviewModal = true" />
+      <ImageEditPanel
+        ref="editPanelEl"
+        :style="store.currentImage ? { marginTop: editPanelMarginTop + 'px' } : {}"
+        @open-preview="showPreviewModal = true"
+      />
       <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
       <ToastContainer />
     </div>

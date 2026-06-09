@@ -266,10 +266,12 @@ function clearImage() {
   flex-direction: column;
   border-left: 1px solid var(--border-light);
   overflow-y: auto;
-  max-height: 100vh;
+  max-height: calc(100vh - 53px);
+  align-self: flex-start;
   transition:
     background 0.3s ease,
-    border-color 0.3s ease;
+    border-color 0.3s ease,
+    margin-top 0.3s ease;
 }
 
 .panel-header {
