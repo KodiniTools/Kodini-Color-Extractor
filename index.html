@@ -3,11 +3,115 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Kodini Color Extractor - Farben aus Bildern extrahieren</title>
+
+    <!-- Primary meta -->
+    <title>Kodini Color Extractor – Farbpaletten aus Bildern extrahieren</title>
     <meta
       name="description"
-      content="Extrahiere automatisch Farbpaletten aus deinen Bildern. Kostenlos, datenschutzfreundlich, direkt im Browser."
+      content="Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking. Export als HEX, RGB, HSL & CSS."
     />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="KodiniTools" />
+    <meta name="application-name" content="Kodini Color Extractor" />
+    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Canonical & language alternates -->
+    <link rel="canonical" href="https://kodinitools.github.io/kodini-color-extractor/" />
+    <link
+      rel="alternate"
+      hreflang="de"
+      href="https://kodinitools.github.io/kodini-color-extractor/"
+    />
+    <link
+      rel="alternate"
+      hreflang="en"
+      href="https://kodinitools.github.io/kodini-color-extractor/"
+    />
+    <link
+      rel="alternate"
+      hreflang="x-default"
+      href="https://kodinitools.github.io/kodini-color-extractor/"
+    />
+
+    <!-- Icons & PWA -->
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <link rel="manifest" href="/site.webmanifest" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Kodini Color Extractor" />
+    <meta
+      property="og:title"
+      content="Kodini Color Extractor – Farbpaletten aus Bildern extrahieren"
+    />
+    <meta
+      property="og:description"
+      content="Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking."
+    />
+    <meta property="og:url" content="https://kodinitools.github.io/kodini-color-extractor/" />
+    <meta
+      property="og:image"
+      content="https://kodinitools.github.io/kodini-color-extractor/og-image.png"
+    />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Kodini Color Extractor" />
+    <meta property="og:locale" content="de_DE" />
+    <meta property="og:locale:alternate" content="en_US" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Kodini Color Extractor – Farbpaletten aus Bildern extrahieren"
+    />
+    <meta
+      name="twitter:description"
+      content="Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking."
+    />
+    <meta
+      name="twitter:image"
+      content="https://kodinitools.github.io/kodini-color-extractor/og-image.png"
+    />
+
+    <!-- Structured data: Web application -->
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "Kodini Color Extractor",
+        "url": "https://kodinitools.github.io/kodini-color-extractor/",
+        "description": "Free, privacy-first tool to extract color palettes from any image directly in the browser. Export as HEX, RGB, RGBA, HSL, HSLA or CSS variables.",
+        "applicationCategory": "DesignApplication",
+        "operatingSystem": "Any (web browser)",
+        "browserRequirements": "Requires JavaScript. Modern browser with HTML5 Canvas support.",
+        "inLanguage": ["de", "en"],
+        "isAccessibleForFree": true,
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "EUR"
+        },
+        "featureList": [
+          "Extract up to 20 dominant colors from an image",
+          "Pixel-precise color picking with magnifier",
+          "Real-time brightness, contrast, saturation and hue adjustment",
+          "Export as HEX, RGB, RGBA, HSL, HSLA and CSS variables",
+          "100% client-side processing – images never leave the device",
+          "Light and dark theme"
+        ],
+        "publisher": {
+          "@type": "Organization",
+          "name": "KodiniTools",
+          "url": "https://kodinitools.github.io/"
+        }
+      }
+    </script>
   </head>
   <body>
     <!--#include virtual="/partials/nav.html" -->
