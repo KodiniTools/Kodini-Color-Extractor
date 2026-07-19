@@ -22,10 +22,10 @@ const pixelZoomCanvas = computed(() => pixelMagnifierRef.value?.canvas)
 
 // Computed style for image filters and pan
 const imageFilterStyle = computed(() => {
-  const { zoom, brightness, contrast, saturation, hue } = store.imageAdjustments
+  const { zoom, brightness, contrast, saturation, hue, blur, grayscale } = store.imageAdjustments
   const { x: panX, y: panY } = store.panPosition
   return {
-    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) blur(${blur}px) grayscale(${grayscale}%)`,
     transform: `scale(${zoom / 100}) translate(${panX}px, ${panY}px)`,
     transformOrigin: 'center center',
   }

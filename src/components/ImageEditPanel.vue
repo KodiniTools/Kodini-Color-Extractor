@@ -33,7 +33,25 @@ const hue = computed({
   set: (val) => store.setImageAdjustment('hue', val),
 })
 
-const defaults = { zoom: 100, brightness: 100, contrast: 100, saturation: 100, hue: 0 }
+const blur = computed({
+  get: () => store.imageAdjustments.blur,
+  set: (val) => store.setImageAdjustment('blur', val),
+})
+
+const grayscale = computed({
+  get: () => store.imageAdjustments.grayscale,
+  set: (val) => store.setImageAdjustment('grayscale', val),
+})
+
+const defaults = {
+  zoom: 100,
+  brightness: 100,
+  contrast: 100,
+  saturation: 100,
+  hue: 0,
+  blur: 0,
+  grayscale: 0,
+}
 
 const isModified = computed(() => ({
   zoom: zoom.value !== defaults.zoom,
@@ -41,6 +59,8 @@ const isModified = computed(() => ({
   contrast: contrast.value !== defaults.contrast,
   saturation: saturation.value !== defaults.saturation,
   hue: hue.value !== defaults.hue,
+  blur: blur.value !== defaults.blur,
+  grayscale: grayscale.value !== defaults.grayscale,
 }))
 
 function resetAll() {
@@ -253,6 +273,64 @@ function clearImage() {
         class="slider slider-hue"
       />
     </div>
+
+    <div class="section-divider">{{ t('effectsTitle') }}</div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('blur') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ blur }}px</span>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.blur }"
+            @click="resetSlider('blur')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input type="range" v-model.number="blur" min="0" max="8" step="0.5" class="slider" />
+    </div>
+
+    <div class="slider-group">
+      <div class="slider-header">
+        <label>{{ t('grayscale') }}</label>
+        <div class="slider-value-group">
+          <span class="slider-value">{{ grayscale }}%</span>
+          <button
+            class="reset-btn"
+            :class="{ active: isModified.grayscale }"
+            @click="resetSlider('grayscale')"
+            :title="t('reset')"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+              <path d="M3 3v5h5" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <input type="range" v-model.number="grayscale" min="0" max="100" step="1" class="slider" />
+    </div>
   </aside>
 </template>
 
@@ -309,6 +387,18 @@ function clearImage() {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
+  transition: color 0.3s ease;
+}
+
+.section-divider {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--text-tertiary);
+  margin: 8px 0 4px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border-light);
   transition: color 0.3s ease;
 }
 

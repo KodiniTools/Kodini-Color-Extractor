@@ -33,6 +33,8 @@ export const usePaletteStore = defineStore('palette', () => {
     contrast: 100,
     saturation: 100,
     hue: 0,
+    blur: 0,
+    grayscale: 0,
   })
 
   // Pan position for zoomed image
@@ -103,6 +105,8 @@ export const usePaletteStore = defineStore('palette', () => {
       contrast: 100,
       saturation: 100,
       hue: 0,
+      blur: 0,
+      grayscale: 0,
     }
     panPosition.value = { x: 0, y: 0 }
     applyFiltersToCanvas()
@@ -111,7 +115,7 @@ export const usePaletteStore = defineStore('palette', () => {
   function applyFiltersToCanvas() {
     if (!canvasRef.value || !currentImage.value) return
 
-    const { brightness, contrast, saturation, hue } = imageAdjustments.value
+    const { brightness, contrast, saturation, hue, blur, grayscale } = imageAdjustments.value
 
     // Create filtered canvas if not exists
     if (!filteredCanvasRef.value) {
@@ -127,7 +131,7 @@ export const usePaletteStore = defineStore('palette', () => {
     const ctx = filteredCanvas.getContext('2d')
 
     // Apply CSS-like filters using canvas
-    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) blur(${blur}px) grayscale(${grayscale}%)`
     ctx.drawImage(originalCanvas, 0, 0)
 
     // Reset filter for future operations
@@ -258,11 +262,7 @@ export const usePaletteStore = defineStore('palette', () => {
         )
         worker.onmessage = ({ data: { sorted } }) => {
           worker.terminate()
-          const positions = getCenteredGridPositions(
-            sorted.length,
-            canvas.width,
-            canvas.height
-          )
+          const positions = getCenteredGridPositions(sorted.length, canvas.width, canvas.height)
           // Assign grid positions, then re-sample pixel colors at those positions
           colors.value = sorted.map((c, i) => ({ ...c, position: positions[i] }))
           updateAllColorsFromFilteredCanvas()
