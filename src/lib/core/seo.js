@@ -1,12 +1,13 @@
 // Central SEO configuration and DOM helpers.
 //
-// The app is a client-rendered Vue SPA deployed to GitHub Pages. index.html
-// ships sensible static defaults (Open Graph, Twitter, JSON-LD) for crawlers
-// and social scrapers; useSeo.js then keeps the <head> in sync with the active
-// route and UI language at runtime.
+// The app is a client-rendered Vue SPA served under the kodinitools.com custom
+// domain at the /kodini-color-extractor/ base path. index.html ships sensible
+// static defaults (Open Graph, Twitter, JSON-LD) for crawlers and social
+// scrapers; useSeo.js then keeps the <head> in sync with the active route and
+// UI language at runtime.
 
 // Absolute canonical origin + base path (no trailing slash).
-export const SITE_URL = 'https://kodinitools.github.io/kodini-color-extractor'
+export const SITE_URL = 'https://kodinitools.com/kodini-color-extractor'
 
 // Absolute URL of the social sharing image (1200x630).
 export const OG_IMAGE = `${SITE_URL}/og-image.png`

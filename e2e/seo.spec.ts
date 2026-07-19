@@ -13,10 +13,10 @@ test.describe('SEO head management', () => {
     expect(desc && desc.length).toBeGreaterThan(50)
 
     const canonical = await attr(page, 'link[rel="canonical"]', 'href')
-    expect(canonical).toBe('https://kodinitools.github.io/kodini-color-extractor/')
+    expect(canonical).toBe('https://kodinitools.com/kodini-color-extractor/')
 
     expect(await attr(page, 'meta[property="og:url"]', 'content')).toBe(
-      'https://kodinitools.github.io/kodini-color-extractor/'
+      'https://kodinitools.com/kodini-color-extractor/'
     )
     expect(await attr(page, 'meta[property="og:image"]', 'content')).toContain('/og-image.png')
     expect(await attr(page, 'meta[name="twitter:card"]', 'content')).toBe('summary_large_image')
@@ -32,7 +32,7 @@ test.describe('SEO head management', () => {
 
     await expect(page).toHaveTitle(/FAQ/)
     expect(await attr(page, 'link[rel="canonical"]', 'href')).toBe(
-      'https://kodinitools.github.io/kodini-color-extractor/faq'
+      'https://kodinitools.com/kodini-color-extractor/faq'
     )
   })
 

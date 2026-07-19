@@ -5,4 +5,4 @@ Allow: /
 # Internal, state-driven views are not useful in the index
 Disallow: /kodini-color-extractor/app/gallery
 
-Sitemap: https://kodinitools.github.io/kodini-color-extractor/sitemap.xml
+Sitemap: https://kodinitools.com/kodini-color-extractor/sitemap.xml
