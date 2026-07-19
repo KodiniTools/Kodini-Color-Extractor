@@ -90,6 +90,7 @@ function startDragWithRects(e, index) {
 
 const {
   isPanning,
+  isPinching,
   startPan,
   cleanup: cleanupPan,
 } = useCanvasPan({
@@ -146,9 +147,15 @@ onUnmounted(() => {
       <div
         ref="imageContainer"
         class="image-container"
-        :class="{ 'is-zoomed': isZoomed, 'is-panning': isPanning, 'file-dragging': isFileDragging }"
+        :class="{
+          'is-zoomed': isZoomed,
+          'is-panning': isPanning || isPinching,
+          'file-dragging': isFileDragging,
+          'has-image': store.currentImage,
+        }"
         :style="containerAspectStyle"
         @mousedown="startPan"
+        @touchstart="startPan"
       >
         <template v-if="store.currentImage">
           <img
@@ -252,6 +259,12 @@ onUnmounted(() => {
   border-color: var(--selection-color);
   border-width: 3px;
   background: var(--bg-hover);
+}
+
+/* Capture touch gestures (single-finger pan / two-finger pinch-zoom)
+   instead of letting the browser scroll or native-zoom the page. */
+.image-container.has-image {
+  touch-action: none;
 }
 
 .image-container.is-zoomed {
