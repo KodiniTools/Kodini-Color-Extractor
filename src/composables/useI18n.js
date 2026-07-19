@@ -155,6 +155,17 @@ const translations = {
 
     faqCtaTitle: 'Still have questions? Try it yourself!',
     faqCtaButton: 'Open Color Extractor',
+
+    // SEO meta (page titles & descriptions)
+    metaTitleHome: 'Kodini Color Extractor – Extract Color Palettes from Images',
+    metaTitleApp: 'Color Extractor App – Pick Colors from Your Image',
+    metaTitleFaq: 'FAQ – Kodini Color Extractor',
+    metaDescHome:
+      'Extract beautiful color palettes from any image for free. Privacy-first and 100% in-browser – no uploads, no tracking. Export as HEX, RGB, HSL & CSS.',
+    metaDescApp:
+      'Upload an image and extract up to 20 dominant colors with pixel-precise picking. Export palettes as HEX, RGB, HSL or CSS variables. 100% private, in your browser.',
+    metaDescFaq:
+      'Answers to common questions about Kodini Color Extractor: pricing, privacy, supported image formats, export options, mobile support and dark mode.',
   },
   de: {
     // App
@@ -310,6 +321,17 @@ const translations = {
 
     faqCtaTitle: 'Noch Fragen? Probiere es selbst aus!',
     faqCtaButton: 'Color Extractor öffnen',
+
+    // SEO meta (page titles & descriptions)
+    metaTitleHome: 'Kodini Color Extractor – Farbpaletten aus Bildern extrahieren',
+    metaTitleApp: 'Color Extractor App – Farben aus deinem Bild wählen',
+    metaTitleFaq: 'FAQ – Kodini Color Extractor',
+    metaDescHome:
+      'Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking. Export als HEX, RGB, HSL & CSS.',
+    metaDescApp:
+      'Lade ein Bild hoch und extrahiere bis zu 20 dominante Farben mit pixelgenauer Auswahl. Export als HEX, RGB, HSL oder CSS-Variablen. 100% privat, direkt im Browser.',
+    metaDescFaq:
+      'Antworten auf häufige Fragen zum Kodini Color Extractor: Kosten, Datenschutz, unterstützte Bildformate, Exportoptionen, mobile Nutzung und Dark Mode.',
   },
 }
 
