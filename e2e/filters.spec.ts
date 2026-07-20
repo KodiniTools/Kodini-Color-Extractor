@@ -71,4 +71,21 @@ test.describe('Image effect filters', () => {
     expect(style).toContain('grayscale(0%)')
     expect(style).toContain('blur(0px)')
   })
+
+  test('before/after preview reflects the effect filters', async ({ page }) => {
+    await sliderByLabel(page, 'Graustufen').fill('76')
+    await sliderByLabel(page, 'Weichzeichnen').fill('4')
+
+    // Open the before/after comparison modal (eye icon in the panel header)
+    await page.locator('.preview-btn').click()
+    const afterImg = page.locator('.after-image img')
+    await expect(afterImg).toBeVisible()
+
+    const style = await afterImg.getAttribute('style')
+    expect(style).toContain('grayscale(76%)')
+    expect(style).toContain('blur(4px)')
+
+    // With adjustments active, the "Vorher = Nachher" hint must be gone
+    await expect(page.locator('.no-adjustments-hint')).toHaveCount(0)
+  })
 })

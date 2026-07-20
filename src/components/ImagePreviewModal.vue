@@ -17,15 +17,22 @@ const isDragging = ref(false)
 const containerRef = ref(null)
 
 const imageFilterStyle = computed(() => {
-  const { brightness, contrast, saturation, hue } = store.imageAdjustments
+  const { brightness, contrast, saturation, hue, blur, grayscale } = store.imageAdjustments
   return {
-    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg)`,
+    filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) blur(${blur}px) grayscale(${grayscale}%)`,
   }
 })
 
 const hasAdjustments = computed(() => {
-  const { brightness, contrast, saturation, hue } = store.imageAdjustments
-  return brightness !== 100 || contrast !== 100 || saturation !== 100 || hue !== 0
+  const { brightness, contrast, saturation, hue, blur, grayscale } = store.imageAdjustments
+  return (
+    brightness !== 100 ||
+    contrast !== 100 ||
+    saturation !== 100 ||
+    hue !== 0 ||
+    blur !== 0 ||
+    grayscale !== 0
+  )
 })
 
 function handleKeydown(e) {
