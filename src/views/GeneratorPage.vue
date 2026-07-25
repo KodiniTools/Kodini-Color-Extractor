@@ -59,6 +59,14 @@ function rgbToHex({ r, g, b }) {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
 }
 
+// Parse a #RRGGBB string into an { r, g, b } object, or null if invalid.
+function hexToRgb(hex) {
+  const m = /^#?([0-9a-fA-F]{6})$/.exec(String(hex).trim())
+  if (!m) return null
+  const n = parseInt(m[1], 16)
+  return { r: (n >> 16) & 255, g: (n >> 8) & 255, b: n & 255 }
+}
+
 // Relative luminance → pick readable overlay text (dark vs light).
 function isLightColor({ r, g, b }) {
   const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
@@ -225,6 +233,47 @@ function onAllScope() {
     unlockAll()
   } else {
     scope.value = 'all'
+  }
+}
+
+// ─── Colour picker + eyedropper ───
+// Operate on the single selected colour and stay in sync with its swatch and
+// sliders. The EyeDropper API is Chromium-only, so it is feature-detected.
+const eyedropperSupported = typeof window !== 'undefined' && 'EyeDropper' in window
+
+// The currently selected colour object (null while editing all colours).
+const selectedColor = computed(() =>
+  scope.value === 'all' ? null : palette.value[scope.value] || null
+)
+
+// Whether the picker can act right now (a single, unlocked colour is chosen).
+const canPick = computed(() => !!selectedColor.value && !selectedColor.value.locked)
+
+// The picker reflects the selected colour's displayed (adjusted) value.
+const pickerHex = computed(() =>
+  selectedColor.value ? displayHex(selectedColor.value) : '#000000'
+)
+
+// Apply a picked colour: it becomes the swatch's new base with neutral
+// adjustments, so the swatch, the hex and the sliders all resync to it.
+function setColorFromHex(hex) {
+  const c = selectedColor.value
+  if (!c || c.locked) return
+  const rgb = hexToRgb(hex)
+  if (!rgb) return
+  c.base = rgb
+  Object.assign(c.adj, neutralAdjust())
+}
+
+// Pipette: sample any pixel on screen with the browser's eyedropper.
+async function pickWithEyedropper() {
+  if (!eyedropperSupported || !canPick.value) return
+  try {
+    const result = await new window.EyeDropper().open()
+    setColorFromHex(result.sRGBHex)
+    toast.success(t('genColorPicked').replace('{hex}', result.sRGBHex.toUpperCase()))
+  } catch {
+    // The user pressed Escape / cancelled — nothing to do.
   }
 }
 
@@ -410,6 +459,43 @@ onUnmounted(() => {
       </div>
 
       <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
+
+      <!-- Colour picker + eyedropper for the selected colour -->
+      <div class="adjust-picker">
+        <template v-if="canPick">
+          <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
+          <label class="color-well" :style="{ background: pickerHex }" :title="t('genPickColor')">
+            <input type="color" :value="pickerHex" @input="setColorFromHex($event.target.value)" />
+          </label>
+          <span class="adjust-picker-hex">{{ pickerHex }}</span>
+          <button
+            v-if="eyedropperSupported"
+            type="button"
+            class="pipette-btn"
+            :title="t('genEyedropper')"
+            @click="pickWithEyedropper"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="m2 22 1-1h3l9-9"></path>
+              <path d="M3 21v-3l9-9"></path>
+              <path
+                d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"
+              ></path>
+            </svg>
+            <span>{{ t('genEyedropper') }}</span>
+          </button>
+        </template>
+        <span v-else class="adjust-picker-hint">{{ t('genPickHint') }}</span>
+      </div>
 
       <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
         <div v-for="f in ADJUST_FIELDS" :key="f.key" class="adjust-field">
@@ -753,6 +839,84 @@ onUnmounted(() => {
 
 .adjust-locked-note {
   margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
+}
+
+/* Colour picker + eyedropper row */
+.adjust-picker {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  min-height: 34px;
+  margin-bottom: 14px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.adjust-picker-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Native colour input rendered as a small square swatch */
+.color-well {
+  position: relative;
+  display: inline-block;
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  box-shadow: inset 0 0 0 2px var(--bg-secondary);
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.color-well input[type='color'] {
+  position: absolute;
+  inset: -4px;
+  width: calc(100% + 8px);
+  height: calc(100% + 8px);
+  padding: 0;
+  border: none;
+  background: none;
+  cursor: pointer;
+  opacity: 0;
+}
+
+.adjust-picker-hex {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+}
+
+.pipette-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+  padding: 7px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pipette-btn:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+}
+
+.adjust-picker-hint {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-tertiary);
