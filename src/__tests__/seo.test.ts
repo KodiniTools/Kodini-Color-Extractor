@@ -42,6 +42,11 @@ describe('seo helpers', () => {
     expect(faq.title).toBe('T:metaTitleFaq')
     expect(faq.robots).toBe('index, follow')
 
+    const generator = routeSeo('generator', t)
+    expect(generator.title).toBe('T:metaTitleGenerator')
+    expect(generator.description).toBe('T:metaDescGenerator')
+    expect(generator.robots).toBe('index, follow')
+
     // Internal, state-driven view must not be indexed
     expect(routeSeo('gallery', t).robots).toBe('noindex, follow')
 

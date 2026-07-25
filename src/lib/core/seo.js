@@ -31,6 +31,11 @@ export function canonicalUrl(path) {
 const ROUTE_SEO = {
   landing: { titleKey: 'metaTitleHome', descKey: 'metaDescHome', robots: 'index, follow' },
   app: { titleKey: 'metaTitleApp', descKey: 'metaDescApp', robots: 'index, follow' },
+  generator: {
+    titleKey: 'metaTitleGenerator',
+    descKey: 'metaDescGenerator',
+    robots: 'index, follow',
+  },
   gallery: { titleKey: 'metaTitleApp', descKey: 'metaDescApp', robots: 'noindex, follow' },
   faq: { titleKey: 'metaTitleFaq', descKey: 'metaDescFaq', robots: 'index, follow' },
 }

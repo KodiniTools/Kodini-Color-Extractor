@@ -10,6 +10,7 @@ const { t } = useI18n()
       <div class="nav-links">
         <router-link to="/" class="nav-link">{{ t('navHome') }}</router-link>
         <router-link to="/app" class="nav-link">{{ t('navApp') }}</router-link>
+        <router-link to="/generator" class="nav-link">{{ t('navGenerator') }}</router-link>
         <router-link to="/faq" class="nav-link">{{ t('navFaq') }}</router-link>
       </div>
     </div>

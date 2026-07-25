@@ -14,9 +14,14 @@ const { t } = useI18n()
       <div class="hero-content">
         <h1 class="hero-title">{{ t('heroTitle') }}</h1>
         <p class="hero-subtitle">{{ t('heroSubtitle') }}</p>
-        <router-link to="/app" class="hero-cta">
-          {{ t('heroCta') }}
-        </router-link>
+        <div class="hero-actions">
+          <router-link to="/app" class="hero-cta">
+            {{ t('heroCta') }}
+          </router-link>
+          <router-link to="/generator" class="hero-cta hero-cta-secondary">
+            {{ t('heroCtaSecondary') }}
+          </router-link>
+        </div>
       </div>
 
       <!-- Feature Cards Grid -->
@@ -128,6 +133,13 @@ const { t } = useI18n()
   transition: color 0.3s ease;
 }
 
+.hero-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
 .hero-cta {
   display: inline-block;
   background: var(--btn-primary-bg);
@@ -143,6 +155,17 @@ const { t } = useI18n()
 .hero-cta:hover {
   background: var(--btn-primary-hover);
   transform: translateY(-2px);
+}
+
+.hero-cta-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+}
+
+.hero-cta-secondary:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
 }
 
 /* Feature Cards */
