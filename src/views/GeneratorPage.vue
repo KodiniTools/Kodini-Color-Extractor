@@ -759,6 +759,14 @@ onUnmounted(() => {
   color: var(--btn-primary-text);
 }
 
+/* Keep the filled button's light label readable on hover (the generic
+   .scope-tab:hover would otherwise darken the text onto the dark fill). */
+.scope-tab--active:not(.scope-tab--muted):hover {
+  background: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
+  color: var(--btn-primary-text);
+}
+
 /* "All colors" looks deactivated while individual colors are locked.
    Kept as an unfilled toggle so the label stays high-contrast in light mode. */
 .scope-tab--muted {
