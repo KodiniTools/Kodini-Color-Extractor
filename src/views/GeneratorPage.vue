@@ -184,11 +184,16 @@ function generate() {
 
 function toggleLock(index) {
   const c = palette.value[index]
-  if (c) c.locked = !c.locked
+  if (!c) return
+  c.locked = !c.locked
+  // Locking the color you're editing returns the sliders to "all colors".
+  if (c.locked && scope.value === index) scope.value = 'all'
 }
 
-// Select which color(s) the sliders affect.
+// Select which color(s) the sliders affect. Locked colors are protected and
+// cannot be selected for editing until they are unlocked.
 function selectScope(value) {
+  if (value !== 'all' && palette.value[value]?.locked) return
   scope.value = value
 }
 
@@ -197,29 +202,41 @@ const activeAdjust = computed(() =>
   scope.value === 'all' ? masterAdjust : palette.value[scope.value]?.adj || masterAdjust
 )
 
-// Move a slider: in "all" mode the value is applied to every color at once,
-// otherwise only to the selected color.
+// True when the sliders should be inert: a single locked color, or "all"
+// mode when every color is locked. Locked colors never react to the sliders.
+const activeLocked = computed(() => {
+  if (scope.value === 'all') {
+    return palette.value.length > 0 && palette.value.every((c) => c.locked)
+  }
+  return !!palette.value[scope.value]?.locked
+})
+
+// Move a slider: in "all" mode the value is applied to every unlocked color,
+// otherwise only to the selected color. Locked colors are always skipped.
 function setAdjust(key, value) {
   const v = Number(value)
   if (scope.value === 'all') {
     masterAdjust[key] = v
     palette.value.forEach((c) => {
-      c.adj[key] = v
+      if (!c.locked) c.adj[key] = v
     })
   } else {
     const c = palette.value[scope.value]
-    if (c) c.adj[key] = v
+    if (c && !c.locked) c.adj[key] = v
   }
 }
 
-// Reset the adjustments for the current scope back to neutral.
+// Reset the adjustments for the current scope back to neutral (locked colors
+// keep their state).
 function resetAdjust() {
   if (scope.value === 'all') {
     Object.assign(masterAdjust, neutralAdjust())
-    palette.value.forEach((c) => Object.assign(c.adj, neutralAdjust()))
+    palette.value.forEach((c) => {
+      if (!c.locked) Object.assign(c.adj, neutralAdjust())
+    })
   } else {
     const c = palette.value[scope.value]
-    if (c) Object.assign(c.adj, neutralAdjust())
+    if (c && !c.locked) Object.assign(c.adj, neutralAdjust())
   }
 }
 
@@ -334,20 +351,32 @@ onUnmounted(() => {
               v-for="(color, index) in palette"
               :key="index"
               class="scope-dot"
-              :class="{ 'scope-dot--active': scope === index }"
+              :class="{
+                'scope-dot--active': scope === index,
+                'scope-dot--locked': color.locked,
+              }"
               :style="{ background: displayHex(color) }"
-              :title="t('genScopeColor').replace('{n}', index + 1)"
+              :disabled="color.locked"
+              :title="
+                color.locked ? t('genLockedHint') : t('genScopeColor').replace('{n}', index + 1)
+              "
               :aria-label="t('genScopeColor').replace('{n}', index + 1)"
               @click="selectScope(index)"
             ></button>
           </div>
         </div>
-        <button class="adjust-reset" :disabled="!hasActiveAdjust" @click="resetAdjust">
+        <button
+          class="adjust-reset"
+          :disabled="!hasActiveAdjust || activeLocked"
+          @click="resetAdjust"
+        >
           {{ t('reset') }}
         </button>
       </div>
 
-      <div class="adjust-sliders">
+      <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
+
+      <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
         <div v-for="f in ADJUST_FIELDS" :key="f.key" class="adjust-field">
           <div class="adjust-field-head">
             <label class="adjust-field-label">{{ t(f.key) }}</label>
@@ -361,6 +390,7 @@ onUnmounted(() => {
             :min="f.min"
             :max="f.max"
             :value="activeAdjust[f.key]"
+            :disabled="activeLocked"
             @input="setAdjust(f.key, $event.target.value)"
           />
         </div>
@@ -629,6 +659,15 @@ onUnmounted(() => {
   transform: scale(1.12);
 }
 
+.scope-dot--locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.scope-dot--locked:hover {
+  transform: none;
+}
+
 .adjust-reset {
   padding: 7px 16px;
   border: 1px solid var(--border-color);
@@ -656,6 +695,17 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 18px;
+}
+
+.adjust-sliders--disabled {
+  opacity: 0.5;
+}
+
+.adjust-locked-note {
+  margin: 0 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-tertiary);
 }
 
 .adjust-field {
@@ -719,6 +769,10 @@ onUnmounted(() => {
   box-shadow: 0 0 0 3px var(--selection-glow);
 }
 
+.adjust-slider:disabled {
+  cursor: not-allowed;
+}
+
 /* Palette strip */
 .palette-strip {
   flex: 1;
@@ -747,6 +801,11 @@ onUnmounted(() => {
 /* Selected color: inset ring using the swatch's own text color for contrast */
 .swatch--selected {
   box-shadow: inset 0 0 0 4px currentColor;
+}
+
+/* Locked colors are protected from the sliders and are not selectable */
+.swatch--locked {
+  cursor: default;
 }
 
 .swatch-actions {
