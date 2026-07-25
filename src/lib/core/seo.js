@@ -102,8 +102,8 @@ export function removeJsonLd(id) {
 }
 
 // Build a schema.org FAQPage graph from the localized FAQ content so search
-// engines can surface rich results. Mirrors the 8 items rendered in FaqPage.vue.
-export function buildFaqJsonLd(t, faqCount = 8) {
+// engines can surface rich results. Mirrors the items rendered in FaqPage.vue.
+export function buildFaqJsonLd(t, faqCount = 10) {
   const mainEntity = []
   for (let i = 1; i <= faqCount; i++) {
     mainEntity.push({

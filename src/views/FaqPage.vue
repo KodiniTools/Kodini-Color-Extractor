@@ -20,7 +20,7 @@ function isOpen(index) {
   return openItems.value.includes(index)
 }
 
-const faqCount = 8
+const faqCount = 10
 </script>
 
 <template>
