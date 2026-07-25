@@ -460,41 +460,51 @@ onUnmounted(() => {
 
       <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
 
-      <!-- Colour picker + eyedropper for the selected colour -->
+      <!-- Colour picker + eyedropper. Always visible; enabled once a single
+           colour field is selected (disabled with a hint in "all" mode). -->
       <div class="adjust-picker">
-        <template v-if="canPick">
-          <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
-          <label class="color-well" :style="{ background: pickerHex }" :title="t('genPickColor')">
-            <input type="color" :value="pickerHex" @input="setColorFromHex($event.target.value)" />
-          </label>
-          <span class="adjust-picker-hex">{{ pickerHex }}</span>
-          <button
-            v-if="eyedropperSupported"
-            type="button"
-            class="pipette-btn"
-            :title="t('genEyedropper')"
-            @click="pickWithEyedropper"
+        <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
+        <label
+          class="color-well"
+          :class="{ 'color-well--disabled': !canPick }"
+          :style="canPick ? { background: pickerHex } : null"
+          :title="canPick ? t('genPickColor') : t('genPickHint')"
+        >
+          <input
+            type="color"
+            :value="canPick ? pickerHex : '#000000'"
+            :disabled="!canPick"
+            @input="setColorFromHex($event.target.value)"
+          />
+        </label>
+        <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
+        <button
+          v-if="eyedropperSupported"
+          type="button"
+          class="pipette-btn"
+          :disabled="!canPick"
+          :title="canPick ? t('genEyedropper') : t('genPickHint')"
+          @click="pickWithEyedropper"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="m2 22 1-1h3l9-9"></path>
-              <path d="M3 21v-3l9-9"></path>
-              <path
-                d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"
-              ></path>
-            </svg>
-            <span>{{ t('genEyedropper') }}</span>
-          </button>
-        </template>
-        <span v-else class="adjust-picker-hint">{{ t('genPickHint') }}</span>
+            <path d="m2 22 1-1h3l9-9"></path>
+            <path d="M3 21v-3l9-9"></path>
+            <path
+              d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"
+            ></path>
+          </svg>
+          <span>{{ t('genEyedropper') }}</span>
+        </button>
+        <span v-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
       </div>
 
       <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
@@ -895,6 +905,22 @@ onUnmounted(() => {
   opacity: 0;
 }
 
+/* No colour selected yet: show the well as an inert, striped placeholder */
+.color-well--disabled {
+  cursor: not-allowed;
+  background: repeating-linear-gradient(
+    45deg,
+    var(--bg-hover),
+    var(--bg-hover) 5px,
+    var(--bg-secondary) 5px,
+    var(--bg-secondary) 10px
+  );
+}
+
+.color-well--disabled input[type='color'] {
+  cursor: not-allowed;
+}
+
 .adjust-picker-hex {
   font-size: 13px;
   font-weight: 600;
@@ -919,9 +945,14 @@ onUnmounted(() => {
   transition: all 0.2s ease;
 }
 
-.pipette-btn:hover {
+.pipette-btn:hover:not(:disabled) {
   background: var(--bg-hover);
   border-color: var(--border-hover);
+}
+
+.pipette-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .adjust-picker-hint {
