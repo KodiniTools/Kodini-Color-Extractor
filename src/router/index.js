@@ -2,6 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { STORAGE_KEY } from '../lib/core/handoff'
 import LandingPage from '../views/LandingPage.vue'
 import AppPage from '../views/AppPage.vue'
+import GeneratorPage from '../views/GeneratorPage.vue'
 import GalleryView from '../views/GalleryView.vue'
 import FaqPage from '../views/FaqPage.vue'
 
@@ -17,6 +18,12 @@ const routes = [
     name: 'app',
     component: AppPage,
     meta: { title: 'App - Kodini Color Extractor' },
+  },
+  {
+    path: '/generator',
+    name: 'generator',
+    component: GeneratorPage,
+    meta: { title: 'Color Generator - Kodini Color Extractor' },
   },
   {
     path: '/app/gallery',

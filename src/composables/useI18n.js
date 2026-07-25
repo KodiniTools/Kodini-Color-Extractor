@@ -79,6 +79,7 @@ const translations = {
     // Navigation
     navHome: 'Home',
     navApp: 'Open App',
+    navGenerator: 'Generator',
     navFaq: 'FAQ',
 
     // Landing Page - Hero
@@ -86,6 +87,27 @@ const translations = {
     heroSubtitle:
       'A free, privacy-focused tool that runs entirely in your browser. No uploads, no tracking - just pure color extraction.',
     heroCta: 'Start Extracting Colors',
+    heroCtaSecondary: 'Open Color Generator',
+
+    // Color Generator Page
+    genTitle: 'Color Palette Generator',
+    genSubtitle:
+      'Instantly create harmonious color palettes. Press the spacebar to generate, lock the colors you love and copy any HEX with a click.',
+    genHarmony: 'Harmony',
+    genCount: 'Colors',
+    genGenerate: 'Generate',
+    genCopyAll: 'Copy all',
+    genSpaceHint: 'Tip: press the spacebar to generate a fresh palette.',
+    genLock: 'Lock color',
+    genUnlock: 'Unlock color',
+    genClickCopy: 'Click to copy HEX',
+    genCopied: 'Copied {hex} to clipboard',
+    genCopiedAll: 'Palette copied to clipboard',
+    genMode_random: 'Random',
+    genMode_monochromatic: 'Monochromatic',
+    genMode_analogous: 'Analogous',
+    genMode_complementary: 'Complementary',
+    genMode_triadic: 'Triadic',
 
     // Landing Page - Features
     feature1Title: 'Drag & Drop Upload',
@@ -162,11 +184,14 @@ const translations = {
     // SEO meta (page titles & descriptions)
     metaTitleHome: 'Kodini Color Extractor – Extract Color Palettes from Images',
     metaTitleApp: 'Color Extractor App – Pick Colors from Your Image',
+    metaTitleGenerator: 'Color Palette Generator – Create Harmonious Color Schemes',
     metaTitleFaq: 'FAQ – Kodini Color Extractor',
     metaDescHome:
       'Extract beautiful color palettes from any image for free. Privacy-first and 100% in-browser – no uploads, no tracking. Export as HEX, RGB, HSL & CSS.',
     metaDescApp:
       'Upload an image and extract up to 20 dominant colors with pixel-precise picking. Export palettes as HEX, RGB, HSL or CSS variables. 100% private, in your browser.',
+    metaDescGenerator:
+      'Generate harmonious color palettes in seconds. Pick a harmony mode, lock your favourite colors and copy any HEX with one click. Free and 100% in your browser.',
     metaDescFaq:
       'Answers to common questions about Kodini Color Extractor: pricing, privacy, supported image formats, export options, mobile support and dark mode.',
   },
@@ -248,6 +273,7 @@ const translations = {
     // Navigation
     navHome: 'Start',
     navApp: 'App öffnen',
+    navGenerator: 'Generator',
     navFaq: 'FAQ',
 
     // Landing Page - Hero
@@ -255,6 +281,27 @@ const translations = {
     heroSubtitle:
       'Ein kostenloses, datenschutzfreundliches Tool, das vollständig in deinem Browser läuft. Keine Uploads, kein Tracking - nur reine Farbextraktion.',
     heroCta: 'Farben extrahieren',
+    heroCtaSecondary: 'Farbgenerator öffnen',
+
+    // Color Generator Page
+    genTitle: 'Farbpaletten-Generator',
+    genSubtitle:
+      'Erstelle im Handumdrehen harmonische Farbpaletten. Drücke die Leertaste zum Generieren, sperre deine Lieblingsfarben und kopiere jeden HEX-Wert mit einem Klick.',
+    genHarmony: 'Harmonie',
+    genCount: 'Farben',
+    genGenerate: 'Generieren',
+    genCopyAll: 'Alle kopieren',
+    genSpaceHint: 'Tipp: Drücke die Leertaste für eine neue Palette.',
+    genLock: 'Farbe sperren',
+    genUnlock: 'Farbe entsperren',
+    genClickCopy: 'Klicken zum Kopieren des HEX-Werts',
+    genCopied: '{hex} in Zwischenablage kopiert',
+    genCopiedAll: 'Palette in Zwischenablage kopiert',
+    genMode_random: 'Zufällig',
+    genMode_monochromatic: 'Monochrom',
+    genMode_analogous: 'Analog',
+    genMode_complementary: 'Komplementär',
+    genMode_triadic: 'Triadisch',
 
     // Landing Page - Features
     feature1Title: 'Drag & Drop Upload',
@@ -331,11 +378,14 @@ const translations = {
     // SEO meta (page titles & descriptions)
     metaTitleHome: 'Kodini Color Extractor – Farbpaletten aus Bildern extrahieren',
     metaTitleApp: 'Color Extractor App – Farben aus deinem Bild wählen',
+    metaTitleGenerator: 'Farbpaletten-Generator – Harmonische Farbschemata erstellen',
     metaTitleFaq: 'FAQ – Kodini Color Extractor',
     metaDescHome:
       'Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking. Export als HEX, RGB, HSL & CSS.',
     metaDescApp:
       'Lade ein Bild hoch und extrahiere bis zu 20 dominante Farben mit pixelgenauer Auswahl. Export als HEX, RGB, HSL oder CSS-Variablen. 100% privat, direkt im Browser.',
+    metaDescGenerator:
+      'Erstelle in Sekunden harmonische Farbpaletten. Wähle einen Harmonie-Modus, sperre deine Lieblingsfarben und kopiere jeden HEX-Wert mit einem Klick. Kostenlos und 100% im Browser.',
     metaDescFaq:
       'Antworten auf häufige Fragen zum Kodini Color Extractor: Kosten, Datenschutz, unterstützte Bildformate, Exportoptionen, mobile Nutzung und Dark Mode.',
   },
