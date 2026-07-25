@@ -963,9 +963,13 @@ onUnmounted(() => {
   cursor: not-allowed;
 }
 
-/* Palette strip */
+/* Palette strip — constrained to the same content width as header & panel */
 .palette-strip {
   flex: 1;
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 24px 40px;
   display: grid;
   grid-template-columns: repeat(var(--cols), 1fr);
   min-height: 60vh;
@@ -1083,6 +1087,7 @@ onUnmounted(() => {
   .palette-strip {
     grid-template-columns: 1fr;
     grid-auto-rows: minmax(74px, 1fr);
+    padding: 0 16px 24px;
   }
 
   .swatch {
