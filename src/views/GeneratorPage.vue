@@ -236,10 +236,10 @@ function onAllScope() {
   }
 }
 
-// ─── Colour picker + eyedropper ───
-// Operate on the single selected colour and stay in sync with its swatch and
-// sliders. The EyeDropper API is Chromium-only, so it is feature-detected.
-const eyedropperSupported = typeof window !== 'undefined' && 'EyeDropper' in window
+// ─── Colour picker ───
+// The native colour input (which includes the browser's built-in eyedropper)
+// operates on the single selected colour and stays in sync with its swatch
+// and sliders.
 
 // The currently selected colour object (null while editing all colours).
 const selectedColor = computed(() =>
@@ -263,18 +263,6 @@ function setColorFromHex(hex) {
   if (!rgb) return
   c.base = rgb
   Object.assign(c.adj, neutralAdjust())
-}
-
-// Pipette: sample any pixel on screen with the browser's eyedropper.
-async function pickWithEyedropper() {
-  if (!eyedropperSupported || !canPick.value) return
-  try {
-    const result = await new window.EyeDropper().open()
-    setColorFromHex(result.sRGBHex)
-    toast.success(t('genColorPicked').replace('{hex}', result.sRGBHex.toUpperCase()))
-  } catch {
-    // The user pressed Escape / cancelled — nothing to do.
-  }
 }
 
 // The adjustment object currently bound to the sliders.
@@ -460,8 +448,9 @@ onUnmounted(() => {
 
       <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
 
-      <!-- Colour picker + eyedropper. Always visible; enabled once a single
-           colour field is selected (disabled with a hint in "all" mode). -->
+      <!-- Colour picker (native input includes the browser's eyedropper).
+           Always visible; enabled once a single colour field is selected
+           (disabled with a hint in "all" mode). -->
       <div class="adjust-picker">
         <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
         <label
@@ -478,32 +467,6 @@ onUnmounted(() => {
           />
         </label>
         <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
-        <button
-          v-if="eyedropperSupported"
-          type="button"
-          class="pipette-btn"
-          :disabled="!canPick"
-          :title="canPick ? t('genEyedropper') : t('genPickHint')"
-          @click="pickWithEyedropper"
-        >
-          <svg
-            width="16"
-            height="16"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="m2 22 1-1h3l9-9"></path>
-            <path d="M3 21v-3l9-9"></path>
-            <path
-              d="m15 6 3.4-3.4a2.1 2.1 0 1 1 3 3L18 9l.4.4a2.1 2.1 0 1 1-3 3l-3.8-3.8a2.1 2.1 0 1 1 3-3l.4.4Z"
-            ></path>
-          </svg>
-          <span>{{ t('genEyedropper') }}</span>
-        </button>
         <span v-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
       </div>
 
@@ -862,7 +825,7 @@ onUnmounted(() => {
   color: var(--text-tertiary);
 }
 
-/* Colour picker + eyedropper row */
+/* Colour picker row */
 .adjust-picker {
   display: flex;
   align-items: center;
@@ -927,32 +890,6 @@ onUnmounted(() => {
   color: var(--text-secondary);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
-}
-
-.pipette-btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-left: auto;
-  padding: 7px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-input);
-  color: var(--text-primary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.pipette-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-}
-
-.pipette-btn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
 }
 
 .adjust-picker-hint {
