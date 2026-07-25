@@ -185,9 +185,30 @@ function generate() {
 function toggleLock(index) {
   const c = palette.value[index]
   if (!c) return
-  c.locked = !c.locked
-  // Locking the color you're editing returns the sliders to "all colors".
-  if (c.locked && scope.value === index) scope.value = 'all'
+  if (c.locked) {
+    unlockColor(c)
+  } else {
+    c.locked = true
+    // Locking the color you're editing returns the sliders to "all colors".
+    if (scope.value === index) scope.value = 'all'
+  }
+}
+
+// Unlock a color and let it adopt the current "all colors" slider state, so
+// it rejoins the rest of the palette instead of keeping its frozen values.
+function unlockColor(c) {
+  c.locked = false
+  Object.assign(c.adj, { ...masterAdjust })
+}
+
+// True when at least one color is locked.
+const anyLocked = computed(() => palette.value.some((c) => c.locked))
+
+// Unlock every locked color at once (adopting the current slider state).
+function unlockAll() {
+  palette.value.forEach((c) => {
+    if (c.locked) unlockColor(c)
+  })
 }
 
 // Select which color(s) the sliders affect. Locked colors are protected and
@@ -195,6 +216,16 @@ function toggleLock(index) {
 function selectScope(value) {
   if (value !== 'all' && palette.value[value]?.locked) return
   scope.value = value
+}
+
+// Clicking "All colors": switch to all-colors mode, or — if already there and
+// some colors are locked — unlock them all with a repeated click.
+function onAllScope() {
+  if (scope.value === 'all' && anyLocked.value) {
+    unlockAll()
+  } else {
+    scope.value = 'all'
+  }
 }
 
 // The adjustment object currently bound to the sliders.
@@ -342,8 +373,12 @@ onUnmounted(() => {
           <div class="scope-tabs" role="group" :aria-label="t('genAdjustScope')">
             <button
               class="scope-tab"
-              :class="{ 'scope-tab--active': scope === 'all' }"
-              @click="selectScope('all')"
+              :class="{
+                'scope-tab--active': scope === 'all',
+                'scope-tab--muted': anyLocked,
+              }"
+              :title="anyLocked ? t('genUnlockAllHint') : null"
+              @click="onAllScope"
             >
               {{ t('genScopeAll') }}
             </button>
@@ -636,6 +671,20 @@ onUnmounted(() => {
   background: var(--btn-primary-bg);
   border-color: var(--btn-primary-bg);
   color: var(--btn-primary-text);
+}
+
+/* "All colors" looks deactivated while individual colors are locked.
+   Kept as an unfilled toggle so the label stays high-contrast in light mode. */
+.scope-tab--muted {
+  background: var(--bg-hover);
+  border-color: var(--border-color);
+  border-style: dashed;
+  color: var(--text-secondary);
+}
+
+.scope-tab--muted:hover {
+  color: var(--text-primary);
+  border-color: var(--border-hover);
 }
 
 .scope-dot {
