@@ -1,5 +1,5 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
 import LandingNav from '../components/LandingNav.vue'
@@ -33,6 +33,27 @@ function hslToRgb(h, s, l) {
   }
 }
 
+// Convert an { r, g, b } object (0-255) to HSL (h: 0-360, s/l: 0-100).
+function rgbToHsl({ r, g, b }) {
+  r /= 255
+  g /= 255
+  b /= 255
+  const max = Math.max(r, g, b)
+  const min = Math.min(r, g, b)
+  const d = max - min
+  let h = 0
+  const l = (max + min) / 2
+  const s = d === 0 ? 0 : d / (1 - Math.abs(2 * l - 1))
+  if (d !== 0) {
+    if (max === r) h = ((g - b) / d) % 6
+    else if (max === g) h = (b - r) / d + 2
+    else h = (r - g) / d + 4
+    h *= 60
+    if (h < 0) h += 360
+  }
+  return { h, s: s * 100, l: l * 100 }
+}
+
 function rgbToHex({ r, g, b }) {
   const toHex = (n) => n.toString(16).padStart(2, '0')
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
@@ -48,11 +69,52 @@ function randInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
-// Build a single color descriptor from HSL values.
+// ─── Filter adjustments (brightness / contrast / saturation / hue) ───
+// Mirrors the CSS-filter semantics used by the image editor: percentages
+// default to 100 (identity), hue is a rotation in degrees (0 = identity).
+function neutralAdjust() {
+  return { brightness: 100, contrast: 100, saturation: 100, hue: 0 }
+}
+
+const ADJUST_FIELDS = [
+  { key: 'brightness', min: 0, max: 200 },
+  { key: 'contrast', min: 0, max: 200 },
+  { key: 'saturation', min: 0, max: 200 },
+  { key: 'hue', min: 0, max: 360 },
+]
+
+// Apply an adjustment set to a base RGB color and return the resulting RGB.
+function applyAdjust(rgb, adj) {
+  const clamp = (n) => Math.max(0, Math.min(255, n))
+  const bf = adj.brightness / 100
+  let r = rgb.r * bf
+  let g = rgb.g * bf
+  let b = rgb.b * bf
+  const cf = adj.contrast / 100
+  r = clamp((r - 128) * cf + 128)
+  g = clamp((g - 128) * cf + 128)
+  b = clamp((b - 128) * cf + 128)
+  let { h, s, l } = rgbToHsl({ r, g, b })
+  h = (h + adj.hue) % 360
+  s = Math.max(0, Math.min(100, s * (adj.saturation / 100)))
+  return hslToRgb(h, s, l)
+}
+
+// Build a single color descriptor from HSL values. `base` is the generated
+// color; `adj` holds the per-color filter values applied on top of it.
 function makeColor(h, s, l, locked = false) {
-  const rgb = hslToRgb(h, s, l)
-  const hex = rgbToHex(rgb)
-  return { h, s, l, rgb, hex, locked, light: isLightColor(rgb) }
+  return { base: hslToRgb(h, s, l), adj: neutralAdjust(), locked }
+}
+
+// Displayed (adjusted) values used throughout the template.
+function displayRgb(color) {
+  return applyAdjust(color.base, color.adj)
+}
+function displayHex(color) {
+  return rgbToHex(displayRgb(color))
+}
+function displayLight(color) {
+  return isLightColor(displayRgb(color))
 }
 
 // ─── Harmony generators ───
@@ -102,6 +164,11 @@ const mode = ref('random')
 const count = ref(5)
 const palette = ref([])
 
+// Which color the adjustment sliders control: 'all' or a color index.
+const scope = ref('all')
+// Slider values shown when editing all colors at once.
+const masterAdjust = reactive(neutralAdjust())
+
 // Regenerate the palette, preserving any locked swatches in place.
 function generate() {
   const colors = harmonyColors(mode.value, count.value)
@@ -110,6 +177,9 @@ function generate() {
     if (existing && existing.locked) return existing
     return makeColor(c.h, c.s, c.l, false)
   })
+  // Fresh (unlocked) colors start neutral; reset the shared "all" sliders too.
+  Object.assign(masterAdjust, neutralAdjust())
+  if (scope.value !== 'all' && scope.value >= palette.value.length) scope.value = 'all'
 }
 
 function toggleLock(index) {
@@ -117,7 +187,50 @@ function toggleLock(index) {
   if (c) c.locked = !c.locked
 }
 
-async function copyColor(hex) {
+// Select which color(s) the sliders affect.
+function selectScope(value) {
+  scope.value = value
+}
+
+// The adjustment object currently bound to the sliders.
+const activeAdjust = computed(() =>
+  scope.value === 'all' ? masterAdjust : palette.value[scope.value]?.adj || masterAdjust
+)
+
+// Move a slider: in "all" mode the value is applied to every color at once,
+// otherwise only to the selected color.
+function setAdjust(key, value) {
+  const v = Number(value)
+  if (scope.value === 'all') {
+    masterAdjust[key] = v
+    palette.value.forEach((c) => {
+      c.adj[key] = v
+    })
+  } else {
+    const c = palette.value[scope.value]
+    if (c) c.adj[key] = v
+  }
+}
+
+// Reset the adjustments for the current scope back to neutral.
+function resetAdjust() {
+  if (scope.value === 'all') {
+    Object.assign(masterAdjust, neutralAdjust())
+    palette.value.forEach((c) => Object.assign(c.adj, neutralAdjust()))
+  } else {
+    const c = palette.value[scope.value]
+    if (c) Object.assign(c.adj, neutralAdjust())
+  }
+}
+
+// True when the active scope differs from neutral (enables the reset button).
+const hasActiveAdjust = computed(() => {
+  const a = activeAdjust.value
+  return a.brightness !== 100 || a.contrast !== 100 || a.saturation !== 100 || a.hue !== 0
+})
+
+async function copyColor(color) {
+  const hex = displayHex(color)
   try {
     await navigator.clipboard.writeText(hex)
     toast.success(t('genCopied').replace('{hex}', hex))
@@ -127,7 +240,7 @@ async function copyColor(hex) {
 }
 
 async function copyAll() {
-  const text = palette.value.map((c) => c.hex).join(', ')
+  const text = palette.value.map((c) => displayHex(c)).join(', ')
   try {
     await navigator.clipboard.writeText(text)
     toast.success(t('genCopiedAll'))
@@ -141,6 +254,7 @@ function setCount(n) {
   // Trim or extend while keeping existing (and locked) colors.
   if (palette.value.length > n) {
     palette.value = palette.value.slice(0, n)
+    if (scope.value !== 'all' && scope.value >= n) scope.value = 'all'
   } else {
     generate()
   }
@@ -203,20 +317,75 @@ onUnmounted(() => {
 
     <p class="gen-hint">{{ t('genSpaceHint') }}</p>
 
+    <!-- Filter adjustments: edit a single color or all of them together -->
+    <section class="gen-adjust">
+      <div class="adjust-bar">
+        <div class="adjust-scope">
+          <span class="adjust-title">{{ t('genAdjustments') }}</span>
+          <div class="scope-tabs" role="group" :aria-label="t('genAdjustScope')">
+            <button
+              class="scope-tab"
+              :class="{ 'scope-tab--active': scope === 'all' }"
+              @click="selectScope('all')"
+            >
+              {{ t('genScopeAll') }}
+            </button>
+            <button
+              v-for="(color, index) in palette"
+              :key="index"
+              class="scope-dot"
+              :class="{ 'scope-dot--active': scope === index }"
+              :style="{ background: displayHex(color) }"
+              :title="t('genScopeColor').replace('{n}', index + 1)"
+              :aria-label="t('genScopeColor').replace('{n}', index + 1)"
+              @click="selectScope(index)"
+            ></button>
+          </div>
+        </div>
+        <button class="adjust-reset" :disabled="!hasActiveAdjust" @click="resetAdjust">
+          {{ t('reset') }}
+        </button>
+      </div>
+
+      <div class="adjust-sliders">
+        <div v-for="f in ADJUST_FIELDS" :key="f.key" class="adjust-field">
+          <div class="adjust-field-head">
+            <label class="adjust-field-label">{{ t(f.key) }}</label>
+            <span class="adjust-field-value">
+              {{ activeAdjust[f.key] }}{{ f.key === 'hue' ? '°' : '%' }}
+            </span>
+          </div>
+          <input
+            class="adjust-slider"
+            type="range"
+            :min="f.min"
+            :max="f.max"
+            :value="activeAdjust[f.key]"
+            @input="setAdjust(f.key, $event.target.value)"
+          />
+        </div>
+      </div>
+    </section>
+
     <main class="palette-strip" :style="{ '--cols': palette.length }">
       <div
         v-for="(color, index) in palette"
         :key="index"
         class="swatch"
-        :class="{ 'swatch--light': color.light, 'swatch--locked': color.locked }"
-        :style="{ background: color.hex }"
+        :class="{
+          'swatch--light': displayLight(color),
+          'swatch--locked': color.locked,
+          'swatch--selected': scope === index,
+        }"
+        :style="{ background: displayHex(color) }"
+        @click="selectScope(index)"
       >
         <div class="swatch-actions">
           <button
             class="swatch-action"
             :class="{ 'is-active': color.locked }"
             :title="color.locked ? t('genUnlock') : t('genLock')"
-            @click="toggleLock(index)"
+            @click.stop="toggleLock(index)"
           >
             <svg
               v-if="color.locked"
@@ -245,8 +414,8 @@ onUnmounted(() => {
           </button>
         </div>
 
-        <button class="swatch-hex" :title="t('genClickCopy')" @click="copyColor(color.hex)">
-          {{ color.hex }}
+        <button class="swatch-hex" :title="t('genClickCopy')" @click.stop="copyColor(color)">
+          {{ displayHex(color) }}
         </button>
       </div>
     </main>
@@ -374,6 +543,182 @@ onUnmounted(() => {
   transition: color 0.3s ease;
 }
 
+/* Adjustments panel */
+.gen-adjust {
+  max-width: 1200px;
+  width: 100%;
+  margin: 0 auto 20px;
+  padding: 16px 20px;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+  transition: all 0.3s ease;
+}
+
+.adjust-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+
+.adjust-scope {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.adjust-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.scope-tabs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.scope-tab {
+  padding: 7px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scope-tab:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.scope-tab--active {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.scope-dot {
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 2px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+  box-shadow: 0 0 0 1px var(--border-light);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.scope-dot:hover {
+  transform: scale(1.12);
+}
+
+.scope-dot--active {
+  border-color: var(--text-primary);
+  transform: scale(1.12);
+}
+
+.adjust-reset {
+  padding: 7px 16px;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adjust-reset:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.adjust-reset:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
+.adjust-sliders {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 18px;
+}
+
+.adjust-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.adjust-field-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.adjust-field-label {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+
+.adjust-field-value {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  font-variant-numeric: tabular-nums;
+}
+
+.adjust-slider {
+  width: 100%;
+  height: 6px;
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
+  background: var(--bg-hover);
+  cursor: pointer;
+  outline: none;
+}
+
+.adjust-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--btn-primary-bg);
+  border: 2px solid var(--bg-secondary);
+  box-shadow: 0 1px 4px var(--shadow-medium);
+  cursor: pointer;
+}
+
+.adjust-slider::-moz-range-thumb {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--btn-primary-bg);
+  border: 2px solid var(--bg-secondary);
+  cursor: pointer;
+}
+
+.adjust-slider:focus-visible {
+  box-shadow: 0 0 0 3px var(--selection-glow);
+}
+
 /* Palette strip */
 .palette-strip {
   flex: 1;
@@ -391,11 +736,17 @@ onUnmounted(() => {
   justify-content: flex-end;
   padding: 20px 8px 32px;
   color: #ffffff;
+  cursor: pointer;
   transition: background 0.35s ease;
 }
 
 .swatch--light {
   color: #1a1a2e;
+}
+
+/* Selected color: inset ring using the swatch's own text color for contrast */
+.swatch--selected {
+  box-shadow: inset 0 0 0 4px currentColor;
 }
 
 .swatch-actions {
@@ -467,6 +818,17 @@ onUnmounted(() => {
 
   .gen-hint {
     padding: 0 16px 12px;
+  }
+
+  .gen-adjust {
+    margin: 0 16px 16px;
+    width: auto;
+    padding: 14px 16px;
+  }
+
+  .adjust-sliders {
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
   }
 
   .palette-strip {
