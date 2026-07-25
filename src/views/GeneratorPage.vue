@@ -573,15 +573,16 @@ onUnmounted(() => {
   transition: color 0.3s ease;
 }
 
-/* Adjustments panel */
+/* Adjustments panel — a compact, centered control card */
 .gen-adjust {
-  max-width: 1200px;
+  max-width: 720px;
   width: 100%;
   margin: 0 auto 20px;
-  padding: 16px 20px;
+  padding: 14px 18px;
   border: 1px solid var(--border-light);
   border-radius: 12px;
   background: var(--bg-secondary);
+  box-shadow: 0 6px 24px var(--shadow-soft);
   transition: all 0.3s ease;
 }
 
@@ -693,8 +694,8 @@ onUnmounted(() => {
 
 .adjust-sliders {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 18px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px 22px;
 }
 
 .adjust-sliders--disabled {
