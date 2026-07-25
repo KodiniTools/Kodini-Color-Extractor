@@ -120,6 +120,19 @@ const translations = {
     feature3Desc:
       'Export as HEX, RGB, HSL, or CSS variables. Download as text file or beautifully designed palette image.',
 
+    // Landing Page - Generator Showcase
+    genShowcaseTag: 'New: Color Generator',
+    genShowcaseTitle: 'Generate Harmonious Color Palettes in Seconds',
+    genShowcaseDesc:
+      'No image at hand? Create fresh color schemes from scratch. The generator builds balanced palettes using proven color theory - perfect for branding, UI design, illustrations and moodboards.',
+    genShowcasePoint1:
+      'Five harmony modes: random, monochromatic, analogous, complementary and triadic.',
+    genShowcasePoint2: 'Lock the colors you love and press the spacebar to reshuffle the rest.',
+    genShowcasePoint3: 'Copy any HEX with a single click or grab the whole palette at once.',
+    genShowcaseCta: 'Open Color Generator',
+    genShowcaseImageAlt:
+      'Kodini color palette generator showing a harmonious five-color scheme with HEX codes: teal #2A9D8F, slate #264653, sand #E9C46A, amber #F4A261 and coral #E76F51.',
+
     // Landing Page - Details
     detailsTitle: 'All Features at a Glance',
     detailsSubtitle: 'Professional color extraction with everything you need.',
@@ -177,6 +190,14 @@ const translations = {
     faq8Question: 'Is there a dark mode?',
     faq8Answer:
       'Yes, the application supports both light and dark themes. Click the sun/moon icon to toggle between modes. Your preference is saved locally.',
+
+    faq9Question: 'What is the difference between the color extractor and the color generator?',
+    faq9Answer:
+      'The color extractor pulls the dominant colors out of an image you upload, so you can reuse an existing photo or artwork. The color generator instead creates brand-new harmonious palettes from scratch using color theory - ideal when you have no image and just need a fresh scheme. Both tools are free and run entirely in your browser.',
+
+    faq10Question: 'Which color harmonies does the generator support?',
+    faq10Answer:
+      'The generator offers five harmony modes: random, monochromatic, analogous, complementary and triadic. You can choose between 3 and 8 colors, lock the ones you want to keep, press the spacebar to regenerate the rest, and copy any HEX value with a single click.',
 
     faqCtaTitle: 'Still have questions? Try it yourself!',
     faqCtaButton: 'Open Color Extractor',
@@ -314,6 +335,20 @@ const translations = {
     feature3Desc:
       'Exportiere als HEX, RGB, HSL oder CSS-Variablen. Download als Textdatei oder als ansprechend gestaltetes Palettenbild.',
 
+    // Landing Page - Generator Showcase
+    genShowcaseTag: 'Neu: Farbgenerator',
+    genShowcaseTitle: 'Harmonische Farbpaletten in Sekunden generieren',
+    genShowcaseDesc:
+      'Kein Bild zur Hand? Erstelle Farbschemata komplett von Grund auf. Der Generator baut ausgewogene Paletten nach bewährter Farblehre - ideal für Branding, UI-Design, Illustrationen und Moodboards.',
+    genShowcasePoint1:
+      'Fünf Harmonie-Modi: Zufällig, Monochrom, Analog, Komplementär und Triadisch.',
+    genShowcasePoint2:
+      'Sperre deine Lieblingsfarben und drücke die Leertaste, um den Rest neu zu mischen.',
+    genShowcasePoint3: 'Kopiere jeden HEX-Wert mit einem Klick oder die ganze Palette auf einmal.',
+    genShowcaseCta: 'Farbgenerator öffnen',
+    genShowcaseImageAlt:
+      'Kodini Farbpaletten-Generator mit einem harmonischen Fünf-Farben-Schema und HEX-Codes: Teal #2A9D8F, Slate #264653, Sand #E9C46A, Amber #F4A261 und Coral #E76F51.',
+
     // Landing Page - Details
     detailsTitle: 'Alle Funktionen im Überblick',
     detailsSubtitle: 'Professionelle Farbextraktion mit allem was du brauchst.',
@@ -371,6 +406,14 @@ const translations = {
     faq8Question: 'Gibt es einen Dark Mode?',
     faq8Answer:
       'Ja, die Anwendung unterstützt sowohl helle als auch dunkle Themes. Klicke auf das Sonnen-/Mond-Symbol, um zwischen den Modi zu wechseln. Deine Präferenz wird lokal gespeichert.',
+
+    faq9Question: 'Was ist der Unterschied zwischen dem Color Extractor und dem Farbgenerator?',
+    faq9Answer:
+      'Der Color Extractor holt die dominanten Farben aus einem Bild heraus, das du hochlädst - ideal, um ein vorhandenes Foto oder Artwork weiterzuverwenden. Der Farbgenerator erstellt dagegen völlig neue, harmonische Paletten von Grund auf nach Farblehre - perfekt, wenn du kein Bild hast und einfach ein frisches Schema brauchst. Beide Tools sind kostenlos und laufen vollständig in deinem Browser.',
+
+    faq10Question: 'Welche Farbharmonien unterstützt der Generator?',
+    faq10Answer:
+      'Der Generator bietet fünf Harmonie-Modi: Zufällig, Monochrom, Analog, Komplementär und Triadisch. Du kannst zwischen 3 und 8 Farben wählen, deine Favoriten sperren, mit der Leertaste den Rest neu generieren und jeden HEX-Wert mit einem Klick kopieren.',
 
     faqCtaTitle: 'Noch Fragen? Probiere es selbst aus!',
     faqCtaButton: 'Color Extractor öffnen',

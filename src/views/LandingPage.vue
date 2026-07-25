@@ -3,6 +3,10 @@ import { useI18n } from '../composables/useI18n'
 import LandingNav from '../components/LandingNav.vue'
 
 const { t } = useI18n()
+
+// Public asset served under the app base path (resolved at runtime, not
+// bundled) so the URL stays correct on every route.
+const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-example.png'
 </script>
 
 <template>
@@ -39,6 +43,38 @@ const { t } = useI18n()
         <div class="feature-card">
           <h3 class="feature-title">{{ t('feature3Title') }}</h3>
           <p class="feature-description">{{ t('feature3Desc') }}</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Generator Showcase Section -->
+    <section class="generator-showcase">
+      <div class="showcase-inner">
+        <div class="showcase-text">
+          <span class="showcase-tag">{{ t('genShowcaseTag') }}</span>
+          <h2 class="showcase-title">{{ t('genShowcaseTitle') }}</h2>
+          <p class="showcase-desc">{{ t('genShowcaseDesc') }}</p>
+          <ul class="showcase-list">
+            <li>{{ t('genShowcasePoint1') }}</li>
+            <li>{{ t('genShowcasePoint2') }}</li>
+            <li>{{ t('genShowcasePoint3') }}</li>
+          </ul>
+          <router-link to="/generator" class="showcase-cta">
+            {{ t('genShowcaseCta') }}
+          </router-link>
+        </div>
+        <div class="showcase-media">
+          <router-link to="/generator" class="showcase-image-link">
+            <img
+              class="showcase-image"
+              :src="generatorImage"
+              :alt="t('genShowcaseImageAlt')"
+              width="1800"
+              height="1125"
+              loading="lazy"
+              decoding="async"
+            />
+          </router-link>
         </div>
       </div>
     </section>
@@ -220,6 +256,124 @@ const { t } = useI18n()
   transition: color 0.3s ease;
 }
 
+/* Generator Showcase Section */
+.generator-showcase {
+  padding: 72px 24px;
+}
+
+.showcase-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 48px;
+  align-items: center;
+}
+
+.showcase-tag {
+  display: inline-block;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--accent-text);
+  background: var(--accent-bg);
+  padding: 6px 14px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.showcase-title {
+  font-size: clamp(24px, 3.5vw, 34px);
+  font-weight: 700;
+  color: var(--text-primary);
+  line-height: 1.2;
+  margin-bottom: 16px;
+  transition: color 0.3s ease;
+}
+
+.showcase-desc {
+  font-size: 16px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin-bottom: 20px;
+  transition: color 0.3s ease;
+}
+
+.showcase-list {
+  list-style: none;
+  margin: 0 0 28px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.showcase-list li {
+  position: relative;
+  padding-left: 28px;
+  font-size: 15px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  transition: color 0.3s ease;
+}
+
+.showcase-list li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 6px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--accent-bg);
+}
+
+.showcase-list li::after {
+  content: '';
+  position: absolute;
+  left: 5px;
+  top: 10px;
+  width: 5px;
+  height: 8px;
+  border: solid var(--accent-text);
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.showcase-cta {
+  display: inline-block;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  padding: 14px 28px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 15px;
+  transition: all 0.2s ease;
+}
+
+.showcase-cta:hover {
+  background: var(--btn-primary-hover);
+  transform: translateY(-2px);
+}
+
+.showcase-image-link {
+  display: block;
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px var(--shadow-medium);
+  transition: transform 0.3s ease;
+}
+
+.showcase-image-link:hover {
+  transform: translateY(-4px);
+}
+
+.showcase-image {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Details Section */
 .details-section {
   background: var(--bg-secondary);
@@ -334,6 +488,16 @@ const { t } = useI18n()
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
   }
+
+  .showcase-inner {
+    grid-template-columns: 1fr;
+    gap: 32px;
+    max-width: 560px;
+  }
+
+  .showcase-media {
+    order: -1;
+  }
 }
 
 @media (max-width: 600px) {
@@ -350,6 +514,10 @@ const { t } = useI18n()
   }
 
   .cta-section {
+    padding: 48px 16px;
+  }
+
+  .generator-showcase {
     padding: 48px 16px;
   }
 }
@@ -420,6 +588,10 @@ const { t } = useI18n()
 
   .cta-section {
     padding: 32px 12px;
+  }
+
+  .generator-showcase {
+    padding: 36px 12px;
   }
 
   .cta-content h2 {
