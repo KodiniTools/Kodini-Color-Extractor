@@ -75,6 +75,11 @@ export function useColorGenerator() {
     scope.value = value
   }
 
+  // Clear a single-color selection and return the sliders to "all colors".
+  function clearScope() {
+    scope.value = 'all'
+  }
+
   // Clicking "All colors": switch to all-colors mode, or — if already there and
   // some colors are locked — unlock them all with a repeated click.
   function onAllScope() {
@@ -233,6 +238,7 @@ export function useColorGenerator() {
     toggleLock,
     selectScope,
     onAllScope,
+    clearScope,
     setColorFromHex,
     setAdjust,
     resetAdjust,

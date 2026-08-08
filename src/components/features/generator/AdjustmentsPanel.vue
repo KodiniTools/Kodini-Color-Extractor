@@ -16,7 +16,14 @@ defineProps({
   adjustFields: { type: Array, required: true },
 })
 
-const emit = defineEmits(['all-scope', 'select-scope', 'reset', 'pick', 'set-adjust'])
+const emit = defineEmits([
+  'all-scope',
+  'select-scope',
+  'clear-scope',
+  'reset',
+  'pick',
+  'set-adjust',
+])
 </script>
 
 <template>
@@ -85,6 +92,14 @@ const emit = defineEmits(['all-scope', 'select-scope', 'reset', 'pick', 'set-adj
         />
       </label>
       <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
+      <button
+        v-if="scope !== 'all'"
+        class="adjust-clear"
+        :title="t('genClearScope')"
+        @click="emit('clear-scope')"
+      >
+        {{ t('genClearScope') }}
+      </button>
       <span v-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
     </div>
 
@@ -340,6 +355,27 @@ const emit = defineEmits(['all-scope', 'select-scope', 'reset', 'pick', 'set-adj
   font-size: 13px;
   font-weight: 500;
   color: var(--text-tertiary);
+}
+
+/* "Clear selection" — returns the sliders to all-colors mode. Sits at the
+   far right of the picker row and only appears while a single color is chosen. */
+.adjust-clear {
+  margin-left: auto;
+  padding: 6px 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--bg-input);
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adjust-clear:hover {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
 }
 
 .adjust-field {
