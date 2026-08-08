@@ -28,6 +28,7 @@ const {
   toggleLock,
   selectScope,
   onAllScope,
+  clearScope,
   setColorFromHex,
   setAdjust,
   resetAdjust,
@@ -64,6 +65,7 @@ const {
       :adjust-fields="ADJUST_FIELDS"
       @all-scope="onAllScope"
       @select-scope="selectScope"
+      @clear-scope="clearScope"
       @reset="resetAdjust"
       @pick="setColorFromHex"
       @set-adjust="setAdjust"
