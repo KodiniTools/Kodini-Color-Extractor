@@ -101,9 +101,15 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
   color: #1a1a2e;
 }
 
-/* Selected color: inset ring using the swatch's own text color for contrast */
+/* Selected color: a fixed, identical double ring (white over dark) so the
+   marker looks exactly the same and stays clearly visible on every color,
+   regardless of the swatch's brightness. Raised above neighbors so adjacent
+   selections never merge into uneven bands. */
 .swatch--selected {
-  box-shadow: inset 0 0 0 4px currentColor;
+  z-index: 1;
+  box-shadow:
+    inset 0 0 0 3px #ffffff,
+    inset 0 0 0 6px rgba(17, 17, 17, 0.85);
 }
 
 /* Locked colors are protected from the sliders and are not selectable */
