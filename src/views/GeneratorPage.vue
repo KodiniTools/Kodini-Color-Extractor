@@ -112,6 +112,7 @@ const {
   margin: 0 auto;
   padding: 0 24px 16px;
   font-size: 13px;
+  text-align: center;
   color: var(--text-tertiary);
   transition: color 0.3s ease;
 }

@@ -63,10 +63,14 @@ function onModeChange(event) {
   margin: 0 auto;
   padding: 40px 24px 16px;
   display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
   gap: 24px;
-  flex-wrap: wrap;
+}
+
+.gen-header-text {
+  max-width: 640px;
 }
 
 .gen-title {
@@ -78,7 +82,7 @@ function onModeChange(event) {
 }
 
 .gen-subtitle {
-  margin-top: 8px;
+  margin: 8px auto 0;
   font-size: 15px;
   color: var(--text-secondary);
   max-width: 520px;
@@ -89,6 +93,7 @@ function onModeChange(event) {
 .gen-controls {
   display: flex;
   align-items: flex-end;
+  justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
 }
@@ -159,12 +164,6 @@ function onModeChange(event) {
 @media (max-width: 700px) {
   .gen-header {
     padding: 24px 16px 12px;
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-  .gen-controls {
-    width: 100%;
   }
 }
 </style>
