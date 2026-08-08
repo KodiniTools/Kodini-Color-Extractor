@@ -26,6 +26,8 @@ const {
   hasActiveAdjust,
   selectedCount,
   isSelected,
+  canUndo,
+  canRedo,
   generate,
   toggleLock,
   selectScope,
@@ -38,6 +40,8 @@ const {
   copyAll,
   copySelected,
   setCount,
+  undo,
+  redo,
 } = useColorGenerator()
 </script>
 
@@ -68,6 +72,8 @@ const {
       :has-active-adjust="hasActiveAdjust"
       :adjust-fields="ADJUST_FIELDS"
       :is-selected="isSelected"
+      :can-undo="canUndo"
+      :can-redo="canRedo"
       @all-scope="onAllScope"
       @select-scope="selectScope"
       @clear-scope="clearScope"
@@ -75,6 +81,8 @@ const {
       @reset="resetAdjust"
       @pick="setColorFromHex"
       @set-adjust="setAdjust"
+      @undo="undo"
+      @redo="redo"
     />
 
     <PaletteStrip

@@ -42,6 +42,77 @@ export function useColorGenerator() {
   // Slider values shown when editing all colors at once.
   const masterAdjust = reactive(neutralAdjust())
 
+  // ─── Undo / redo history ───
+  // Each snapshot captures the palette (base color, per-color adjustments and
+  // lock state), the current selection and the master sliders, so stepping
+  // back or forward restores a fully coherent editing state.
+  const history = ref([])
+  const historyIndex = ref(-1)
+  const MAX_HISTORY = 60
+
+  // Consecutive drags of the same slider collapse into a single history step.
+  let coalesceKey = null
+  let coalesceTime = 0
+
+  function snapshot() {
+    return {
+      palette: palette.value.map((c) => ({
+        base: { ...c.base },
+        adj: { ...c.adj },
+        locked: c.locked,
+      })),
+      scope: scope.value === 'all' ? 'all' : [...scope.value],
+      master: { ...masterAdjust },
+    }
+  }
+
+  // Record the current state. `replace` overwrites the latest entry (used while
+  // a single slider is dragged) instead of pushing a new one.
+  function commit(replace = false) {
+    const snap = snapshot()
+    if (replace && historyIndex.value >= 0) {
+      history.value[historyIndex.value] = snap
+      history.value.length = historyIndex.value + 1
+      return
+    }
+    history.value = history.value.slice(0, historyIndex.value + 1)
+    history.value.push(snap)
+    if (history.value.length > MAX_HISTORY) history.value.shift()
+    historyIndex.value = history.value.length - 1
+  }
+
+  // End any in-progress slider coalescing so the next change starts a new step.
+  function endCoalesce() {
+    coalesceKey = null
+  }
+
+  function restore(snap) {
+    palette.value = snap.palette.map((c) => ({
+      base: { ...c.base },
+      adj: { ...c.adj },
+      locked: c.locked,
+    }))
+    scope.value = snap.scope === 'all' ? 'all' : [...snap.scope]
+    Object.assign(masterAdjust, snap.master)
+  }
+
+  const canUndo = computed(() => historyIndex.value > 0)
+  const canRedo = computed(() => historyIndex.value < history.value.length - 1)
+
+  function undo() {
+    if (!canUndo.value) return
+    endCoalesce()
+    historyIndex.value -= 1
+    restore(history.value[historyIndex.value])
+  }
+
+  function redo() {
+    if (!canRedo.value) return
+    endCoalesce()
+    historyIndex.value += 1
+    restore(history.value[historyIndex.value])
+  }
+
   // Regenerate the palette, preserving any locked swatches in place.
   function generate() {
     const colors = harmonyColors(mode.value, count.value)
@@ -53,6 +124,8 @@ export function useColorGenerator() {
     // Fresh (unlocked) colors start neutral; reset the shared "all" sliders too.
     Object.assign(masterAdjust, neutralAdjust())
     if (scope.value !== 'all') scope.value = normalizeScope(scope.value)
+    endCoalesce()
+    commit()
   }
 
   function toggleLock(index) {
@@ -68,6 +141,8 @@ export function useColorGenerator() {
         scope.value = normalizeScope(scope.value.filter((i) => i !== index))
       }
     }
+    endCoalesce()
+    commit()
   }
 
   // Unlock a color and let it adopt the current "all colors" slider state, so
@@ -143,6 +218,8 @@ export function useColorGenerator() {
     if (!rgb) return
     c.base = rgb
     Object.assign(c.adj, neutralAdjust())
+    endCoalesce()
+    commit()
   }
 
   // The color indices the sliders currently target: every color in "all" mode,
@@ -178,6 +255,15 @@ export function useColorGenerator() {
       const c = palette.value[i]
       if (c && !c.locked) c.adj[key] = v
     })
+    // Collapse a continuous drag of the same slider into one undo step: the
+    // first move pushes a new entry, later moves replace it until the user
+    // pauses or grabs a different control.
+    const sig = `${JSON.stringify(scope.value)}:${key}`
+    const now = Date.now()
+    const continuation = sig === coalesceKey && now - coalesceTime < 700
+    coalesceKey = sig
+    coalesceTime = now
+    commit(continuation)
   }
 
   // Reset the adjustments for the current scope back to neutral (locked colors
@@ -189,6 +275,8 @@ export function useColorGenerator() {
       const c = palette.value[i]
       if (c && !c.locked) Object.assign(c.adj, neutralAdjust())
     })
+    endCoalesce()
+    commit()
   }
 
   // True when the active scope differs from neutral (enables the reset button).
@@ -239,15 +327,35 @@ export function useColorGenerator() {
     if (palette.value.length > n) {
       palette.value = palette.value.slice(0, n)
       if (scope.value !== 'all') scope.value = normalizeScope(scope.value)
+      endCoalesce()
+      commit()
     } else {
+      // generate() records its own history entry.
       generate()
     }
   }
 
-  // Spacebar generates a new palette (unless the user is typing in a control).
+  // Keyboard shortcuts: spacebar generates a fresh palette, Ctrl/Cmd+Z undoes
+  // and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) redoes — all ignored while typing in
+  // a form control.
   function onKeydown(e) {
     const tag = (e.target && e.target.tagName) || ''
-    if (e.code === 'Space' && tag !== 'INPUT' && tag !== 'SELECT' && tag !== 'TEXTAREA') {
+    const typing = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA'
+    if (typing) return
+
+    const key = e.key.toLowerCase()
+    if ((e.ctrlKey || e.metaKey) && key === 'z') {
+      e.preventDefault()
+      if (e.shiftKey) redo()
+      else undo()
+      return
+    }
+    if ((e.ctrlKey || e.metaKey) && key === 'y') {
+      e.preventDefault()
+      redo()
+      return
+    }
+    if (e.code === 'Space') {
       e.preventDefault()
       generate()
     }
@@ -280,6 +388,8 @@ export function useColorGenerator() {
     hasActiveAdjust,
     selectedCount,
     isSelected,
+    canUndo,
+    canRedo,
     // actions
     generate,
     toggleLock,
@@ -293,5 +403,7 @@ export function useColorGenerator() {
     copyAll,
     copySelected,
     setCount,
+    undo,
+    redo,
   }
 }
