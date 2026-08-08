@@ -16,6 +16,8 @@ defineProps({
   hasActiveAdjust: { type: Boolean, required: true },
   adjustFields: { type: Array, required: true },
   isSelected: { type: Function, required: true },
+  canUndo: { type: Boolean, required: true },
+  canRedo: { type: Boolean, required: true },
 })
 
 const emit = defineEmits([
@@ -26,6 +28,8 @@ const emit = defineEmits([
   'reset',
   'pick',
   'set-adjust',
+  'undo',
+  'redo',
 ])
 </script>
 
@@ -68,13 +72,57 @@ const emit = defineEmits([
           {{ t('genSelectedCount').replace('{n}', selectedCount) }}
         </span>
       </div>
-      <button
-        class="adjust-reset"
-        :disabled="!hasActiveAdjust || activeLocked"
-        @click="emit('reset')"
-      >
-        {{ t('reset') }}
-      </button>
+      <div class="adjust-tools">
+        <button
+          class="adjust-icon-btn"
+          :disabled="!canUndo"
+          :title="t('undo')"
+          :aria-label="t('undo')"
+          @click="emit('undo')"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M9 14 4 9l5-5" />
+            <path d="M4 9h11a5 5 0 0 1 0 10h-1" />
+          </svg>
+        </button>
+        <button
+          class="adjust-icon-btn"
+          :disabled="!canRedo"
+          :title="t('redo')"
+          :aria-label="t('redo')"
+          @click="emit('redo')"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="m15 14 5-5-5-5" />
+            <path d="M20 9H9a5 5 0 0 0 0 10h1" />
+          </svg>
+        </button>
+        <button
+          class="adjust-reset"
+          :disabled="!hasActiveAdjust || activeLocked"
+          @click="emit('reset')"
+        >
+          {{ t('reset') }}
+        </button>
+      </div>
     </div>
 
     <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
@@ -268,6 +316,41 @@ const emit = defineEmits([
 
 .scope-dot--locked:hover {
   transform: none;
+}
+
+/* Undo / redo / reset grouped together at the right of the adjustments bar */
+.adjust-tools {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Subtle icon buttons for undo/redo — quiet until hovered, dimmed when there
+   is nothing to step to. */
+.adjust-icon-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adjust-icon-btn:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.adjust-icon-btn:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .adjust-reset {

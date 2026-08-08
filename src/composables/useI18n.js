@@ -39,6 +39,8 @@ const translations = {
     grayscale: 'Grayscale',
     reset: 'Reset',
     resetAll: 'Reset all',
+    undo: 'Undo',
+    redo: 'Redo',
     deleteImage: 'Delete image',
     // Toast messages
     copiedToClipboard: 'Color copied to clipboard',
@@ -267,6 +269,8 @@ const translations = {
     grayscale: 'Graustufen',
     reset: 'Zurücksetzen',
     resetAll: 'Alles zurücksetzen',
+    undo: 'Rückgängig',
+    redo: 'Wiederholen',
     deleteImage: 'Bild löschen',
     // Toast messages
     copiedToClipboard: 'Farbe in Zwischenablage kopiert',
