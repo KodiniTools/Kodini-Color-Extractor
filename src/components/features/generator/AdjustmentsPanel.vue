@@ -64,6 +64,9 @@ const emit = defineEmits([
             @click="emit('select-scope', index)"
           ></button>
         </div>
+        <span v-if="selectedCount > 0" class="scope-count" aria-live="polite">
+          {{ t('genSelectedCount').replace('{n}', selectedCount) }}
+        </span>
       </div>
       <button
         class="adjust-reset"
@@ -106,7 +109,7 @@ const emit = defineEmits([
           :title="t('genCopySelected')"
           @click="emit('copy-selected')"
         >
-          {{ t('genCopySelected') }}
+          {{ t('genCopySelected') }} ({{ selectedCount }})
         </button>
         <button class="adjust-action-btn" :title="t('genClearScope')" @click="emit('clear-scope')">
           {{ t('genClearScope') }}
@@ -177,6 +180,18 @@ const emit = defineEmits([
   align-items: center;
   gap: 8px;
   flex-wrap: wrap;
+}
+
+/* Live count of selected colors, updates as the selection changes */
+.scope-count {
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+  font-size: 12px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
 }
 
 .scope-tab {
