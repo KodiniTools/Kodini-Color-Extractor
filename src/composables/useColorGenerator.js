@@ -21,8 +21,24 @@ export function useColorGenerator() {
   const count = ref(5)
   const palette = ref([])
 
-  // Which color the adjustment sliders control: 'all' or a color index.
+  // Which color(s) the adjustment sliders control: the string 'all', or a
+  // non-empty array of selected color indices (multi-select). An empty
+  // selection is never stored — it collapses back to 'all'.
   const scope = ref('all')
+
+  // Normalize a set of indices to a sorted, unique, in-range array — or 'all'
+  // when nothing valid remains.
+  function normalizeScope(indices) {
+    const next = [...new Set(indices)]
+      .filter((i) => i >= 0 && i < palette.value.length)
+      .sort((a, b) => a - b)
+    return next.length ? next : 'all'
+  }
+
+  // True when the given color index is part of the current selection.
+  function isSelected(index) {
+    return scope.value !== 'all' && scope.value.includes(index)
+  }
   // Slider values shown when editing all colors at once.
   const masterAdjust = reactive(neutralAdjust())
 
@@ -36,7 +52,7 @@ export function useColorGenerator() {
     })
     // Fresh (unlocked) colors start neutral; reset the shared "all" sliders too.
     Object.assign(masterAdjust, neutralAdjust())
-    if (scope.value !== 'all' && scope.value >= palette.value.length) scope.value = 'all'
+    if (scope.value !== 'all') scope.value = normalizeScope(scope.value)
   }
 
   function toggleLock(index) {
@@ -46,8 +62,11 @@ export function useColorGenerator() {
       unlockColor(c)
     } else {
       c.locked = true
-      // Locking the color you're editing returns the sliders to "all colors".
-      if (scope.value === index) scope.value = 'all'
+      // Locking a color drops it from the selection (locked colors can't be
+      // edited); an emptied selection returns the sliders to "all colors".
+      if (scope.value !== 'all') {
+        scope.value = normalizeScope(scope.value.filter((i) => i !== index))
+      }
     }
   }
 
@@ -68,17 +87,23 @@ export function useColorGenerator() {
     })
   }
 
-  // Select which color(s) the sliders affect. Locked colors are protected and
-  // cannot be selected for editing until they are unlocked.
-  function selectScope(value) {
-    if (value !== 'all' && palette.value[value]?.locked) return
-    scope.value = value
+  // Toggle a color in or out of the selection. Clicking an unselected color
+  // adds it; clicking a selected one removes it — so several colors can be
+  // edited together. Locked colors are protected and can't be selected.
+  function selectScope(index) {
+    if (palette.value[index]?.locked) return
+    const current = scope.value === 'all' ? [] : scope.value
+    const next = current.includes(index) ? current.filter((i) => i !== index) : [...current, index]
+    scope.value = normalizeScope(next)
   }
 
-  // Clear a single-color selection and return the sliders to "all colors".
+  // Clear the current selection and return the sliders to "all colors".
   function clearScope() {
     scope.value = 'all'
   }
+
+  // How many colors are currently selected (0 in "all" mode).
+  const selectedCount = computed(() => (scope.value === 'all' ? 0 : scope.value.length))
 
   // Clicking "All colors": switch to all-colors mode, or — if already there and
   // some colors are locked — unlock them all with a repeated click.
@@ -95,9 +120,10 @@ export function useColorGenerator() {
   // operates on the single selected colour and stays in sync with its swatch
   // and sliders.
 
-  // The currently selected colour object (null while editing all colours).
+  // The single selected colour object, used by the picker. Null unless exactly
+  // one colour is selected (the eyedropper can only act on one at a time).
   const selectedColor = computed(() =>
-    scope.value === 'all' ? null : palette.value[scope.value] || null
+    scope.value !== 'all' && scope.value.length === 1 ? palette.value[scope.value[0]] || null : null
   )
 
   // Whether the picker can act right now (a single, unlocked colour is chosen).
@@ -119,47 +145,50 @@ export function useColorGenerator() {
     Object.assign(c.adj, neutralAdjust())
   }
 
-  // The adjustment object currently bound to the sliders.
-  const activeAdjust = computed(() =>
-    scope.value === 'all' ? masterAdjust : palette.value[scope.value]?.adj || masterAdjust
+  // The color indices the sliders currently target: every color in "all" mode,
+  // otherwise the selected ones.
+  const scopeIndices = computed(() =>
+    scope.value === 'all' ? palette.value.map((_, i) => i) : scope.value
   )
 
-  // True when the sliders should be inert: a single locked color, or "all"
-  // mode when every color is locked. Locked colors never react to the sliders.
-  const activeLocked = computed(() => {
-    if (scope.value === 'all') {
-      return palette.value.length > 0 && palette.value.every((c) => c.locked)
+  // The adjustment object bound to the sliders. A single selected color edits
+  // its own values directly; "all" mode and multi-select share the master
+  // sliders (which then fan out to every targeted color).
+  const activeAdjust = computed(() => {
+    if (scope.value !== 'all' && scope.value.length === 1) {
+      return palette.value[scope.value[0]]?.adj || masterAdjust
     }
-    return !!palette.value[scope.value]?.locked
+    return masterAdjust
   })
 
-  // Move a slider: in "all" mode the value is applied to every unlocked color,
-  // otherwise only to the selected color. Locked colors are always skipped.
+  // True when the sliders should be inert: every targeted color is locked.
+  // Locked colors never react to the sliders.
+  const activeLocked = computed(() => {
+    const cols = scopeIndices.value.map((i) => palette.value[i]).filter(Boolean)
+    return cols.length > 0 && cols.every((c) => c.locked)
+  })
+
+  // Move a slider: the value is applied to every targeted, unlocked color.
+  // In "all" or multi-select mode the master sliders track the shared value.
   function setAdjust(key, value) {
     const v = Number(value)
-    if (scope.value === 'all') {
-      masterAdjust[key] = v
-      palette.value.forEach((c) => {
-        if (!c.locked) c.adj[key] = v
-      })
-    } else {
-      const c = palette.value[scope.value]
+    const single = scope.value !== 'all' && scope.value.length === 1
+    if (!single) masterAdjust[key] = v
+    scopeIndices.value.forEach((i) => {
+      const c = palette.value[i]
       if (c && !c.locked) c.adj[key] = v
-    }
+    })
   }
 
   // Reset the adjustments for the current scope back to neutral (locked colors
   // keep their state).
   function resetAdjust() {
-    if (scope.value === 'all') {
-      Object.assign(masterAdjust, neutralAdjust())
-      palette.value.forEach((c) => {
-        if (!c.locked) Object.assign(c.adj, neutralAdjust())
-      })
-    } else {
-      const c = palette.value[scope.value]
+    const single = scope.value !== 'all' && scope.value.length === 1
+    if (!single) Object.assign(masterAdjust, neutralAdjust())
+    scopeIndices.value.forEach((i) => {
+      const c = palette.value[i]
       if (c && !c.locked) Object.assign(c.adj, neutralAdjust())
-    }
+    })
   }
 
   // True when the active scope differs from neutral (enables the reset button).
@@ -188,12 +217,28 @@ export function useColorGenerator() {
     }
   }
 
+  // Copy the HEX values of just the selected colors (in palette order).
+  async function copySelected() {
+    if (scope.value === 'all' || scope.value.length === 0) return
+    const hexes = scope.value
+      .map((i) => palette.value[i])
+      .filter(Boolean)
+      .map(displayHex)
+    if (!hexes.length) return
+    try {
+      await navigator.clipboard.writeText(hexes.join(', '))
+      toast.success(t('genCopiedSelected').replace('{n}', hexes.length))
+    } catch {
+      toast.error(t('clipboardError'))
+    }
+  }
+
   function setCount(n) {
     count.value = n
     // Trim or extend while keeping existing (and locked) colors.
     if (palette.value.length > n) {
       palette.value = palette.value.slice(0, n)
-      if (scope.value !== 'all' && scope.value >= n) scope.value = 'all'
+      if (scope.value !== 'all') scope.value = normalizeScope(scope.value)
     } else {
       generate()
     }
@@ -233,6 +278,8 @@ export function useColorGenerator() {
     activeAdjust,
     activeLocked,
     hasActiveAdjust,
+    selectedCount,
+    isSelected,
     // actions
     generate,
     toggleLock,
@@ -244,6 +291,7 @@ export function useColorGenerator() {
     resetAdjust,
     copyColor,
     copyAll,
+    copySelected,
     setCount,
   }
 }

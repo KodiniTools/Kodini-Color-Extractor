@@ -24,6 +24,8 @@ const {
   activeAdjust,
   activeLocked,
   hasActiveAdjust,
+  selectedCount,
+  isSelected,
   generate,
   toggleLock,
   selectScope,
@@ -34,6 +36,7 @@ const {
   resetAdjust,
   copyColor,
   copyAll,
+  copySelected,
   setCount,
 } = useColorGenerator()
 </script>
@@ -56,6 +59,7 @@ const {
     <AdjustmentsPanel
       :palette="palette"
       :scope="scope"
+      :selected-count="selectedCount"
       :any-locked="anyLocked"
       :active-adjust="activeAdjust"
       :active-locked="activeLocked"
@@ -63,9 +67,11 @@ const {
       :picker-hex="pickerHex"
       :has-active-adjust="hasActiveAdjust"
       :adjust-fields="ADJUST_FIELDS"
+      :is-selected="isSelected"
       @all-scope="onAllScope"
       @select-scope="selectScope"
       @clear-scope="clearScope"
+      @copy-selected="copySelected"
       @reset="resetAdjust"
       @pick="setColorFromHex"
       @set-adjust="setAdjust"
@@ -73,7 +79,7 @@ const {
 
     <PaletteStrip
       :palette="palette"
-      :scope="scope"
+      :is-selected="isSelected"
       @select="selectScope"
       @toggle-lock="toggleLock"
       @copy="copyColor"

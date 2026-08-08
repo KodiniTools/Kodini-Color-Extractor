@@ -6,7 +6,7 @@ const { t } = useI18n()
 
 defineProps({
   palette: { type: Array, required: true },
-  scope: { type: [String, Number], required: true },
+  isSelected: { type: Function, required: true },
 })
 
 const emit = defineEmits(['select', 'toggle-lock', 'copy'])
@@ -21,7 +21,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
       :class="{
         'swatch--light': displayLight(color),
         'swatch--locked': color.locked,
-        'swatch--selected': scope === index,
+        'swatch--selected': isSelected(index),
       }"
       :style="{ background: displayHex(color) }"
       @click="emit('select', index)"

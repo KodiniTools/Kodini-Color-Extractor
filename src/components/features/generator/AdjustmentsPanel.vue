@@ -6,7 +6,8 @@ const { t } = useI18n()
 
 defineProps({
   palette: { type: Array, required: true },
-  scope: { type: [String, Number], required: true },
+  scope: { type: [String, Array], required: true },
+  selectedCount: { type: Number, required: true },
   anyLocked: { type: Boolean, required: true },
   activeAdjust: { type: Object, required: true },
   activeLocked: { type: Boolean, required: true },
@@ -14,12 +15,14 @@ defineProps({
   pickerHex: { type: String, required: true },
   hasActiveAdjust: { type: Boolean, required: true },
   adjustFields: { type: Array, required: true },
+  isSelected: { type: Function, required: true },
 })
 
 const emit = defineEmits([
   'all-scope',
   'select-scope',
   'clear-scope',
+  'copy-selected',
   'reset',
   'pick',
   'set-adjust',
@@ -49,7 +52,7 @@ const emit = defineEmits([
             :key="index"
             class="scope-dot"
             :class="{
-              'scope-dot--active': scope === index,
+              'scope-dot--active': isSelected(index),
               'scope-dot--locked': color.locked,
             }"
             :style="{ background: displayHex(color) }"
@@ -92,15 +95,23 @@ const emit = defineEmits([
         />
       </label>
       <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
-      <button
-        v-if="scope !== 'all'"
-        class="adjust-clear"
-        :title="t('genClearScope')"
-        @click="emit('clear-scope')"
-      >
-        {{ t('genClearScope') }}
-      </button>
-      <span v-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
+      <span v-if="selectedCount > 1" class="adjust-picker-hint">{{ t('genMultiHint') }}</span>
+      <span v-else-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
+
+      <!-- Selection actions: copy just the chosen colors, or clear the selection.
+           Only shown while at least one color is selected. -->
+      <div v-if="scope !== 'all'" class="adjust-actions">
+        <button
+          class="adjust-action-btn adjust-action-btn--primary"
+          :title="t('genCopySelected')"
+          @click="emit('copy-selected')"
+        >
+          {{ t('genCopySelected') }}
+        </button>
+        <button class="adjust-action-btn" :title="t('genClearScope')" @click="emit('clear-scope')">
+          {{ t('genClearScope') }}
+        </button>
+      </div>
     </div>
 
     <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
@@ -357,10 +368,17 @@ const emit = defineEmits([
   color: var(--text-tertiary);
 }
 
-/* "Clear selection" — returns the sliders to all-colors mode. Sits at the
-   far right of the picker row and only appears while a single color is chosen. */
-.adjust-clear {
+/* Selection actions — "Copy selected" and "Clear selection". Pushed to the
+   far right of the picker row; only shown while colors are selected. */
+.adjust-actions {
   margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adjust-action-btn {
   padding: 6px 14px;
   border: 1px solid var(--border-color);
   border-radius: 999px;
@@ -372,10 +390,22 @@ const emit = defineEmits([
   transition: all 0.2s ease;
 }
 
-.adjust-clear:hover {
+.adjust-action-btn:hover {
   background: var(--bg-hover);
   border-color: var(--border-hover);
   color: var(--text-primary);
+}
+
+.adjust-action-btn--primary {
+  background: var(--btn-primary-bg);
+  border-color: var(--btn-primary-bg);
+  color: var(--btn-primary-text);
+}
+
+.adjust-action-btn--primary:hover {
+  background: var(--btn-primary-hover);
+  border-color: var(--btn-primary-hover);
+  color: var(--btn-primary-text);
 }
 
 .adjust-field {
