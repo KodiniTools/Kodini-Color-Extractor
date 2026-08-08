@@ -68,17 +68,20 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 </template>
 
 <style scoped>
-/* Palette strip — constrained to the same content width as header & panel */
+/* Palette strip — aligned to the same content width as the adjustments panel
+   and rendered as a tidy, rounded card so it never outgrows its container. */
 .palette-strip {
-  flex: 1;
-  max-width: 1200px;
+  max-width: 720px;
   width: 100%;
-  margin: 0 auto;
-  padding: 0 24px 40px;
+  margin: 0 auto 40px;
   display: grid;
-  grid-template-columns: repeat(var(--cols), 1fr);
-  min-height: 60vh;
+  grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
+  min-height: 340px;
   gap: 0;
+  border: 1px solid var(--border-light);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 6px 24px var(--shadow-soft);
 }
 
 .swatch {
@@ -87,7 +90,8 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
   flex-direction: column;
   align-items: center;
   justify-content: flex-end;
-  padding: 20px 8px 32px;
+  min-width: 0;
+  padding: 20px 8px 28px;
   color: #ffffff;
   cursor: pointer;
   transition: background 0.35s ease;
@@ -167,7 +171,9 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
   .palette-strip {
     grid-template-columns: 1fr;
     grid-auto-rows: minmax(74px, 1fr);
-    padding: 0 16px 24px;
+    min-height: 0;
+    margin: 0 16px 24px;
+    width: auto;
   }
 
   .swatch {
