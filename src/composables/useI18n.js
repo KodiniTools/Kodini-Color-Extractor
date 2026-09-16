@@ -91,6 +91,12 @@ const translations = {
     heroCta: 'Start Extracting Colors',
     heroCtaSecondary: 'Open Color Generator',
 
+    // Cross links between the extractor app and the generator
+    crossLinkToGeneratorText: 'No image at hand?',
+    crossLinkToGeneratorCta: 'Try the Color Generator',
+    crossLinkToAppText: 'Have an image?',
+    crossLinkToAppCta: 'Extract its colors with the Color Extractor',
+
     // Color Generator Page
     genTitle: 'Color Palette Generator',
     genSubtitle:
@@ -320,6 +326,12 @@ const translations = {
       'Ein kostenloses, datenschutzfreundliches Tool, das vollständig in deinem Browser läuft. Keine Uploads, kein Tracking - nur reine Farbextraktion.',
     heroCta: 'Farben extrahieren',
     heroCtaSecondary: 'Farbgenerator öffnen',
+
+    // Querverweise zwischen Extractor-App und Generator
+    crossLinkToGeneratorText: 'Kein Bild zur Hand?',
+    crossLinkToGeneratorCta: 'Probiere den Farbgenerator',
+    crossLinkToAppText: 'Du hast ein Bild?',
+    crossLinkToAppCta: 'Farben mit dem Color Extractor extrahieren',
 
     // Color Generator Page
     genTitle: 'Farbpaletten-Generator',

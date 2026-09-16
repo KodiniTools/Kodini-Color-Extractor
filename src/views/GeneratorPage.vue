@@ -3,6 +3,7 @@ import { useI18n } from '../composables/useI18n'
 import { useColorGenerator } from '../composables/useColorGenerator'
 import LandingNav from '../components/LandingNav.vue'
 import ToastContainer from '../components/ToastContainer.vue'
+import ToolCrossLink from '../components/ToolCrossLink.vue'
 import GeneratorHeader from '../components/features/generator/GeneratorHeader.vue'
 import AdjustmentsPanel from '../components/features/generator/AdjustmentsPanel.vue'
 import PaletteStrip from '../components/features/generator/PaletteStrip.vue'
@@ -93,6 +94,14 @@ const {
       @copy="copyColor"
     />
 
+    <div class="gen-cross-link">
+      <ToolCrossLink
+        to="/app"
+        :text="t('crossLinkToAppText')"
+        :link-text="t('crossLinkToAppCta')"
+      />
+    </div>
+
     <ToastContainer />
   </div>
 </template>
@@ -117,9 +126,20 @@ const {
   transition: color 0.3s ease;
 }
 
+.gen-cross-link {
+  max-width: 720px;
+  width: 100%;
+  margin: -16px auto 0;
+  padding: 0 24px 40px;
+}
+
 @media (max-width: 700px) {
   .gen-hint {
     padding: 0 16px 12px;
+  }
+
+  .gen-cross-link {
+    padding: 0 16px 32px;
   }
 }
 </style>
