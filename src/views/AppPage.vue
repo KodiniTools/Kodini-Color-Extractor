@@ -10,6 +10,7 @@ import MainContent from '../components/MainContent.vue'
 import ImageEditPanel from '../components/ImageEditPanel.vue'
 import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
+import ToolCrossLink from '../components/ToolCrossLink.vue'
 
 const store = usePaletteStore()
 const { t } = useI18n()
@@ -102,6 +103,7 @@ function handleDownloadImage() {
         <h1 class="header-title">{{ t('title') }}</h1>
       </div>
       <div class="header-right">
+        <router-link to="/generator" class="header-link">{{ t('navGenerator') }}</router-link>
         <router-link to="/faq" class="header-link">{{ t('navFaq') }}</router-link>
       </div>
     </header>
@@ -210,6 +212,15 @@ function handleDownloadImage() {
               </svg>
             </button>
           </div>
+        </div>
+
+        <!-- Cross link to the Color Generator -->
+        <div class="cross-link-section">
+          <ToolCrossLink
+            to="/generator"
+            :text="t('crossLinkToGeneratorText')"
+            :link-text="t('crossLinkToGeneratorCta')"
+          />
         </div>
 
         <!-- Donate Section -->
@@ -501,9 +512,17 @@ function handleDownloadImage() {
   border-color: var(--btn-primary-hover);
 }
 
+/* Cross link to the generator */
+.cross-link-section {
+  margin-top: auto;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-light);
+  transition: border-color 0.3s ease;
+}
+
 /* Donate Section */
 .donate-section {
-  margin-top: auto;
+  margin-top: 20px;
   padding-top: 20px;
   border-top: 1px solid var(--border-light);
   transition: border-color 0.3s ease;
