@@ -83,6 +83,7 @@ const translations = {
     navApp: 'Open App',
     navGenerator: 'Generator',
     navFaq: 'FAQ',
+    navBlog: 'Blog',
 
     // Landing Page - Hero
     heroTitle: 'Extract Beautiful Color Palettes from Any Image',
@@ -319,6 +320,7 @@ const translations = {
     navApp: 'App öffnen',
     navGenerator: 'Generator',
     navFaq: 'FAQ',
+    navBlog: 'Blog',
 
     // Landing Page - Hero
     heroTitle: 'Extrahiere Farbpaletten aus jedem Bild',

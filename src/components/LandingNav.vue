@@ -12,6 +12,13 @@ const { t } = useI18n()
         <router-link to="/app" class="nav-link">{{ t('navApp') }}</router-link>
         <router-link to="/generator" class="nav-link">{{ t('navGenerator') }}</router-link>
         <router-link to="/faq" class="nav-link">{{ t('navFaq') }}</router-link>
+        <a
+          href="https://kodinitools.com/blog/farbextraktor-farbpalette/"
+          class="nav-link"
+          target="_blank"
+          rel="noopener noreferrer"
+          >{{ t('navBlog') }}</a
+        >
       </div>
     </div>
   </nav>
