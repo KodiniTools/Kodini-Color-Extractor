@@ -2,6 +2,25 @@
 import { computed } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
+import NumberSpinner from './ui/NumberSpinner.vue'
+
+// Range, step and unit per slider — shared by the range input and the number
+// spinner so the two can never disagree about what a value may be.
+const RANGES = {
+  zoom: { min: 25, max: 400, step: 5, unit: '%' },
+  brightness: { min: 0, max: 200, step: 1, unit: '%' },
+  contrast: { min: 0, max: 200, step: 1, unit: '%' },
+  saturation: { min: 0, max: 200, step: 1, unit: '%' },
+  hue: { min: -180, max: 180, step: 1, unit: '°' },
+  blur: { min: 0, max: 8, step: 0.5, unit: 'px' },
+  grayscale: { min: 0, max: 100, step: 1, unit: '%' },
+}
+
+/** Only the attributes a range input understands (no `unit`). */
+function sliderAttrs(key) {
+  const { min, max, step } = RANGES[key]
+  return { min, max, step }
+}
 
 const store = usePaletteStore()
 const { t } = useI18n()
@@ -131,7 +150,7 @@ function clearImage() {
       <div class="slider-header">
         <label>{{ t('zoom') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ zoom }}%</span>
+          <NumberSpinner v-model="zoom" v-bind="RANGES.zoom" :label="t('zoom')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.zoom }"
@@ -152,14 +171,14 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="zoom" min="25" max="400" step="5" class="slider" />
+      <input v-model.number="zoom" type="range" v-bind="sliderAttrs('zoom')" class="slider" />
     </div>
 
     <div class="slider-group">
       <div class="slider-header">
         <label>{{ t('brightness') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ brightness }}%</span>
+          <NumberSpinner v-model="brightness" v-bind="RANGES.brightness" :label="t('brightness')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.brightness }"
@@ -180,14 +199,19 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="brightness" min="0" max="200" step="1" class="slider" />
+      <input
+        v-model.number="brightness"
+        type="range"
+        v-bind="sliderAttrs('brightness')"
+        class="slider"
+      />
     </div>
 
     <div class="slider-group">
       <div class="slider-header">
         <label>{{ t('contrast') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ contrast }}%</span>
+          <NumberSpinner v-model="contrast" v-bind="RANGES.contrast" :label="t('contrast')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.contrast }"
@@ -208,14 +232,19 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="contrast" min="0" max="200" step="1" class="slider" />
+      <input
+        v-model.number="contrast"
+        type="range"
+        v-bind="sliderAttrs('contrast')"
+        class="slider"
+      />
     </div>
 
     <div class="slider-group">
       <div class="slider-header">
         <label>{{ t('saturation') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ saturation }}%</span>
+          <NumberSpinner v-model="saturation" v-bind="RANGES.saturation" :label="t('saturation')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.saturation }"
@@ -236,14 +265,19 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="saturation" min="0" max="200" step="1" class="slider" />
+      <input
+        v-model.number="saturation"
+        type="range"
+        v-bind="sliderAttrs('saturation')"
+        class="slider"
+      />
     </div>
 
     <div class="slider-group">
       <div class="slider-header">
         <label>{{ t('hue') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ hue }}°</span>
+          <NumberSpinner v-model="hue" v-bind="RANGES.hue" :label="t('hue')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.hue }"
@@ -265,11 +299,9 @@ function clearImage() {
         </div>
       </div>
       <input
-        type="range"
         v-model.number="hue"
-        min="-180"
-        max="180"
-        step="1"
+        type="range"
+        v-bind="sliderAttrs('hue')"
         class="slider slider-hue"
       />
     </div>
@@ -280,7 +312,7 @@ function clearImage() {
       <div class="slider-header">
         <label>{{ t('blur') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ blur }}px</span>
+          <NumberSpinner v-model="blur" v-bind="RANGES.blur" :label="t('blur')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.blur }"
@@ -301,14 +333,14 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="blur" min="0" max="8" step="0.5" class="slider" />
+      <input v-model.number="blur" type="range" v-bind="sliderAttrs('blur')" class="slider" />
     </div>
 
     <div class="slider-group">
       <div class="slider-header">
         <label>{{ t('grayscale') }}</label>
         <div class="slider-value-group">
-          <span class="slider-value">{{ grayscale }}%</span>
+          <NumberSpinner v-model="grayscale" v-bind="RANGES.grayscale" :label="t('grayscale')" />
           <button
             class="reset-btn"
             :class="{ active: isModified.grayscale }"
@@ -329,7 +361,12 @@ function clearImage() {
           </button>
         </div>
       </div>
-      <input type="range" v-model.number="grayscale" min="0" max="100" step="1" class="slider" />
+      <input
+        v-model.number="grayscale"
+        type="range"
+        v-bind="sliderAttrs('grayscale')"
+        class="slider"
+      />
     </div>
   </aside>
 </template>
@@ -460,15 +497,6 @@ function clearImage() {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.slider-value {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--text-primary);
-  min-width: 45px;
-  text-align: right;
-  transition: color 0.3s ease;
 }
 
 .reset-btn {

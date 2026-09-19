@@ -1,7 +1,7 @@
 <script setup>
-import { onUnmounted, reactive } from 'vue'
 import { useI18n } from '../../../composables/useI18n'
 import { displayHex } from '../../../lib/core/colorGenerator'
+import NumberSpinner from '../../ui/NumberSpinner.vue'
 
 const { t } = useI18n()
 
@@ -48,135 +48,6 @@ function fieldValue(f) {
 /** True while the field differs from neutral — enables its reset button. */
 function isFieldModified(f) {
   return fieldValue(f) !== f.def
-}
-
-function clamp(n, min, max) {
-  return Math.max(min, Math.min(max, n))
-}
-
-/** Parse a raw input value; null for an empty field or non-numeric text. */
-function readNumber(raw) {
-  if (raw === '' || raw === null || raw === undefined) return null
-  const n = Number(raw)
-  return Number.isFinite(n) ? n : null
-}
-
-// Text the user is currently typing, per field key. The palette always follows
-// the clamped value live (like the slider), while the field keeps showing the
-// raw text — so typing "250" into a 0-200 field is not rewritten under the
-// caret, it just stops moving the palette past the maximum.
-const drafts = reactive({})
-
-/** Drop the in-progress text so the field shows the model value again. */
-function clearDraft(f) {
-  if (f.key in drafts) delete drafts[f.key]
-}
-
-/** What the number field displays: the in-progress text, else the model. */
-function spinValue(f) {
-  return drafts[f.key] ?? String(fieldValue(f))
-}
-
-/** Slider drag — same value path as the spinner, and the field follows along. */
-function onSlide(f, raw) {
-  clearDraft(f)
-  emit('set-adjust', f.key, raw)
-}
-
-/**
- * Spinner arrow: move the value by `factor` steps, clamped to the field range.
- * While accelerating (factor > 1) the result snaps to that coarser grid so the
- * numbers stay round instead of drifting to arbitrary offsets. Returns false
- * when the value could not move, which also ends a press-and-hold.
- */
-function stepField(f, direction, factor = 1) {
-  if (props.activeLocked) return false
-  clearDraft(f)
-  const size = (f.step || 1) * factor
-  const current = fieldValue(f)
-  const target = Math.round((current + direction * size) / size) * size
-  const next = clamp(target, f.min, f.max)
-  if (next === current) return false
-  emit('set-adjust', f.key, next)
-  return true
-}
-
-// Press-and-hold on an arrow: one step on press, then an auto-repeat that
-// starts slow for precise nudging and speeds up the longer the button is
-// held, so the far end of a range is reachable without dozens of clicks.
-const HOLD_DELAY = 400
-const HOLD_PHASES = [
-  { until: 5, interval: 140, factor: 1 },
-  { until: 15, interval: 70, factor: 1 },
-  { until: 30, interval: 40, factor: 1 },
-  { until: Infinity, interval: 40, factor: 5 },
-]
-
-let holdTimer = null
-let holdTicks = 0
-
-/** End a press-and-hold, whatever ended it (release, limit, unmount). */
-function stopHold() {
-  if (holdTimer !== null) {
-    clearTimeout(holdTimer)
-    holdTimer = null
-  }
-  holdTicks = 0
-  window.removeEventListener('pointerup', stopHold)
-  window.removeEventListener('pointercancel', stopHold)
-}
-
-function repeatHold(f, direction) {
-  holdTicks += 1
-  const phase = HOLD_PHASES.find((p) => holdTicks <= p.until)
-  if (!stepField(f, direction, phase.factor)) {
-    stopHold()
-    return
-  }
-  holdTimer = setTimeout(() => repeatHold(f, direction), phase.interval)
-}
-
-function startHold(f, direction) {
-  stopHold()
-  if (!stepField(f, direction)) return
-  // Listen on the window: the pointer is often released off the button, and
-  // the button may even be disabled by then (value arrived at the limit).
-  window.addEventListener('pointerup', stopHold)
-  window.addEventListener('pointercancel', stopHold)
-  holdTimer = setTimeout(() => repeatHold(f, direction), HOLD_DELAY)
-}
-
-onUnmounted(stopHold)
-
-/** Per-field reset — clears any in-progress text along with the value. */
-function onResetField(f) {
-  clearDraft(f)
-  emit('reset-field', f.key)
-}
-
-/**
- * Typing in the number field: apply every keystroke to the palette right away,
- * clamped to the field range. An empty (or not-yet-numeric) field applies
- * nothing and keeps the last value until the user types a number.
- */
-function onSpinInput(f, raw) {
-  drafts[f.key] = raw
-  const n = readNumber(raw)
-  if (n === null) return
-  emit('set-adjust', f.key, clamp(Math.round(n), f.min, f.max))
-}
-
-/**
- * Commit on change/blur: the field stops showing the raw text and snaps to the
- * value the palette actually holds. The DOM is written directly because Vue
- * does not re-render the input when the model value did not change.
- */
-function onSpinCommit(f, el) {
-  const n = readNumber(el.value)
-  const next = n === null ? fieldValue(f) : clamp(Math.round(n), f.min, f.max)
-  clearDraft(f)
-  if (next !== fieldValue(f)) emit('set-adjust', f.key, next)
-  if (el.value !== String(next)) el.value = String(next)
 }
 </script>
 
@@ -320,74 +191,17 @@ function onSpinCommit(f, el) {
           </label>
 
           <div class="adjust-field-tools">
-            <!-- Number spinner: type an exact value or step it with the arrows -->
-            <div class="adjust-spin" :class="{ 'adjust-spin--disabled': activeLocked }">
-              <input
-                class="adjust-spin-input"
-                type="number"
-                inputmode="numeric"
-                :min="f.min"
-                :max="f.max"
-                :step="f.step || 1"
-                :value="spinValue(f)"
-                :disabled="activeLocked"
-                :aria-label="fieldLabel(f)"
-                @input="onSpinInput(f, $event.target.value)"
-                @change="onSpinCommit(f, $event.target)"
-                @blur="onSpinCommit(f, $event.target)"
-              />
-              <span class="adjust-spin-unit" aria-hidden="true">{{ f.unit }}</span>
-              <span class="adjust-spin-arrows">
-                <button
-                  type="button"
-                  class="adjust-spin-arrow"
-                  tabindex="-1"
-                  :disabled="activeLocked || fieldValue(f) >= f.max"
-                  :title="t('genStepUp').replace('{label}', fieldLabel(f))"
-                  :aria-label="t('genStepUp').replace('{label}', fieldLabel(f))"
-                  @pointerdown.prevent="startHold(f, 1)"
-                  @pointerup="stopHold"
-                  @pointercancel="stopHold"
-                >
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="m6 15 6-6 6 6" />
-                  </svg>
-                </button>
-                <button
-                  type="button"
-                  class="adjust-spin-arrow"
-                  tabindex="-1"
-                  :disabled="activeLocked || fieldValue(f) <= f.min"
-                  :title="t('genStepDown').replace('{label}', fieldLabel(f))"
-                  :aria-label="t('genStepDown').replace('{label}', fieldLabel(f))"
-                  @pointerdown.prevent="startHold(f, -1)"
-                  @pointerup="stopHold"
-                  @pointercancel="stopHold"
-                >
-                  <svg
-                    width="10"
-                    height="10"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="3"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="m6 9 6 6 6-6" />
-                  </svg>
-                </button>
-              </span>
-            </div>
+            <!-- Number spinner: type an exact value or hold the arrows -->
+            <NumberSpinner
+              :model-value="fieldValue(f)"
+              :min="f.min"
+              :max="f.max"
+              :step="f.step || 1"
+              :unit="f.unit"
+              :disabled="activeLocked"
+              :label="fieldLabel(f)"
+              @update:model-value="emit('set-adjust', f.key, $event)"
+            />
 
             <!-- Per-field reset: back to this control's neutral value only -->
             <button
@@ -397,7 +211,7 @@ function onSpinCommit(f, el) {
               :disabled="activeLocked || !isFieldModified(f)"
               :title="t('genResetField').replace('{label}', fieldLabel(f))"
               :aria-label="t('genResetField').replace('{label}', fieldLabel(f))"
-              @click="onResetField(f)"
+              @click="emit('reset-field', f.key)"
             >
               <svg
                 width="13"
@@ -425,7 +239,7 @@ function onSpinCommit(f, el) {
           :step="f.step || 1"
           :value="fieldValue(f)"
           :disabled="activeLocked"
-          @input="onSlide(f, $event.target.value)"
+          @input="emit('set-adjust', f.key, $event.target.value)"
         />
       </div>
     </div>
@@ -776,94 +590,6 @@ function onSpinCommit(f, el) {
   display: flex;
   align-items: center;
   gap: 4px;
-}
-
-/* Number spinner — exact value entry with stepper arrows, kept visually
-   in line with the other inputs on the card. */
-.adjust-spin {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 1px 2px 1px 6px;
-  border: 1px solid var(--border-color);
-  border-radius: 7px;
-  background: var(--bg-input);
-  transition: all 0.2s ease;
-}
-
-.adjust-spin:focus-within {
-  border-color: var(--border-hover);
-  box-shadow: 0 0 0 3px var(--selection-glow);
-}
-
-.adjust-spin--disabled {
-  opacity: 0.6;
-}
-
-.adjust-spin-input {
-  width: 38px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--text-primary);
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  text-align: right;
-  outline: none;
-  /* Native arrows are hidden in favour of the custom ones below. */
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.adjust-spin-input::-webkit-outer-spin-button,
-.adjust-spin-input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-.adjust-spin-input:disabled {
-  cursor: not-allowed;
-  color: var(--text-tertiary);
-}
-
-.adjust-spin-unit {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-tertiary);
-}
-
-.adjust-spin-arrows {
-  display: flex;
-  flex-direction: column;
-  margin-left: 2px;
-}
-
-.adjust-spin-arrow {
-  display: flex;
-  touch-action: none;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 13px;
-  padding: 0;
-  border: none;
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all 0.15s ease;
-}
-
-.adjust-spin-arrow:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--text-primary);
-}
-
-.adjust-spin-arrow:disabled {
-  opacity: 0.3;
-  cursor: default;
 }
 
 /* Per-field reset — quiet until the field leaves its neutral value */
