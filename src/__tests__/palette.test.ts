@@ -98,7 +98,29 @@ describe('palette store - getFormatted', () => {
     const { usePaletteStore } = await import('../stores/palette')
     const store = usePaletteStore()
     store.setDownloadFormat('css')
-    expect(store.getFormatted(color, 0)).toBe('--color-1: #ff6432;')
+    // Hex output is upper-cased in every format since both tools share one
+    // export module; this used to be the one format that passed it through.
+    expect(store.getFormatted(color, 0)).toBe('--color-1: #FF6432;')
+  })
+
+  it('formats the code-oriented formats added with the shared module', async () => {
+    const { usePaletteStore } = await import('../stores/palette')
+    const store = usePaletteStore()
+    store.setDownloadFormat('scss')
+    expect(store.getFormatted(color, 0)).toBe('$color-1: #FF6432;')
+    store.setDownloadFormat('tailwind')
+    expect(store.getFormatted(color, 1)).toBe("'color-2': '#FF6432',")
+    // A token is an object, so the swatch label falls back to plain hex.
+    store.setDownloadFormat('tokens')
+    expect(store.getFormatted(color, 0)).toBe('#FF6432')
+  })
+
+  it('ignores an unknown download format', async () => {
+    const { usePaletteStore } = await import('../stores/palette')
+    const store = usePaletteStore()
+    store.setDownloadFormat('scss')
+    store.setDownloadFormat('not-a-format')
+    expect(store.downloadFormat).toBe('scss')
   })
 })
 

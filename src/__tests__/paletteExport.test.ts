@@ -8,6 +8,11 @@ async function mod() {
   return await import('../lib/core/paletteExport')
 }
 
+async function formatColor(entry: unknown, format: string, index = 0) {
+  const m = await mod()
+  return m.formatColor(entry as never, format, index)
+}
+
 async function entries(hexes = HEXES) {
   const { paletteEntry } = await mod()
   return hexes.map((h) => paletteEntry(h))
@@ -49,9 +54,50 @@ describe('paletteExport - formats', () => {
       expect(file!.filename).toBe(`kodini-palette.${f.ext}`)
       expect(file!.mime).toBe(f.mime)
       expect(file!.content.length).toBeGreaterThan(0)
-      // Every format has to carry every color of the palette.
-      for (const hex of HEXES) expect(file!.content).toContain(hex)
+      // Every format has to carry every color of the palette, in whatever
+      // notation it uses.
+      for (let i = 0; i < colors.length; i++) {
+        expect(file!.content, `format ${f.key}`).toContain(await formatColor(colors[i], f.key, i))
+      }
     }
+  })
+
+  it('covers every notation web designers pick from', async () => {
+    const { EXPORT_FORMATS } = await mod()
+    expect(EXPORT_FORMATS.map((f) => f.key)).toEqual([
+      'hex',
+      'rgb',
+      'rgba',
+      'hsl',
+      'hsla',
+      'css',
+      'scss',
+      'tailwind',
+      'tokens',
+    ])
+  })
+
+  it('renders the plain notations one per line', async () => {
+    const { buildPaletteExport } = await mod()
+    const colors = await entries(['#FF6432'])
+    expect(buildPaletteExport('rgb', colors)!.content).toBe('rgb(255, 100, 50)')
+    expect(buildPaletteExport('rgba', colors)!.content).toBe('rgba(255, 100, 50, 1)')
+    // #FF6432 is hue 14.63 -> 15; rounded to whole units, never fractional.
+    expect(buildPaletteExport('hsl', colors)!.content).toBe('hsl(15, 100%, 60%)')
+    expect(buildPaletteExport('hsla', colors)!.content).toBe('hsla(15, 100%, 60%, 1)')
+  })
+
+  it('keeps a caller-supplied hsl instead of rounding it again', async () => {
+    const { paletteEntry, formatColor } = await mod()
+    const entry = paletteEntry('#FF6432', { r: 255, g: 100, b: 50 }, { h: 16, s: 99, l: 61 })
+    expect(formatColor(entry, 'hsl')).toBe('hsl(16, 99%, 61%)')
+  })
+
+  it('falls back to hex for a per-color label it has no one-liner for', async () => {
+    const { formatColor } = await mod()
+    const [entry] = await entries(['#49313E'])
+    expect(formatColor(entry, 'tokens', 0)).toBe('#49313E')
+    expect(formatColor(entry, 'nope', 0)).toBe('#49313E')
   })
 
   it('hex export is one color per line', async () => {
