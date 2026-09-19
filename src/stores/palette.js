@@ -1,5 +1,13 @@
 import { defineStore } from 'pinia'
 import { ref, computed, watch } from 'vue'
+import {
+  EXPORT_FORMATS,
+  buildPaletteExport,
+  downloadPaletteFile,
+  exportFormat as findExportFormat,
+  formatColor,
+  paletteEntry,
+} from '../lib/core/paletteExport'
 
 let filterDebounceTimer = null
 
@@ -65,7 +73,7 @@ export const usePaletteStore = defineStore('palette', () => {
   }
 
   function setDownloadFormat(format) {
-    downloadFormat.value = format
+    if (findExportFormat(format)) downloadFormat.value = format
   }
 
   function setImageExportFormat(format) {
@@ -335,45 +343,39 @@ export const usePaletteStore = defineStore('palette', () => {
     colors.value[index] = { r, g, b, hex, hsl }
   }
 
+  // Extracted colors carry their own rounded HSL — pass it through instead of
+  // deriving it again, so the displayed values never shift.
+  function toEntry(color) {
+    return paletteEntry(color.hex, { r: color.r, g: color.g, b: color.b }, color.hsl)
+  }
+
+  function paletteEntries() {
+    return colors.value.map(toEntry)
+  }
+
   function getFormatted(color, index) {
-    const f = downloadFormat.value
-    const { r, g, b, hex, hsl } = color
-    switch (f) {
-      case 'hex':
-        return hex.toUpperCase()
-      case 'rgb':
-        return `rgb(${r}, ${g}, ${b})`
-      case 'rgba':
-        return `rgba(${r}, ${g}, ${b}, 1)`
-      case 'hsl':
-        return `hsl(${hsl.h}, ${hsl.s}%, ${hsl.l}%)`
-      case 'hsla':
-        return `hsla(${hsl.h}, ${hsl.s}%, ${hsl.l}%, 1)`
-      case 'css':
-        return `--color-${index + 1}: ${hex};`
-      default:
-        return hex.toUpperCase()
-    }
+    return formatColor(toEntry(color), downloadFormat.value, index)
+  }
+
+  function buildExport() {
+    return buildPaletteExport(downloadFormat.value, paletteEntries(), {
+      basename: `color-palette-${downloadFormat.value}`,
+    })
   }
 
   function getPaletteText() {
-    const f = downloadFormat.value
-    if (f === 'css') {
-      return ':root {\n' + colors.value.map((c, i) => '  ' + getFormatted(c, i)).join('\n') + '\n}'
-    } else {
-      return colors.value.map((c, i) => getFormatted(c, i)).join('\n')
-    }
+    return buildExport()?.content ?? ''
   }
 
+  // Saves the palette in the selected format, with the extension that format
+  // actually needs (.css, .scss, .js, .json — .txt for the plain notations).
+  function downloadPalette() {
+    return downloadPaletteFile(buildExport())
+  }
+
+  // Former name, kept so existing callers keep working.
   function downloadTxt() {
-    const f = downloadFormat.value
-    const content = getPaletteText()
-    const blob = new Blob([content], { type: 'text/plain' })
-    const link = document.createElement('a')
-    link.download = `color-palette-${f}.txt`
-    link.href = URL.createObjectURL(blob)
-    link.click()
-    URL.revokeObjectURL(link.href)
+    downloadPalette()
   }
 
   async function copyPalette() {
@@ -394,6 +396,7 @@ export const usePaletteStore = defineStore('palette', () => {
 
     // Calculate minimum swatch width based on format text length
     // Longer formats like rgba need more space to prevent text overlap
+    // Longer notations need a wider swatch so the label does not overlap.
     const formatWidths = {
       hex: 80,
       rgb: 110,
@@ -401,6 +404,8 @@ export const usePaletteStore = defineStore('palette', () => {
       hsl: 130,
       hsla: 145,
       css: 150,
+      scss: 150,
+      tailwind: 165,
     }
     const baseSwatchSize = formatWidths[f] || 80
     const basePadding = 20
@@ -436,6 +441,8 @@ export const usePaletteStore = defineStore('palette', () => {
       hsl: 10,
       hsla: 9,
       css: 9,
+      scss: 9,
+      tailwind: 9,
     }
     const mainFontSize = Math.round((baseFontSizes[f] || 11) * scale)
     const subFontSize = Math.round(10 * scale)
@@ -457,7 +464,10 @@ export const usePaletteStore = defineStore('palette', () => {
       pCtx.textAlign = 'center'
       pCtx.fillText(getFormatted(c, i), x + swatchSize / 2, y + swatchSize + Math.round(20 * scale))
 
-      if (f !== 'hex') {
+      // Second line repeats the plain HEX under a richer notation. Formats
+      // that already render as plain HEX (hex itself, and the ones with no
+      // one-line form) would just print it twice.
+      if (f !== 'hex' && findExportFormat(f)?.perColor) {
         pCtx.fillStyle = '#718096'
         pCtx.font = `500 ${subFontSize}px -apple-system, BlinkMacSystemFont, sans-serif`
         pCtx.fillText(
@@ -504,6 +514,8 @@ export const usePaletteStore = defineStore('palette', () => {
     imageData,
     colorCount,
     downloadFormat,
+    EXPORT_FORMATS,
+    downloadPalette,
     hasColors,
     selectedColorIndex,
     originalImageSize,

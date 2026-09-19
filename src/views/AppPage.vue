@@ -69,7 +69,7 @@ async function handleCopy() {
 }
 
 function handleDownloadTxt() {
-  store.downloadTxt()
+  store.downloadPalette()
   toast.show(t('downloadStarted'), 'success')
 }
 
@@ -130,12 +130,9 @@ function handleDownloadImage() {
           <div class="control-group">
             <label>{{ t('formatLabel') }}</label>
             <select v-model="format" class="format-select">
-              <option value="hex">hex</option>
-              <option value="rgb">rgb</option>
-              <option value="rgba">rgba</option>
-              <option value="hsl">hsl</option>
-              <option value="hsla">hsla</option>
-              <option value="css">css variables</option>
+              <option v-for="f in store.EXPORT_FORMATS" :key="f.key" :value="f.key">
+                {{ t(f.labelKey) }}
+              </option>
             </select>
           </div>
         </div>
@@ -177,7 +174,7 @@ function handleDownloadImage() {
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
             </button>
-            <button class="export-btn" @click="handleDownloadTxt" :title="t('downloadTxt')">
+            <button class="export-btn" @click="handleDownloadTxt" :title="t('downloadPalette')">
               <svg
                 width="18"
                 height="18"
