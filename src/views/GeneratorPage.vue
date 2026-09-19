@@ -42,6 +42,10 @@ const {
   copyAll,
   copySelected,
   setCount,
+  EXPORT_FORMATS,
+  exportFormat,
+  setExportFormat,
+  downloadPalette,
   undo,
   redo,
 } = useColorGenerator()
@@ -55,9 +59,13 @@ const {
       v-model:mode="mode"
       :count="count"
       :harmony-modes="harmonyModes"
+      :export-format="exportFormat"
+      :export-formats="EXPORT_FORMATS"
       @generate="generate"
       @set-count="setCount"
       @copy-all="copyAll"
+      @set-export-format="setExportFormat"
+      @download="downloadPalette"
     />
 
     <p class="gen-hint">{{ t('genSpaceHint') }}</p>

@@ -7,9 +7,18 @@ defineProps({
   mode: { type: String, required: true },
   count: { type: Number, required: true },
   harmonyModes: { type: Array, required: true },
+  exportFormat: { type: String, required: true },
+  exportFormats: { type: Array, required: true },
 })
 
-const emit = defineEmits(['update:mode', 'set-count', 'generate', 'copy-all'])
+const emit = defineEmits([
+  'update:mode',
+  'set-count',
+  'generate',
+  'copy-all',
+  'set-export-format',
+  'download',
+])
 
 // Changing the harmony updates the bound mode and regenerates in one go.
 function onModeChange(event) {
@@ -51,6 +60,39 @@ function onModeChange(event) {
       </button>
       <button class="gen-btn" @click="emit('copy-all')">
         {{ t('genCopyAll') }}
+      </button>
+
+      <!-- Export: pick a format, then download the palette as that file -->
+      <div class="gen-control">
+        <label class="gen-label" for="gen-export-format">{{ t('genExportFormat') }}</label>
+        <select
+          id="gen-export-format"
+          :value="exportFormat"
+          class="gen-select"
+          @change="emit('set-export-format', $event.target.value)"
+        >
+          <option v-for="f in exportFormats" :key="f.key" :value="f.key">
+            {{ t(f.labelKey) }}
+          </option>
+        </select>
+      </div>
+      <button class="gen-btn gen-btn-icon" :title="t('genDownload')" @click="emit('download')">
+        <svg
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+          <path d="M7 10l5 5 5-5" />
+          <path d="M12 15V3" />
+        </svg>
+        {{ t('genDownload') }}
       </button>
     </div>
   </header>
@@ -148,6 +190,12 @@ function onModeChange(event) {
   background: var(--bg-hover);
   border-color: var(--border-hover);
   transform: translateY(-1px);
+}
+
+.gen-btn-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .gen-btn-primary {

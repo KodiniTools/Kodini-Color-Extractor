@@ -9,8 +9,16 @@ import {
   makeColor,
   neutralAdjust,
   hexToRgb,
+  rgbToHex,
   displayHex,
+  displayRgb,
 } from '../lib/core/colorGenerator'
+import {
+  DEFAULT_EXPORT_FORMAT,
+  EXPORT_FORMATS,
+  buildPaletteExport,
+  paletteEntry,
+} from '../lib/core/paletteExport'
 
 // Reactive state and behaviour for the palette generator. Keeps the view
 // components thin: they render props and emit intent, this owns the logic.
@@ -342,6 +350,37 @@ export function useColorGenerator() {
     }
   }
 
+  // ─── Export ───
+  // The format the download uses; the palette is exported with the adjusted
+  // (displayed) colors, never the untouched base values.
+  const exportFormatKey = ref(DEFAULT_EXPORT_FORMAT)
+
+  function setExportFormat(key) {
+    if (EXPORT_FORMATS.some((f) => f.key === key)) exportFormatKey.value = key
+  }
+
+  function exportEntries() {
+    return palette.value.map((c) => {
+      const rgb = displayRgb(c)
+      return paletteEntry(rgbToHex(rgb), rgb)
+    })
+  }
+
+  function downloadPalette() {
+    const file = buildPaletteExport(exportFormatKey.value, exportEntries())
+    if (!file) return
+    const blob = new Blob([file.content], { type: `${file.mime};charset=utf-8` })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = file.filename
+    document.body.appendChild(link)
+    link.click()
+    link.remove()
+    URL.revokeObjectURL(url)
+    toast.success(t('genDownloaded').replace('{file}', file.filename))
+  }
+
   function setCount(n) {
     count.value = n
     // Trim or extend while keeping existing (and locked) colors.
@@ -425,6 +464,10 @@ export function useColorGenerator() {
     copyAll,
     copySelected,
     setCount,
+    EXPORT_FORMATS,
+    exportFormat: exportFormatKey,
+    setExportFormat,
+    downloadPalette,
     undo,
     redo,
   }
