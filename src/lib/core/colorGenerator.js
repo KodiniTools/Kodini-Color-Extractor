@@ -77,12 +77,39 @@ export function neutralAdjust() {
   return { brightness: 100, contrast: 100, saturation: 100, hue: 0 }
 }
 
+// Neutral (identity) values, kept as the single source of truth for both the
+// per-color adjustment objects and the field descriptors below.
+const NEUTRAL_ADJUST = neutralAdjust()
+
+// Field descriptors for the adjustment controls: range, step size, display
+// unit and the neutral default the per-field reset returns to.
 export const ADJUST_FIELDS = [
-  { key: 'brightness', min: 0, max: 200 },
-  { key: 'contrast', min: 0, max: 200 },
-  { key: 'saturation', min: 0, max: 200 },
-  { key: 'hue', min: 0, max: 360 },
+  { key: 'brightness', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.brightness },
+  { key: 'contrast', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.contrast },
+  { key: 'saturation', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.saturation },
+  { key: 'hue', min: 0, max: 360, step: 1, unit: '°', def: NEUTRAL_ADJUST.hue },
 ]
+
+// Look up a field descriptor by key (null for unknown keys).
+export function adjustField(key) {
+  return ADJUST_FIELDS.find((f) => f.key === key) || null
+}
+
+// Normalize an adjustment value coming from a control: rounded to whole units
+// and clamped to the field range. Returns null for unknown fields or values
+// that are not a finite number (an empty number input, for instance), so
+// callers can ignore the change instead of writing NaN into the palette.
+export function clampAdjust(key, value) {
+  const field = adjustField(key)
+  if (!field) return null
+  // Number('') and Number(null) are 0, so empty input is rejected up front
+  // instead of silently snapping the control to its minimum.
+  if (value === null || value === undefined || typeof value === 'boolean') return null
+  if (typeof value === 'string' && value.trim() === '') return null
+  const n = Number(value)
+  if (!Number.isFinite(n)) return null
+  return Math.max(field.min, Math.min(field.max, Math.round(n)))
+}
 
 // Apply an adjustment set to a base RGB color and return the resulting RGB.
 export function applyAdjust(rgb, adj) {

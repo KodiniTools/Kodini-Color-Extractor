@@ -3,6 +3,7 @@ import { useI18n } from './useI18n'
 import { useToast } from './useToast'
 import {
   ADJUST_FIELDS,
+  clampAdjust,
   harmonyModes,
   harmonyColors,
   makeColor,
@@ -248,7 +249,11 @@ export function useColorGenerator() {
   // Move a slider: the value is applied to every targeted, unlocked color.
   // In "all" or multi-select mode the master sliders track the shared value.
   function setAdjust(key, value) {
-    const v = Number(value)
+    // The value can come from the slider or the number spinner, so it is
+    // normalized here: out-of-range or non-numeric input never reaches the
+    // palette.
+    const v = clampAdjust(key, value)
+    if (v === null) return
     const single = scope.value !== 'all' && scope.value.length === 1
     if (!single) masterAdjust[key] = v
     scopeIndices.value.forEach((i) => {
@@ -274,6 +279,22 @@ export function useColorGenerator() {
     scopeIndices.value.forEach((i) => {
       const c = palette.value[i]
       if (c && !c.locked) Object.assign(c.adj, neutralAdjust())
+    })
+    endCoalesce()
+    commit()
+  }
+
+  // Reset a single adjustment (one slider/spinner row) back to its neutral
+  // value for the current scope. Locked colors keep their state.
+  function resetAdjustField(key) {
+    const neutral = neutralAdjust()
+    if (!(key in neutral)) return
+    const def = neutral[key]
+    const single = scope.value !== 'all' && scope.value.length === 1
+    if (!single) masterAdjust[key] = def
+    scopeIndices.value.forEach((i) => {
+      const c = palette.value[i]
+      if (c && !c.locked) c.adj[key] = def
     })
     endCoalesce()
     commit()
@@ -399,6 +420,7 @@ export function useColorGenerator() {
     setColorFromHex,
     setAdjust,
     resetAdjust,
+    resetAdjustField,
     copyColor,
     copyAll,
     copySelected,
