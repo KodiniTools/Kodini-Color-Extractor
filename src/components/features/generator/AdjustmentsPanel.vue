@@ -4,7 +4,7 @@ import { displayHex } from '../../../lib/core/colorGenerator'
 
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   palette: { type: Array, required: true },
   scope: { type: [String, Array], required: true },
   selectedCount: { type: Number, required: true },
@@ -26,11 +26,71 @@ const emit = defineEmits([
   'clear-scope',
   'copy-selected',
   'reset',
+  'reset-field',
   'pick',
   'set-adjust',
   'undo',
   'redo',
 ])
+
+/** Translated name of an adjustment field, used in labels and titles. */
+function fieldLabel(f) {
+  return t(f.key)
+}
+
+/** Current value of a field, falling back to its neutral default. */
+function fieldValue(f) {
+  const v = Number(props.activeAdjust[f.key])
+  return Number.isFinite(v) ? v : f.def
+}
+
+/** True while the field differs from neutral — enables its reset button. */
+function isFieldModified(f) {
+  return fieldValue(f) !== f.def
+}
+
+function clamp(n, min, max) {
+  return Math.max(min, Math.min(max, n))
+}
+
+/** Parse a raw input value; null for an empty field or non-numeric text. */
+function readNumber(raw) {
+  if (raw === '' || raw === null || raw === undefined) return null
+  const n = Number(raw)
+  return Number.isFinite(n) ? n : null
+}
+
+/** Spinner arrow: move the value by one step, clamped to the field range. */
+function stepField(f, direction) {
+  if (props.activeLocked) return
+  const size = f.step || 1
+  const current = fieldValue(f)
+  const next = clamp(current + direction * size, f.min, f.max)
+  if (next !== current) emit('set-adjust', f.key, next)
+}
+
+/**
+ * Typing in the number field. Out-of-range or incomplete input is ignored
+ * here and normalized on change/blur, so clamping never fights the user
+ * mid-keystroke (typing "25" on the way to "250" would otherwise snap).
+ */
+function onSpinInput(f, raw) {
+  const n = readNumber(raw)
+  if (n === null || n < f.min || n > f.max) return
+  emit('set-adjust', f.key, Math.round(n))
+}
+
+/**
+ * Commit the number field on change/blur: clamp what the user typed, and
+ * write the result back to the DOM when the model value did not change
+ * (Vue would not re-render the input in that case).
+ */
+function onSpinCommit(f, el) {
+  const n = readNumber(el.value)
+  const next = n === null ? fieldValue(f) : clamp(Math.round(n), f.min, f.max)
+  if (next !== fieldValue(f)) emit('set-adjust', f.key, next)
+  if (el.value !== String(next)) el.value = String(next)
+}
 </script>
 
 <template>
@@ -168,17 +228,111 @@ const emit = defineEmits([
     <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
       <div v-for="f in adjustFields" :key="f.key" class="adjust-field">
         <div class="adjust-field-head">
-          <label class="adjust-field-label">{{ t(f.key) }}</label>
-          <span class="adjust-field-value">
-            {{ activeAdjust[f.key] }}{{ f.key === 'hue' ? '°' : '%' }}
-          </span>
+          <label class="adjust-field-label" :for="`adjust-slider-${f.key}`">
+            {{ fieldLabel(f) }}
+          </label>
+
+          <div class="adjust-field-tools">
+            <!-- Number spinner: type an exact value or step it with the arrows -->
+            <div class="adjust-spin" :class="{ 'adjust-spin--disabled': activeLocked }">
+              <input
+                class="adjust-spin-input"
+                type="number"
+                inputmode="numeric"
+                :min="f.min"
+                :max="f.max"
+                :step="f.step || 1"
+                :value="fieldValue(f)"
+                :disabled="activeLocked"
+                :aria-label="fieldLabel(f)"
+                @input="onSpinInput(f, $event.target.value)"
+                @change="onSpinCommit(f, $event.target)"
+                @blur="onSpinCommit(f, $event.target)"
+              />
+              <span class="adjust-spin-unit" aria-hidden="true">{{ f.unit }}</span>
+              <span class="adjust-spin-arrows">
+                <button
+                  type="button"
+                  class="adjust-spin-arrow"
+                  tabindex="-1"
+                  :disabled="activeLocked || fieldValue(f) >= f.max"
+                  :title="t('genStepUp').replace('{label}', fieldLabel(f))"
+                  :aria-label="t('genStepUp').replace('{label}', fieldLabel(f))"
+                  @click="stepField(f, 1)"
+                >
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m6 15 6-6 6 6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="adjust-spin-arrow"
+                  tabindex="-1"
+                  :disabled="activeLocked || fieldValue(f) <= f.min"
+                  :title="t('genStepDown').replace('{label}', fieldLabel(f))"
+                  :aria-label="t('genStepDown').replace('{label}', fieldLabel(f))"
+                  @click="stepField(f, -1)"
+                >
+                  <svg
+                    width="10"
+                    height="10"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="3"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="m6 9 6 6 6-6" />
+                  </svg>
+                </button>
+              </span>
+            </div>
+
+            <!-- Per-field reset: back to this control's neutral value only -->
+            <button
+              type="button"
+              class="adjust-field-reset"
+              :class="{ 'adjust-field-reset--active': isFieldModified(f) }"
+              :disabled="activeLocked || !isFieldModified(f)"
+              :title="t('genResetField').replace('{label}', fieldLabel(f))"
+              :aria-label="t('genResetField').replace('{label}', fieldLabel(f))"
+              @click="emit('reset-field', f.key)"
+            >
+              <svg
+                width="13"
+                height="13"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+
         <input
+          :id="`adjust-slider-${f.key}`"
           class="adjust-slider"
           type="range"
           :min="f.min"
           :max="f.max"
-          :value="activeAdjust[f.key]"
+          :step="f.step || 1"
+          :value="fieldValue(f)"
           :disabled="activeLocked"
           @input="emit('set-adjust', f.key, $event.target.value)"
         />
@@ -514,21 +668,141 @@ const emit = defineEmits([
 
 .adjust-field-head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
+  gap: 8px;
+  min-height: 30px;
 }
 
 .adjust-field-label {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
+  cursor: pointer;
 }
 
-.adjust-field-value {
+.adjust-field-tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+/* Number spinner — exact value entry with stepper arrows, kept visually
+   in line with the other inputs on the card. */
+.adjust-spin {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 2px 1px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 7px;
+  background: var(--bg-input);
+  transition: all 0.2s ease;
+}
+
+.adjust-spin:focus-within {
+  border-color: var(--border-hover);
+  box-shadow: 0 0 0 3px var(--selection-glow);
+}
+
+.adjust-spin--disabled {
+  opacity: 0.6;
+}
+
+.adjust-spin-input {
+  width: 38px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--text-primary);
+  font-family: inherit;
   font-size: 12px;
   font-weight: 600;
-  color: var(--text-tertiary);
   font-variant-numeric: tabular-nums;
+  text-align: right;
+  outline: none;
+  /* Native arrows are hidden in favour of the custom ones below. */
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+.adjust-spin-input::-webkit-outer-spin-button,
+.adjust-spin-input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.adjust-spin-input:disabled {
+  cursor: not-allowed;
+  color: var(--text-tertiary);
+}
+
+.adjust-spin-unit {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+}
+
+.adjust-spin-arrows {
+  display: flex;
+  flex-direction: column;
+  margin-left: 2px;
+}
+
+.adjust-spin-arrow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 13px;
+  padding: 0;
+  border: none;
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.adjust-spin-arrow:hover:not(:disabled) {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+}
+
+.adjust-spin-arrow:disabled {
+  opacity: 0.3;
+  cursor: default;
+}
+
+/* Per-field reset — quiet until the field leaves its neutral value */
+.adjust-field-reset {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--text-tertiary);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.adjust-field-reset:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+}
+
+.adjust-field-reset--active:not(:disabled) {
+  color: var(--btn-primary-bg);
+}
+
+.adjust-field-reset:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 .adjust-slider {
@@ -578,8 +852,9 @@ const emit = defineEmits([
     padding: 14px 16px;
   }
 
+  /* One column on phones: the label + spinner + reset row needs the width. */
   .adjust-sliders {
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr;
     gap: 14px;
   }
 }

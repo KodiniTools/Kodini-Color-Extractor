@@ -37,6 +37,7 @@ const {
   setColorFromHex,
   setAdjust,
   resetAdjust,
+  resetAdjustField,
   copyColor,
   copyAll,
   copySelected,
@@ -80,6 +81,7 @@ const {
       @clear-scope="clearScope"
       @copy-selected="copySelected"
       @reset="resetAdjust"
+      @reset-field="resetAdjustField"
       @pick="setColorFromHex"
       @set-adjust="setAdjust"
       @undo="undo"
