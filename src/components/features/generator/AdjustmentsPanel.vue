@@ -1,4 +1,5 @@
 <script setup>
+import { reactive } from 'vue'
 import { useI18n } from '../../../composables/useI18n'
 import { displayHex } from '../../../lib/core/colorGenerator'
 
@@ -60,34 +61,65 @@ function readNumber(raw) {
   return Number.isFinite(n) ? n : null
 }
 
+// Text the user is currently typing, per field key. The palette always follows
+// the clamped value live (like the slider), while the field keeps showing the
+// raw text — so typing "250" into a 0-200 field is not rewritten under the
+// caret, it just stops moving the palette past the maximum.
+const drafts = reactive({})
+
+/** Drop the in-progress text so the field shows the model value again. */
+function clearDraft(f) {
+  if (f.key in drafts) delete drafts[f.key]
+}
+
+/** What the number field displays: the in-progress text, else the model. */
+function spinValue(f) {
+  return drafts[f.key] ?? String(fieldValue(f))
+}
+
+/** Slider drag — same value path as the spinner, and the field follows along. */
+function onSlide(f, raw) {
+  clearDraft(f)
+  emit('set-adjust', f.key, raw)
+}
+
 /** Spinner arrow: move the value by one step, clamped to the field range. */
 function stepField(f, direction) {
   if (props.activeLocked) return
+  clearDraft(f)
   const size = f.step || 1
   const current = fieldValue(f)
   const next = clamp(current + direction * size, f.min, f.max)
   if (next !== current) emit('set-adjust', f.key, next)
 }
 
-/**
- * Typing in the number field. Out-of-range or incomplete input is ignored
- * here and normalized on change/blur, so clamping never fights the user
- * mid-keystroke (typing "25" on the way to "250" would otherwise snap).
- */
-function onSpinInput(f, raw) {
-  const n = readNumber(raw)
-  if (n === null || n < f.min || n > f.max) return
-  emit('set-adjust', f.key, Math.round(n))
+/** Per-field reset — clears any in-progress text along with the value. */
+function onResetField(f) {
+  clearDraft(f)
+  emit('reset-field', f.key)
 }
 
 /**
- * Commit the number field on change/blur: clamp what the user typed, and
- * write the result back to the DOM when the model value did not change
- * (Vue would not re-render the input in that case).
+ * Typing in the number field: apply every keystroke to the palette right away,
+ * clamped to the field range. An empty (or not-yet-numeric) field applies
+ * nothing and keeps the last value until the user types a number.
+ */
+function onSpinInput(f, raw) {
+  drafts[f.key] = raw
+  const n = readNumber(raw)
+  if (n === null) return
+  emit('set-adjust', f.key, clamp(Math.round(n), f.min, f.max))
+}
+
+/**
+ * Commit on change/blur: the field stops showing the raw text and snaps to the
+ * value the palette actually holds. The DOM is written directly because Vue
+ * does not re-render the input when the model value did not change.
  */
 function onSpinCommit(f, el) {
   const n = readNumber(el.value)
   const next = n === null ? fieldValue(f) : clamp(Math.round(n), f.min, f.max)
+  clearDraft(f)
   if (next !== fieldValue(f)) emit('set-adjust', f.key, next)
   if (el.value !== String(next)) el.value = String(next)
 }
@@ -242,7 +274,7 @@ function onSpinCommit(f, el) {
                 :min="f.min"
                 :max="f.max"
                 :step="f.step || 1"
-                :value="fieldValue(f)"
+                :value="spinValue(f)"
                 :disabled="activeLocked"
                 :aria-label="fieldLabel(f)"
                 @input="onSpinInput(f, $event.target.value)"
@@ -306,7 +338,7 @@ function onSpinCommit(f, el) {
               :disabled="activeLocked || !isFieldModified(f)"
               :title="t('genResetField').replace('{label}', fieldLabel(f))"
               :aria-label="t('genResetField').replace('{label}', fieldLabel(f))"
-              @click="emit('reset-field', f.key)"
+              @click="onResetField(f)"
             >
               <svg
                 width="13"
@@ -334,7 +366,7 @@ function onSpinCommit(f, el) {
           :step="f.step || 1"
           :value="fieldValue(f)"
           :disabled="activeLocked"
-          @input="emit('set-adjust', f.key, $event.target.value)"
+          @input="onSlide(f, $event.target.value)"
         />
       </div>
     </div>

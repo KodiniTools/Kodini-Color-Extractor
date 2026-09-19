@@ -119,13 +119,50 @@ describe('AdjustmentsPanel - number spinner', () => {
     await input.trigger('input')
   }
 
-  it('emits in-range typing and ignores incomplete or out-of-range input', async () => {
+  it('applies every keystroke live, clamped to the field range', async () => {
     const wrapper = await mountPanel()
     const input = wrapper.findAll('input.adjust-spin-input')[0]
     await type(input, '150')
-    await type(input, '') // cleared field on the way to a new value
-    await type(input, '999') // above max — normalized on commit, not while typing
-    expect(wrapper.emitted('set-adjust')).toEqual([['brightness', 150]])
+    await type(input, '') // cleared field: nothing to apply yet
+    await type(input, '999') // above max: applied as the maximum, live
+    expect(wrapper.emitted('set-adjust')).toEqual([
+      ['brightness', 150],
+      ['brightness', 200],
+    ])
+  })
+
+  it('keeps the typed text while the palette follows the clamped value', async () => {
+    const wrapper = await mountPanel()
+    const input = wrapper.findAll('input.adjust-spin-input')[0]
+    const el = input.element as HTMLInputElement
+    await type(input, '1005')
+    // Palette went live to the maximum...
+    expect(wrapper.emitted('set-adjust')).toEqual([['brightness', 200]])
+    // ...but the caret is not yanked around: the field still shows what was typed.
+    await wrapper.setProps({
+      activeAdjust: { brightness: 200, contrast: 100, saturation: 100, hue: 0 },
+    })
+    expect(el.value).toBe('1005')
+    // Leaving the field snaps it to the value the palette holds.
+    await input.trigger('blur')
+    expect(el.value).toBe('200')
+  })
+
+  it('the arrows and the slider take the field out of typing mode', async () => {
+    const wrapper = await mountPanel()
+    const field = wrapper.findAll('.adjust-field')[0]
+    const input = field.find('input.adjust-spin-input')
+    const el = input.element as HTMLInputElement
+
+    await type(input, '1005')
+    await field.findAll('.adjust-spin-arrow')[0].trigger('click')
+    expect(el.value).toBe('100') // model value, not the stale draft
+
+    await type(input, '1005')
+    const slider = field.find('input.adjust-slider')
+    ;(slider.element as HTMLInputElement).value = '120'
+    await slider.trigger('input')
+    expect(el.value).toBe('100')
   })
 
   it('clamps an out-of-range value on change and resyncs the field', async () => {
@@ -145,6 +182,14 @@ describe('AdjustmentsPanel - number spinner', () => {
     await input.trigger('change')
     expect(wrapper.emitted('set-adjust')).toHaveLength(1)
     expect(el.value).toBe('200')
+  })
+
+  it('the slider keeps emitting its value', async () => {
+    const wrapper = await mountPanel()
+    const slider = wrapper.findAll('input.adjust-slider')[0]
+    ;(slider.element as HTMLInputElement).value = '77'
+    await slider.trigger('input')
+    expect(wrapper.emitted('set-adjust')).toEqual([['brightness', '77']])
   })
 
   it('restores the model value when the field is left empty', async () => {
