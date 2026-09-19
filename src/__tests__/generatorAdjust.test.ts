@@ -1,5 +1,7 @@
+/* Test harnesses below define throwaway host components, not real SFCs. */
+/* eslint-disable vue/one-component-per-file */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
-import { defineComponent, h } from 'vue'
+import { defineComponent, h, reactive } from 'vue'
 import { mount, type DOMWrapper } from '@vue/test-utils'
 
 // Minimal palette entry shaped like makeColor() output.
@@ -9,6 +11,9 @@ function color(locked = false) {
 function neutral() {
   return { brightness: 100, contrast: 100, saturation: 100, hue: 0 }
 }
+
+// Mirrors HOLD_DELAY in AdjustmentsPanel.vue.
+const HOLD_DELAY = 400
 
 const FIELDS = [
   { key: 'brightness', min: 0, max: 200, step: 1, unit: '%', def: 100 },
@@ -38,6 +43,38 @@ async function mountPanel(overrides: Record<string, unknown> = {}) {
       ...overrides,
     },
   })
+}
+
+// Mounts the panel under a parent that writes back what it emits, so a
+// press-and-hold walks a real value instead of re-stepping a frozen prop.
+async function mountLive(initial: Record<string, number> = neutral()) {
+  const { default: AdjustmentsPanel } =
+    await import('../components/features/generator/AdjustmentsPanel.vue')
+  const state = reactive(initial)
+  const Parent = defineComponent({
+    setup() {
+      return () =>
+        h(AdjustmentsPanel, {
+          palette: [color(), color()],
+          scope: 'all',
+          selectedCount: 0,
+          anyLocked: false,
+          activeAdjust: state,
+          activeLocked: false,
+          canPick: false,
+          pickerHex: '#000000',
+          hasActiveAdjust: false,
+          adjustFields: FIELDS,
+          isSelected: () => false,
+          canUndo: false,
+          canRedo: false,
+          onSetAdjust: (key: string, value: number | string) => {
+            state[key] = Number(value)
+          },
+        })
+    },
+  })
+  return { wrapper: mount(Parent), state }
 }
 
 describe('colorGenerator - ADJUST_FIELDS / clampAdjust', () => {
@@ -87,15 +124,32 @@ describe('AdjustmentsPanel - number spinner', () => {
     expect(inputs[0].attributes('max')).toBe('200')
   })
 
-  it('the arrows step the value by one unit', async () => {
+  it('the arrows step the value by one unit on press', async () => {
     const wrapper = await mountPanel()
     const arrows = wrapper.findAll('.adjust-field')[0].findAll('.adjust-spin-arrow')
-    await arrows[0].trigger('click') // up
-    await arrows[1].trigger('click') // down
+    await arrows[0].trigger('pointerdown') // up
+    await arrows[0].trigger('pointerup')
+    await arrows[1].trigger('pointerdown') // down
+    await arrows[1].trigger('pointerup')
     expect(wrapper.emitted('set-adjust')).toEqual([
       ['brightness', 101],
       ['brightness', 99],
     ])
+  })
+
+  it('a short press does not auto-repeat', async () => {
+    vi.useFakeTimers()
+    try {
+      const wrapper = await mountPanel()
+      const up = wrapper.findAll('.adjust-spin-arrow')[0]
+      await up.trigger('pointerdown')
+      vi.advanceTimersByTime(200) // released before the repeat delay is up
+      await up.trigger('pointerup')
+      vi.advanceTimersByTime(3000)
+      expect(wrapper.emitted('set-adjust')).toHaveLength(1)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   it('disables the arrows at the ends of the range', async () => {
@@ -107,9 +161,80 @@ describe('AdjustmentsPanel - number spinner', () => {
     const down = fields[1].findAll('.adjust-spin-arrow')[1]
     expect(up.attributes('disabled')).toBeDefined()
     expect(down.attributes('disabled')).toBeDefined()
-    await up.trigger('click')
-    await down.trigger('click')
+    await up.trigger('pointerdown')
+    await down.trigger('pointerdown')
     expect(wrapper.emitted('set-adjust')).toBeUndefined()
+  })
+
+  it('holding an arrow repeats slowly at first, then accelerates', async () => {
+    vi.useFakeTimers()
+    try {
+      const { wrapper, state } = await mountLive()
+      // Hue (0-360) leaves room for the fast phase without hitting the limit.
+      const up = wrapper.findAll('.adjust-field')[3].findAll('.adjust-spin-arrow')[0]
+
+      await up.trigger('pointerdown')
+      expect(state.hue).toBe(1) // one step on press
+
+      // The initial pause: a press that is not held changes nothing more.
+      vi.advanceTimersByTime(HOLD_DELAY - 20)
+      expect(state.hue).toBe(1)
+
+      vi.advanceTimersByTime(20)
+      const slowStart = state.hue
+      vi.advanceTimersByTime(420)
+      const slowGain = state.hue - slowStart
+
+      // Keep holding into the fast phase, then measure the same time window.
+      vi.advanceTimersByTime(2200)
+      const fastStart = state.hue
+      vi.advanceTimersByTime(420)
+      const fastGain = state.hue - fastStart
+
+      expect(slowGain).toBeGreaterThan(0)
+      expect(slowGain).toBeLessThanOrEqual(4) // still nudging, ~1 per 140ms
+      expect(fastGain).toBeGreaterThan(slowGain * 3)
+
+      // Releasing stops it for good.
+      await up.trigger('pointerup')
+      const settled = state.hue
+      vi.advanceTimersByTime(5000)
+      expect(state.hue).toBe(settled)
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('stops the repeat once the value reaches the limit', async () => {
+    vi.useFakeTimers()
+    try {
+      const { wrapper, state } = await mountLive()
+      const up = wrapper.findAll('.adjust-field')[0].findAll('.adjust-spin-arrow')[0]
+      await up.trigger('pointerdown')
+      vi.advanceTimersByTime(20000) // hold far longer than the range needs
+      expect(state.brightness).toBe(200) // clamped, and the timer stopped there
+      await up.trigger('pointerup')
+    } finally {
+      vi.useRealTimers()
+    }
+  })
+
+  it('a release outside the button still ends the hold', async () => {
+    vi.useFakeTimers()
+    try {
+      const { wrapper, state } = await mountLive()
+      const up = wrapper.findAll('.adjust-field')[3].findAll('.adjust-spin-arrow')[0]
+      await up.trigger('pointerdown')
+      vi.advanceTimersByTime(HOLD_DELAY + 300)
+      expect(state.hue).toBeGreaterThan(1)
+      // Pointer released somewhere else on the page.
+      window.dispatchEvent(new Event('pointerup'))
+      const settled = state.hue
+      vi.advanceTimersByTime(3000)
+      expect(state.hue).toBe(settled)
+    } finally {
+      vi.useRealTimers()
+    }
   })
 
   // wrapper.setValue() fires input AND change; typing only fires input, so the
@@ -155,7 +280,8 @@ describe('AdjustmentsPanel - number spinner', () => {
     const el = input.element as HTMLInputElement
 
     await type(input, '1005')
-    await field.findAll('.adjust-spin-arrow')[0].trigger('click')
+    await field.findAll('.adjust-spin-arrow')[1].trigger('pointerdown')
+    await field.findAll('.adjust-spin-arrow')[1].trigger('pointerup')
     expect(el.value).toBe('100') // model value, not the stale draft
 
     await type(input, '1005')

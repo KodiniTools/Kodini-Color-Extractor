@@ -1,5 +1,5 @@
 <script setup>
-import { reactive } from 'vue'
+import { onUnmounted, reactive } from 'vue'
 import { useI18n } from '../../../composables/useI18n'
 import { displayHex } from '../../../lib/core/colorGenerator'
 
@@ -83,15 +83,70 @@ function onSlide(f, raw) {
   emit('set-adjust', f.key, raw)
 }
 
-/** Spinner arrow: move the value by one step, clamped to the field range. */
-function stepField(f, direction) {
-  if (props.activeLocked) return
+/**
+ * Spinner arrow: move the value by `factor` steps, clamped to the field range.
+ * While accelerating (factor > 1) the result snaps to that coarser grid so the
+ * numbers stay round instead of drifting to arbitrary offsets. Returns false
+ * when the value could not move, which also ends a press-and-hold.
+ */
+function stepField(f, direction, factor = 1) {
+  if (props.activeLocked) return false
   clearDraft(f)
-  const size = f.step || 1
+  const size = (f.step || 1) * factor
   const current = fieldValue(f)
-  const next = clamp(current + direction * size, f.min, f.max)
-  if (next !== current) emit('set-adjust', f.key, next)
+  const target = Math.round((current + direction * size) / size) * size
+  const next = clamp(target, f.min, f.max)
+  if (next === current) return false
+  emit('set-adjust', f.key, next)
+  return true
 }
+
+// Press-and-hold on an arrow: one step on press, then an auto-repeat that
+// starts slow for precise nudging and speeds up the longer the button is
+// held, so the far end of a range is reachable without dozens of clicks.
+const HOLD_DELAY = 400
+const HOLD_PHASES = [
+  { until: 5, interval: 140, factor: 1 },
+  { until: 15, interval: 70, factor: 1 },
+  { until: 30, interval: 40, factor: 1 },
+  { until: Infinity, interval: 40, factor: 5 },
+]
+
+let holdTimer = null
+let holdTicks = 0
+
+/** End a press-and-hold, whatever ended it (release, limit, unmount). */
+function stopHold() {
+  if (holdTimer !== null) {
+    clearTimeout(holdTimer)
+    holdTimer = null
+  }
+  holdTicks = 0
+  window.removeEventListener('pointerup', stopHold)
+  window.removeEventListener('pointercancel', stopHold)
+}
+
+function repeatHold(f, direction) {
+  holdTicks += 1
+  const phase = HOLD_PHASES.find((p) => holdTicks <= p.until)
+  if (!stepField(f, direction, phase.factor)) {
+    stopHold()
+    return
+  }
+  holdTimer = setTimeout(() => repeatHold(f, direction), phase.interval)
+}
+
+function startHold(f, direction) {
+  stopHold()
+  if (!stepField(f, direction)) return
+  // Listen on the window: the pointer is often released off the button, and
+  // the button may even be disabled by then (value arrived at the limit).
+  window.addEventListener('pointerup', stopHold)
+  window.addEventListener('pointercancel', stopHold)
+  holdTimer = setTimeout(() => repeatHold(f, direction), HOLD_DELAY)
+}
+
+onUnmounted(stopHold)
 
 /** Per-field reset — clears any in-progress text along with the value. */
 function onResetField(f) {
@@ -290,7 +345,9 @@ function onSpinCommit(f, el) {
                   :disabled="activeLocked || fieldValue(f) >= f.max"
                   :title="t('genStepUp').replace('{label}', fieldLabel(f))"
                   :aria-label="t('genStepUp').replace('{label}', fieldLabel(f))"
-                  @click="stepField(f, 1)"
+                  @pointerdown.prevent="startHold(f, 1)"
+                  @pointerup="stopHold"
+                  @pointercancel="stopHold"
                 >
                   <svg
                     width="10"
@@ -312,7 +369,9 @@ function onSpinCommit(f, el) {
                   :disabled="activeLocked || fieldValue(f) <= f.min"
                   :title="t('genStepDown').replace('{label}', fieldLabel(f))"
                   :aria-label="t('genStepDown').replace('{label}', fieldLabel(f))"
-                  @click="stepField(f, -1)"
+                  @pointerdown.prevent="startHold(f, -1)"
+                  @pointerup="stopHold"
+                  @pointercancel="stopHold"
                 >
                   <svg
                     width="10"
@@ -783,6 +842,7 @@ function onSpinCommit(f, el) {
 
 .adjust-spin-arrow {
   display: flex;
+  touch-action: none;
   align-items: center;
   justify-content: center;
   width: 20px;
