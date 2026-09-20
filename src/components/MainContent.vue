@@ -228,13 +228,15 @@ onUnmounted(() => {
   flex-direction: column;
   align-items: center;
   width: 100%;
-  max-width: 800px;
+  /* Was a hard 800px, which left ~260px of dead margin on either side on a
+     wide screen. The canvas now grows with the workspace. */
+  max-width: 1000px;
 }
 
 .image-container {
   position: relative;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   /* aspect-ratio is set dynamically via :style binding */
   display: flex;
   align-items: center;
