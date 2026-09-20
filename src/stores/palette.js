@@ -49,7 +49,6 @@ export const usePaletteStore = defineStore('palette', () => {
   const panPosition = ref({ x: 0, y: 0 })
 
   // Vertical center of the image container relative to .app-container top (px)
-  const imageCenterY = ref(0)
 
   const hasColors = computed(() => colors.value.length > 0)
 
@@ -525,7 +524,6 @@ export const usePaletteStore = defineStore('palette', () => {
     imageExportFormat,
     imageExportSize,
     exportSizes,
-    imageCenterY,
     setImage,
     clearImage,
     setColorCount,

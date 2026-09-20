@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import NumberSpinner from './ui/NumberSpinner.vue'
+import PanelSection from './ui/PanelSection.vue'
 
 // Range, step and unit per slider — shared by the range input and the number
 // spinner so the two can never disagree about what a value may be.
@@ -146,228 +147,238 @@ function clearImage() {
       </div>
     </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('zoom') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="zoom" v-bind="RANGES.zoom" :label="t('zoom')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.zoom }"
-            @click="resetSlider('zoom')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+    <PanelSection :title="t('adjustmentsTitle')" first>
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('zoom') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner v-model="zoom" v-bind="RANGES.zoom" :label="t('zoom')" />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.zoom }"
+              @click="resetSlider('zoom')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input v-model.number="zoom" type="range" v-bind="sliderAttrs('zoom')" class="slider" />
       </div>
-      <input v-model.number="zoom" type="range" v-bind="sliderAttrs('zoom')" class="slider" />
-    </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('brightness') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="brightness" v-bind="RANGES.brightness" :label="t('brightness')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.brightness }"
-            @click="resetSlider('brightness')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('brightness') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner
+              v-model="brightness"
+              v-bind="RANGES.brightness"
+              :label="t('brightness')"
+            />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.brightness }"
+              @click="resetSlider('brightness')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input
+          v-model.number="brightness"
+          type="range"
+          v-bind="sliderAttrs('brightness')"
+          class="slider"
+        />
       </div>
-      <input
-        v-model.number="brightness"
-        type="range"
-        v-bind="sliderAttrs('brightness')"
-        class="slider"
-      />
-    </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('contrast') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="contrast" v-bind="RANGES.contrast" :label="t('contrast')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.contrast }"
-            @click="resetSlider('contrast')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('contrast') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner v-model="contrast" v-bind="RANGES.contrast" :label="t('contrast')" />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.contrast }"
+              @click="resetSlider('contrast')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input
+          v-model.number="contrast"
+          type="range"
+          v-bind="sliderAttrs('contrast')"
+          class="slider"
+        />
       </div>
-      <input
-        v-model.number="contrast"
-        type="range"
-        v-bind="sliderAttrs('contrast')"
-        class="slider"
-      />
-    </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('saturation') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="saturation" v-bind="RANGES.saturation" :label="t('saturation')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.saturation }"
-            @click="resetSlider('saturation')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('saturation') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner
+              v-model="saturation"
+              v-bind="RANGES.saturation"
+              :label="t('saturation')"
+            />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.saturation }"
+              @click="resetSlider('saturation')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input
+          v-model.number="saturation"
+          type="range"
+          v-bind="sliderAttrs('saturation')"
+          class="slider"
+        />
       </div>
-      <input
-        v-model.number="saturation"
-        type="range"
-        v-bind="sliderAttrs('saturation')"
-        class="slider"
-      />
-    </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('hue') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="hue" v-bind="RANGES.hue" :label="t('hue')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.hue }"
-            @click="resetSlider('hue')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('hue') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner v-model="hue" v-bind="RANGES.hue" :label="t('hue')" />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.hue }"
+              @click="resetSlider('hue')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input
+          v-model.number="hue"
+          type="range"
+          v-bind="sliderAttrs('hue')"
+          class="slider slider-hue"
+        />
       </div>
-      <input
-        v-model.number="hue"
-        type="range"
-        v-bind="sliderAttrs('hue')"
-        class="slider slider-hue"
-      />
-    </div>
+    </PanelSection>
 
-    <div class="section-divider">{{ t('effectsTitle') }}</div>
-
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('blur') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="blur" v-bind="RANGES.blur" :label="t('blur')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.blur }"
-            @click="resetSlider('blur')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+    <PanelSection :title="t('effectsTitle')">
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('blur') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner v-model="blur" v-bind="RANGES.blur" :label="t('blur')" />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.blur }"
+              @click="resetSlider('blur')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input v-model.number="blur" type="range" v-bind="sliderAttrs('blur')" class="slider" />
       </div>
-      <input v-model.number="blur" type="range" v-bind="sliderAttrs('blur')" class="slider" />
-    </div>
 
-    <div class="slider-group">
-      <div class="slider-header">
-        <label>{{ t('grayscale') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="grayscale" v-bind="RANGES.grayscale" :label="t('grayscale')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.grayscale }"
-            @click="resetSlider('grayscale')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
+      <div class="slider-group">
+        <div class="slider-header">
+          <label>{{ t('grayscale') }}</label>
+          <div class="slider-value-group">
+            <NumberSpinner v-model="grayscale" v-bind="RANGES.grayscale" :label="t('grayscale')" />
+            <button
+              class="reset-btn"
+              :class="{ active: isModified.grayscale }"
+              @click="resetSlider('grayscale')"
+              :title="t('reset')"
             >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
+              <svg
+                width="12"
+                height="12"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+                <path d="M3 3v5h5" />
+              </svg>
+            </button>
+          </div>
         </div>
+        <input
+          v-model.number="grayscale"
+          type="range"
+          v-bind="sliderAttrs('grayscale')"
+          class="slider"
+        />
       </div>
-      <input
-        v-model.number="grayscale"
-        type="range"
-        v-bind="sliderAttrs('grayscale')"
-        class="slider"
-      />
-    </div>
+    </PanelSection>
   </aside>
 </template>
 
@@ -381,19 +392,22 @@ function clearImage() {
   flex-direction: column;
   border-left: 1px solid var(--border-light);
   overflow-y: auto;
-  max-height: calc(100vh - 53px);
+  /* Anchored to the top of the workspace, like the left sidebar. */
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
   align-self: flex-start;
   transition:
     background 0.3s ease,
-    border-color 0.3s ease,
-    margin-top 0.3s ease;
+    border-color 0.3s ease;
 }
 
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 24px;
+  gap: 8px;
+  margin-bottom: 20px;
 }
 
 .header-buttons {
@@ -424,18 +438,6 @@ function clearImage() {
   font-weight: 600;
   color: var(--text-primary);
   margin: 0;
-  transition: color 0.3s ease;
-}
-
-.section-divider {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-tertiary);
-  margin: 8px 0 4px;
-  padding-top: 16px;
-  border-top: 1px solid var(--border-light);
   transition: color 0.3s ease;
 }
 
@@ -476,7 +478,9 @@ function clearImage() {
 }
 
 .slider-group {
-  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .slider-header {
@@ -581,7 +585,11 @@ function clearImage() {
   .edit-panel {
     width: 100%;
     min-width: 100%;
+    /* Stacked layout: a normal block again, not a viewport-height frame. */
+    position: static;
+    height: auto;
     max-height: none;
+    overflow-y: visible;
     border-left: none;
     border-top: 1px solid var(--border-light);
   }
