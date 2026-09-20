@@ -103,6 +103,14 @@ export function formatColor(entry, format, index = 0) {
   }
 }
 
+/**
+ * True when a format's one-line rendering already spells out the HEX value,
+ * so a UI showing that line does not need to repeat the HEX underneath.
+ */
+export function showsHexInline(format) {
+  return !['rgb', 'rgba', 'hsl', 'hsla'].includes(format)
+}
+
 function header(colors) {
   return `Kodini color palette — ${colors.length} colors`
 }

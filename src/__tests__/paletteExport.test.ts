@@ -252,3 +252,21 @@ describe('useColorGenerator - download', () => {
     }
   })
 })
+
+describe('paletteExport - showsHexInline', () => {
+  beforeEach(() => vi.resetModules())
+
+  it('is false only for the notations that hide the hex value', async () => {
+    const { showsHexInline, EXPORT_FORMATS, formatColor } = await mod()
+    const [entry] = await entries(['#49313E'])
+    for (const f of EXPORT_FORMATS) {
+      const line = formatColor(entry, f.key, 0)
+      // The flag has to agree with what the rendered line actually contains.
+      expect(showsHexInline(f.key), `format ${f.key}`).toBe(line.includes('#49313E'))
+    }
+    expect(showsHexInline('rgb')).toBe(false)
+    expect(showsHexInline('hsla')).toBe(false)
+    expect(showsHexInline('css')).toBe(true)
+    expect(showsHexInline('hex')).toBe(true)
+  })
+})

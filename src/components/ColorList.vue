@@ -1,5 +1,6 @@
 <script setup>
 import { ref } from 'vue'
+import { showsHexInline } from '../lib/core/paletteExport'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
@@ -32,8 +33,13 @@ function selectColor(index) {
   store.setSelectedColor(index)
 }
 
+/**
+ * The second line carries the HEX value under notations that do not spell it
+ * out (rgb/hsl). Under HEX itself, or a CSS/SCSS/Tailwind line that already
+ * contains it, it would just repeat what is above.
+ */
 function getSecondaryText(color) {
-  return `rgb(${color.r}, ${color.g}, ${color.b})`
+  return color.hex.toUpperCase()
 }
 
 function showTooltip(event, index) {
@@ -71,7 +77,9 @@ function hideTooltip() {
         <div class="color-swatch" :style="{ backgroundColor: color.hex }"></div>
         <div class="color-info">
           <div class="color-primary">{{ store.getFormatted(color, index) }}</div>
-          <div class="color-secondary">{{ getSecondaryText(color) }}</div>
+          <div v-if="!showsHexInline(store.downloadFormat)" class="color-secondary">
+            {{ getSecondaryText(color) }}
+          </div>
         </div>
         <button class="copy-btn" @click.stop="copyColor(color, index)" :title="t('clickToCopy')">
           <svg
