@@ -510,6 +510,15 @@ function handleDownloadImage() {
   transition: color 0.2s ease;
 }
 
+/* Wide screens: spend some of the empty canvas margin on the panel so the
+   colour cards and settings breathe instead of wrapping. */
+@media (min-width: 1600px) {
+  .sidebar {
+    width: 360px;
+    min-width: 360px;
+  }
+}
+
 @media (max-width: 1200px) {
   .app-container {
     flex-wrap: wrap;
