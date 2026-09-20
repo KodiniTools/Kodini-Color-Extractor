@@ -137,7 +137,7 @@ const {
 }
 
 .gen-cross-link {
-  max-width: 720px;
+  max-width: 1200px;
   width: 100%;
   margin: -16px auto 0;
   padding: 0 24px 40px;
