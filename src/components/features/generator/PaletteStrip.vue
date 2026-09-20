@@ -1,13 +1,26 @@
 <script setup>
+import { computed } from 'vue'
 import { useI18n } from '../../../composables/useI18n'
-import { displayHex, displayLight } from '../../../lib/core/colorGenerator'
+import { displayHex, displayLight, displayRgb } from '../../../lib/core/colorGenerator'
+import { formatColor, paletteEntry } from '../../../lib/core/paletteExport'
 
 const { t } = useI18n()
 
-defineProps({
+const props = defineProps({
   palette: { type: Array, required: true },
   isSelected: { type: Function, required: true },
+  /** Export format the labels are written in, so the strip shows what you get. */
+  format: { type: String, default: 'hex' },
 })
+
+/** The swatch label in the selected notation (HEX for formats without one). */
+function swatchLabel(color, index) {
+  const rgb = displayRgb(color)
+  return formatColor(paletteEntry(displayHex(color), rgb), props.format, index)
+}
+
+// Code-shaped formats produce a much longer label than a bare HEX value.
+const longLabel = computed(() => ['css', 'scss', 'tailwind'].includes(props.format))
 
 const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 </script>
@@ -60,8 +73,13 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
         </button>
       </div>
 
-      <button class="swatch-hex" :title="t('genClickCopy')" @click.stop="emit('copy', color)">
-        {{ displayHex(color) }}
+      <button
+        class="swatch-hex"
+        :class="{ 'swatch-hex--long': longLabel }"
+        :title="t('genClickCopy')"
+        @click.stop="emit('copy', color)"
+      >
+        {{ swatchLabel(color, index) }}
       </button>
     </div>
   </main>
@@ -155,6 +173,8 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 }
 
 .swatch-hex {
+  max-width: 100%;
+  overflow-wrap: anywhere;
   border: none;
   background: transparent;
   color: inherit;
@@ -166,6 +186,13 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
   padding: 8px 12px;
   border-radius: 8px;
   transition: background 0.2s ease;
+}
+
+/* CSS/SCSS/Tailwind labels are several times longer than a HEX value and
+   have to stay inside a swatch that is only a fraction of the strip. */
+.swatch-hex--long {
+  font-size: clamp(11px, 0.85vw, 13px);
+  letter-spacing: 0.02em;
 }
 
 .swatch-hex:hover {

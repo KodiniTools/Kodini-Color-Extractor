@@ -3,6 +3,7 @@ import { useI18n } from '../composables/useI18n'
 import { useColorGenerator } from '../composables/useColorGenerator'
 import ToastContainer from '../components/ToastContainer.vue'
 import ToolCrossLink from '../components/ToolCrossLink.vue'
+import LandingNav from '../components/LandingNav.vue'
 import PanelSection from '../components/ui/PanelSection.vue'
 import AdjustmentsPanel from '../components/features/generator/AdjustmentsPanel.vue'
 import PaletteStrip from '../components/features/generator/PaletteStrip.vue'
@@ -58,36 +59,12 @@ function onModeChange(event) {
 
 <template>
   <div class="app-page">
-    <header class="app-header">
-      <div class="header-left">
-        <router-link to="/" class="back-link">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>{{ t('navHome') }}</span>
-        </router-link>
-      </div>
-      <div class="header-center">
-        <h1 class="header-title">{{ t('genTitle') }}</h1>
-      </div>
-      <div class="header-right">
-        <router-link to="/app" class="header-link">{{ t('navApp') }}</router-link>
-        <router-link to="/faq" class="header-link">{{ t('navFaq') }}</router-link>
-      </div>
-    </header>
+    <LandingNav />
 
     <div class="app-container">
       <aside class="sidebar">
         <div class="panel-header">
-          <h2 class="panel-title">{{ t('genPanelTitle') }}</h2>
+          <h1 class="panel-title">{{ t('genTitle') }}</h1>
         </div>
 
         <PanelSection :title="t('genSectionCreate')" first>
@@ -185,6 +162,7 @@ function onModeChange(event) {
       <main class="workspace-main">
         <PaletteStrip
           :palette="palette"
+          :format="exportFormat"
           :is-selected="isSelected"
           @select="selectScope"
           @toggle-lock="toggleLock"

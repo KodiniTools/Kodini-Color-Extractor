@@ -17,6 +17,7 @@ import {
   DEFAULT_EXPORT_FORMAT,
   EXPORT_FORMATS,
   buildPaletteExport,
+  formatColor,
   paletteEntry,
 } from '../lib/core/paletteExport'
 
@@ -314,11 +315,17 @@ export function useColorGenerator() {
     return a.brightness !== 100 || a.contrast !== 100 || a.saturation !== 100 || a.hue !== 0
   })
 
+  // Copies exactly what the swatch shows: the color in the selected format.
   async function copyColor(color) {
-    const hex = displayHex(color)
+    const index = palette.value.indexOf(color)
+    const value = formatColor(
+      paletteEntry(displayHex(color), displayRgb(color)),
+      exportFormatKey.value,
+      index < 0 ? 0 : index
+    )
     try {
-      await navigator.clipboard.writeText(hex)
-      toast.success(t('genCopied').replace('{hex}', hex))
+      await navigator.clipboard.writeText(value)
+      toast.success(t('genCopied').replace('{hex}', value))
     } catch {
       toast.error(t('clipboardError'))
     }
