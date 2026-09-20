@@ -68,15 +68,15 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 </template>
 
 <style scoped>
-/* Palette strip — aligned to the same content width as the adjustments panel
-   and rendered as a tidy, rounded card so it never outgrows its container. */
+/* Fills the middle of the workspace the way the extractor's canvas does. */
 .palette-strip {
-  max-width: 1200px;
   width: 100%;
-  margin: 0 auto 40px;
+  max-width: 1000px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
   min-height: 340px;
+  height: 100%;
   gap: 0;
   border: 1px solid var(--border-light);
   border-radius: 12px;
@@ -178,8 +178,11 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
     grid-template-columns: 1fr;
     grid-auto-rows: minmax(74px, 1fr);
     min-height: 0;
-    margin: 0 16px 24px;
-    width: auto;
+    /* The workspace column supplies the gutter now; `width: auto` inside its
+       centred flex box collapsed the strip to its content width. */
+    width: 100%;
+    height: auto;
+    margin: 0;
   }
 
   .swatch {
