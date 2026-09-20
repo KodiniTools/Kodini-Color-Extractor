@@ -2,6 +2,7 @@
 import { useI18n } from '../../../composables/useI18n'
 import { displayHex } from '../../../lib/core/colorGenerator'
 import NumberSpinner from '../../ui/NumberSpinner.vue'
+import PanelSection from '../../ui/PanelSection.vue'
 
 const { t } = useI18n()
 
@@ -55,41 +56,7 @@ function isFieldModified(f) {
   <!-- Filter adjustments: edit a single color or all of them together -->
   <section class="gen-adjust">
     <div class="adjust-bar">
-      <div class="adjust-scope">
-        <span class="adjust-title">{{ t('genAdjustments') }}</span>
-        <div class="scope-tabs" role="group" :aria-label="t('genAdjustScope')">
-          <button
-            class="scope-tab"
-            :class="{
-              'scope-tab--active': scope === 'all',
-              'scope-tab--muted': anyLocked,
-            }"
-            :title="anyLocked ? t('genUnlockAllHint') : null"
-            @click="emit('all-scope')"
-          >
-            {{ t('genScopeAll') }}
-          </button>
-          <button
-            v-for="(color, index) in palette"
-            :key="index"
-            class="scope-dot"
-            :class="{
-              'scope-dot--active': isSelected(index),
-              'scope-dot--locked': color.locked,
-            }"
-            :style="{ background: displayHex(color) }"
-            :disabled="color.locked"
-            :title="
-              color.locked ? t('genLockedHint') : t('genScopeColor').replace('{n}', index + 1)
-            "
-            :aria-label="t('genScopeColor').replace('{n}', index + 1)"
-            @click="emit('select-scope', index)"
-          ></button>
-        </div>
-        <span v-if="selectedCount > 0" class="scope-count" aria-live="polite">
-          {{ t('genSelectedCount').replace('{n}', selectedCount) }}
-        </span>
-      </div>
+      <span class="adjust-title">{{ t('genAdjustments') }}</span>
       <div class="adjust-tools">
         <button
           class="adjust-icon-btn"
@@ -145,47 +112,88 @@ function isFieldModified(f) {
 
     <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
 
-    <!-- Colour picker (native input includes the browser's eyedropper).
+    <PanelSection :title="t('genSectionPick')" first>
+      <div class="adjust-scope">
+        <div class="scope-tabs" role="group" :aria-label="t('genAdjustScope')">
+          <button
+            class="scope-tab"
+            :class="{
+              'scope-tab--active': scope === 'all',
+              'scope-tab--muted': anyLocked,
+            }"
+            :title="anyLocked ? t('genUnlockAllHint') : null"
+            @click="emit('all-scope')"
+          >
+            {{ t('genScopeAll') }}
+          </button>
+          <button
+            v-for="(color, index) in palette"
+            :key="index"
+            class="scope-dot"
+            :class="{
+              'scope-dot--active': isSelected(index),
+              'scope-dot--locked': color.locked,
+            }"
+            :style="{ background: displayHex(color) }"
+            :disabled="color.locked"
+            :title="
+              color.locked ? t('genLockedHint') : t('genScopeColor').replace('{n}', index + 1)
+            "
+            :aria-label="t('genScopeColor').replace('{n}', index + 1)"
+            @click="emit('select-scope', index)"
+          ></button>
+        </div>
+        <span v-if="selectedCount > 0" class="scope-count" aria-live="polite">
+          {{ t('genSelectedCount').replace('{n}', selectedCount) }}
+        </span>
+      </div>
+
+      <!-- Colour picker (native input includes the browser's eyedropper).
          Always visible; enabled once a single colour field is selected
          (disabled with a hint in "all" mode). -->
-    <div class="adjust-picker">
-      <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
-      <label
-        class="color-well"
-        :class="{ 'color-well--disabled': !canPick }"
-        :style="canPick ? { background: pickerHex } : null"
-        :title="canPick ? t('genPickColor') : t('genPickHint')"
-      >
-        <input
-          type="color"
-          :value="canPick ? pickerHex : '#000000'"
-          :disabled="!canPick"
-          @input="emit('pick', $event.target.value)"
-        />
-      </label>
-      <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
-      <span v-if="selectedCount > 1" class="adjust-picker-hint">{{ t('genMultiHint') }}</span>
-      <span v-else-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
-
-      <!-- Selection actions: copy just the chosen colors, or clear the selection.
-           Only shown while at least one color is selected. -->
-      <div v-if="scope !== 'all'" class="adjust-actions">
-        <button
-          class="adjust-action-btn adjust-action-btn--primary"
-          :title="t('genCopySelected')"
-          @click="emit('copy-selected')"
+      <div class="adjust-picker">
+        <span class="adjust-picker-label">{{ t('genPickColor') }}</span>
+        <label
+          class="color-well"
+          :class="{ 'color-well--disabled': !canPick }"
+          :style="canPick ? { background: pickerHex } : null"
+          :title="canPick ? t('genPickColor') : t('genPickHint')"
         >
-          {{ t('genCopySelected') }} ({{ selectedCount }})
-        </button>
-        <button class="adjust-action-btn" :title="t('genClearScope')" @click="emit('clear-scope')">
-          {{ t('genClearScope') }}
-        </button>
-      </div>
-    </div>
+          <input
+            type="color"
+            :value="canPick ? pickerHex : '#000000'"
+            :disabled="!canPick"
+            @input="emit('pick', $event.target.value)"
+          />
+        </label>
+        <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>
+        <span v-if="selectedCount > 1" class="adjust-picker-hint">{{ t('genMultiHint') }}</span>
+        <span v-else-if="!canPick" class="adjust-picker-hint">{{ t('genPickHint') }}</span>
 
-    <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
-      <div v-for="f in adjustFields" :key="f.key" class="adjust-field">
-        <div class="adjust-field-head">
+        <!-- Selection actions: copy just the chosen colors, or clear the selection.
+           Only shown while at least one color is selected. -->
+        <div v-if="scope !== 'all'" class="adjust-actions">
+          <button
+            class="adjust-action-btn adjust-action-btn--primary"
+            :title="t('genCopySelected')"
+            @click="emit('copy-selected')"
+          >
+            {{ t('genCopySelected') }} ({{ selectedCount }})
+          </button>
+          <button
+            class="adjust-action-btn"
+            :title="t('genClearScope')"
+            @click="emit('clear-scope')"
+          >
+            {{ t('genClearScope') }}
+          </button>
+        </div>
+      </div>
+    </PanelSection>
+
+    <PanelSection :title="t('genSectionFilters')">
+      <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
+        <div v-for="f in adjustFields" :key="f.key" class="adjust-field">
           <label class="adjust-field-label" :for="`adjust-slider-${f.key}`">
             {{ fieldLabel(f) }}
           </label>
@@ -228,28 +236,28 @@ function isFieldModified(f) {
               </svg>
             </button>
           </div>
-        </div>
 
-        <input
-          :id="`adjust-slider-${f.key}`"
-          class="adjust-slider"
-          type="range"
-          :min="f.min"
-          :max="f.max"
-          :step="f.step || 1"
-          :value="fieldValue(f)"
-          :disabled="activeLocked"
-          @input="emit('set-adjust', f.key, $event.target.value)"
-        />
+          <input
+            :id="`adjust-slider-${f.key}`"
+            class="adjust-slider"
+            type="range"
+            :min="f.min"
+            :max="f.max"
+            :step="f.step || 1"
+            :value="fieldValue(f)"
+            :disabled="activeLocked"
+            @input="emit('set-adjust', f.key, $event.target.value)"
+          />
+        </div>
       </div>
-    </div>
+    </PanelSection>
   </section>
 </template>
 
 <style scoped>
 /* Adjustments panel — a compact, centered control card */
 .gen-adjust {
-  max-width: 720px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto 20px;
   padding: 14px 18px;
@@ -459,9 +467,6 @@ function isFieldModified(f) {
   gap: 10px;
   flex-wrap: wrap;
   min-height: 34px;
-  margin-bottom: 14px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid var(--border-light);
 }
 
 .adjust-picker-label {
@@ -565,21 +570,21 @@ function isFieldModified(f) {
   color: var(--btn-primary-text);
 }
 
+/* One control = label, slider, tools. A grid so the same markup is a two-row
+   block in a narrow card and a single row once there is width for it. */
 .adjust-field {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.adjust-field-head {
-  display: flex;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas:
+    'label tools'
+    'slider slider';
   align-items: center;
-  justify-content: space-between;
-  gap: 8px;
+  gap: 6px 10px;
   min-height: 30px;
 }
 
 .adjust-field-label {
+  grid-area: label;
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
@@ -587,6 +592,7 @@ function isFieldModified(f) {
 }
 
 .adjust-field-tools {
+  grid-area: tools;
   display: flex;
   align-items: center;
   gap: 4px;
@@ -624,7 +630,9 @@ function isFieldModified(f) {
 }
 
 .adjust-slider {
+  grid-area: slider;
   width: 100%;
+  min-width: 0;
   height: 6px;
   -webkit-appearance: none;
   appearance: none;
@@ -661,6 +669,21 @@ function isFieldModified(f) {
 
 .adjust-slider:disabled {
   cursor: not-allowed;
+}
+
+/* Wide screens: each control fits on one line, so the four filters sit in a
+   single row instead of a 2x2 block of stacked pairs. */
+@media (min-width: 1100px) {
+  .adjust-sliders {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 18px 40px;
+  }
+
+  .adjust-field {
+    grid-template-columns: 92px 1fr auto;
+    grid-template-areas: 'label slider tools';
+    gap: 10px;
+  }
 }
 
 @media (max-width: 700px) {

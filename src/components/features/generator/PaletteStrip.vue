@@ -71,7 +71,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 /* Palette strip — aligned to the same content width as the adjustments panel
    and rendered as a tidy, rounded card so it never outgrows its container. */
 .palette-strip {
-  max-width: 720px;
+  max-width: 1200px;
   width: 100%;
   margin: 0 auto 40px;
   display: grid;
