@@ -149,36 +149,136 @@ export function displayLight(color) {
 // Each returns an array of {h,s,l} of the requested length, derived from a
 // random base hue. Locked colors are re-applied by the caller afterwards.
 
-export const harmonyModes = ['random', 'monochromatic', 'analogous', 'complementary', 'triadic']
+// ─── Harmonies and style presets ───
+// The first group is classic colour-wheel theory, the second is a set of
+// ready-made looks a web designer can drop into a site. Presets still
+// randomise inside their style, so "Generate" keeps producing new palettes.
+export const harmonyModes = [
+  'random',
+  'monochromatic',
+  'analogous',
+  'complementary',
+  'triadic',
+  'pastel',
+  'neon',
+  'earthy',
+  'sunset',
+  'darkui',
+]
 
-export function harmonyColors(mode, count) {
-  const base = randInt(0, 359)
-  const out = []
+/** Dropdown grouping: colour theory first, then the style presets. */
+export const harmonyGroups = [
+  { labelKey: 'genHarmonyTheory', modes: harmonyModes.slice(0, 5) },
+  { labelKey: 'genHarmonyPresets', modes: harmonyModes.slice(5) },
+]
 
-  const push = (h, s, l) => out.push({ h: ((h % 360) + 360) % 360, s, l })
-
-  if (mode === 'monochromatic') {
+// Each builder receives the random base hue, the wanted count and a `push`
+// that normalizes the hue and stores one colour.
+const HARMONY_BUILDERS = {
+  monochromatic(base, count, push) {
     const s = randInt(45, 75)
     for (let i = 0; i < count; i++) {
       const l = Math.round(24 + (60 * i) / Math.max(1, count - 1))
       push(base + randInt(-6, 6), s, l)
     }
-  } else if (mode === 'analogous') {
+  },
+
+  analogous(base, count, push) {
     const step = 28
     const start = base - (step * (count - 1)) / 2
     for (let i = 0; i < count; i++) {
       push(start + step * i, randInt(55, 80), randInt(45, 68))
     }
-  } else if (mode === 'complementary') {
+  },
+
+  complementary(base, count, push) {
     for (let i = 0; i < count; i++) {
       const h = i % 2 === 0 ? base : base + 180
       push(h + randInt(-10, 10), randInt(50, 80), randInt(40, 70))
     }
-  } else if (mode === 'triadic') {
+  },
+
+  triadic(base, count, push) {
     const wheel = [base, base + 120, base + 240]
     for (let i = 0; i < count; i++) {
       push(wheel[i % 3] + randInt(-8, 8), randInt(55, 80), randInt(42, 68))
     }
+  },
+
+  // Soft, airy tints — the look behind most "soft UI" and onboarding pages.
+  pastel(base, count, push) {
+    const step = 360 / Math.max(1, count)
+    for (let i = 0; i < count; i++) {
+      push(base + step * i + randInt(-10, 10), randInt(38, 62), randInt(82, 90))
+    }
+  },
+
+  // Vivid, electric hues. Muddy oranges and browns are skipped on purpose —
+  // they never read as neon.
+  neon(base, count, push) {
+    const vivid = [180, 195, 165, 280, 300, 320, 90, 135]
+    const offset = randInt(0, vivid.length - 1)
+    for (let i = 0; i < count; i++) {
+      push(
+        vivid[(offset + i * 3) % vivid.length] + randInt(-8, 8),
+        randInt(88, 100),
+        randInt(52, 64)
+      )
+    }
+  },
+
+  // Muted naturals: terracotta, ochre, clay, olive, sand.
+  earthy(base, count, push) {
+    const warm = [18, 28, 38, 45, 70, 85]
+    const offset = randInt(0, warm.length - 1)
+    for (let i = 0; i < count; i++) {
+      push(warm[(offset + i * 2) % warm.length] + randInt(-6, 6), randInt(24, 52), randInt(34, 72))
+    }
+  },
+
+  // A warm dusk ramp, violet through red and orange into gold — the usual
+  // hero-gradient palette.
+  sunset(base, count, push) {
+    const from = 282
+    const span = 123 // ends around 45deg (gold) after wrapping past 360
+    for (let i = 0; i < count; i++) {
+      const t = count === 1 ? 0 : i / (count - 1)
+      push(from + span * t + randInt(-5, 5), randInt(68, 92), Math.round(48 + 18 * t))
+    }
+  },
+
+  // A dark interface ramp: near-black surfaces on one hue, then bright
+  // accents for buttons and links.
+  darkui(base, count, push) {
+    const accents = count <= 3 ? 1 : 2
+    const surfaces = Math.max(1, count - accents)
+    for (let i = 0; i < surfaces; i++) {
+      const l = Math.round(10 + (18 * i) / Math.max(1, surfaces - 1))
+      push(base + randInt(-4, 4), randInt(8, 20), l)
+    }
+    // One accent hue, and a related second tone rather than a competing one —
+    // two unrelated bright colours on dark surfaces read as a clash.
+    const accentHue = base + 150 + randInt(-20, 20)
+    for (let i = 0; i < count - surfaces; i++) {
+      push(accentHue + i * randInt(18, 28), randInt(70, 92), 58 + i * 8)
+    }
+  },
+}
+
+export function harmonyColors(mode, count) {
+  const base = randInt(0, 359)
+  const out = []
+
+  const push = (h, s, l) =>
+    out.push({
+      h: ((h % 360) + 360) % 360,
+      s: Math.max(0, Math.min(100, Math.round(s))),
+      l: Math.max(0, Math.min(100, Math.round(l))),
+    })
+
+  const build = HARMONY_BUILDERS[mode]
+  if (build) {
+    build(base, count, push)
   } else {
     // 'random' — pleasant but unconstrained
     for (let i = 0; i < count; i++) {
