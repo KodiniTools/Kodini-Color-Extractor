@@ -119,6 +119,10 @@ select {
   #app {
     padding-top: 50px;
   }
+
+  .app-container {
+    --workspace-top: 50px;
+  }
 }
 
 /* ─── Workspace shell ───────────────────────────────────────────────────────
@@ -209,6 +213,10 @@ select {
 .app-container {
   display: flex;
   flex: 1;
+  /* Sticky panels have to clear the site's fixed global navigation, which is
+     the same space #app reserves above the app. Sticking any higher puts them
+     behind that bar once the page scrolls. */
+  --workspace-top: 60px;
 }
 
 .sidebar {
@@ -223,8 +231,8 @@ select {
   /* Anchored to the top of the workspace: the panel is a fixed frame around
      the canvas, not something that drifts with the image's height. */
   position: sticky;
-  top: 53px;
-  height: calc(100vh - 53px);
+  top: var(--workspace-top, 53px);
+  height: calc(100vh - var(--workspace-top, 53px));
   align-self: flex-start;
   transition:
     background 0.3s ease,

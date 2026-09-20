@@ -372,8 +372,8 @@ function clearImage() {
   overflow-y: auto;
   /* Anchored to the top of the workspace, like the left sidebar. */
   position: sticky;
-  top: 53px;
-  height: calc(100vh - 53px);
+  top: var(--workspace-top, 53px);
+  height: calc(100vh - var(--workspace-top, 53px));
   align-self: flex-start;
   transition:
     background 0.3s ease,
