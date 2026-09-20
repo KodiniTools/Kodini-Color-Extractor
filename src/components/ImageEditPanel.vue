@@ -380,14 +380,6 @@ function clearImage() {
     border-color 0.3s ease;
 }
 
-.panel-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 20px;
-}
-
 .header-buttons {
   display: flex;
   gap: 6px;
@@ -409,14 +401,6 @@ function clearImage() {
 .preview-btn:hover {
   background: var(--accent-bg);
   color: var(--btn-primary-text);
-}
-
-.panel-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-  transition: color 0.3s ease;
 }
 
 .reset-all-btn {

@@ -54,9 +54,9 @@ function isFieldModified(f) {
 
 <template>
   <!-- Filter adjustments: edit a single color or all of them together -->
-  <section class="gen-adjust">
-    <div class="adjust-bar">
-      <span class="adjust-title">{{ t('genAdjustments') }}</span>
+  <aside class="gen-adjust">
+    <div class="panel-header">
+      <h2 class="panel-title">{{ t('genAdjustments') }}</h2>
       <div class="adjust-tools">
         <button
           class="adjust-icon-btn"
@@ -251,30 +251,28 @@ function isFieldModified(f) {
         </div>
       </div>
     </PanelSection>
-  </section>
+  </aside>
 </template>
 
 <style scoped>
 /* Adjustments panel — a compact, centered control card */
+/* Right-hand panel of the workspace, matching the extractor's image panel. */
 .gen-adjust {
-  max-width: 1200px;
-  width: 100%;
-  margin: 0 auto 20px;
-  padding: 14px 18px;
-  border: 1px solid var(--border-light);
-  border-radius: 12px;
-  background: var(--bg-secondary);
-  box-shadow: 0 6px 24px var(--shadow-soft);
-  transition: all 0.3s ease;
-}
-
-.adjust-bar {
+  width: 320px;
+  min-width: 320px;
+  background: var(--bg-sidebar);
+  padding: 20px;
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-  margin-bottom: 14px;
+  flex-direction: column;
+  border-left: 1px solid var(--border-light);
+  overflow-y: auto;
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
+  align-self: flex-start;
+  transition:
+    background 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .adjust-scope {
@@ -282,12 +280,6 @@ function isFieldModified(f) {
   align-items: center;
   gap: 12px;
   flex-wrap: wrap;
-}
-
-.adjust-title {
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text-primary);
 }
 
 .scope-tabs {
@@ -445,8 +437,8 @@ function isFieldModified(f) {
 
 .adjust-sliders {
   display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px 22px;
+  grid-template-columns: 1fr;
+  gap: 14px;
 }
 
 .adjust-sliders--disabled {
@@ -673,10 +665,10 @@ function isFieldModified(f) {
 
 /* Wide screens: each control fits on one line, so the four filters sit in a
    single row instead of a 2x2 block of stacked pairs. */
-@media (min-width: 1100px) {
-  .adjust-sliders {
-    grid-template-columns: repeat(2, 1fr);
-    gap: 18px 40px;
+@media (min-width: 1600px) {
+  .gen-adjust {
+    width: 400px;
+    min-width: 400px;
   }
 
   .adjust-field {
@@ -686,17 +678,24 @@ function isFieldModified(f) {
   }
 }
 
+/* Stacked layout: a normal full-width block again, not a viewport-height
+   frame pinned to the side of the workspace. */
+@media (max-width: 1200px) {
+  .gen-adjust {
+    width: 100%;
+    min-width: 100%;
+    position: static;
+    height: auto;
+    max-height: none;
+    overflow-y: visible;
+    border-left: none;
+    border-top: 1px solid var(--border-light);
+  }
+}
+
 @media (max-width: 700px) {
   .gen-adjust {
-    margin: 0 16px 16px;
-    width: auto;
-    padding: 14px 16px;
-  }
-
-  /* One column on phones: the label + spinner + reset row needs the width. */
-  .adjust-sliders {
-    grid-template-columns: 1fr;
-    gap: 14px;
+    padding: 16px;
   }
 }
 </style>
