@@ -5,6 +5,7 @@ import { useI18n } from '../composables/useI18n'
 import { useKeyboard } from '../composables/useKeyboard'
 import { useToast } from '../composables/useToast'
 import ColorList from '../components/ColorList.vue'
+import LandingNav from '../components/LandingNav.vue'
 import PanelSection from '../components/ui/PanelSection.vue'
 import ImageUploader from '../components/ImageUploader.vue'
 import MainContent from '../components/MainContent.vue'
@@ -69,36 +70,12 @@ function handleDownloadImage() {
 <template>
   <div class="app-page">
     <!-- App Header Navigation -->
-    <header class="app-header">
-      <div class="header-left">
-        <router-link to="/" class="back-link">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>{{ t('navHome') }}</span>
-        </router-link>
-      </div>
-      <div class="header-center">
-        <h1 class="header-title">{{ t('title') }}</h1>
-      </div>
-      <div class="header-right">
-        <router-link to="/generator" class="header-link">{{ t('navGenerator') }}</router-link>
-        <router-link to="/faq" class="header-link">{{ t('navFaq') }}</router-link>
-      </div>
-    </header>
+    <LandingNav />
 
     <div class="app-container">
       <aside class="sidebar">
         <div class="panel-header">
-          <h2 class="panel-title">{{ t('extractorPanelTitle') }}</h2>
+          <h1 class="panel-title">{{ t('extractorPanelTitle') }}</h1>
         </div>
 
         <PanelSection :title="t('sectionImage')" first>

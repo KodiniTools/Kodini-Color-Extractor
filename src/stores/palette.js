@@ -6,6 +6,7 @@ import {
   downloadPaletteFile,
   exportFormat as findExportFormat,
   formatColor,
+  showsHexInline,
   paletteEntry,
 } from '../lib/core/paletteExport'
 
@@ -463,10 +464,8 @@ export const usePaletteStore = defineStore('palette', () => {
       pCtx.textAlign = 'center'
       pCtx.fillText(getFormatted(c, i), x + swatchSize / 2, y + swatchSize + Math.round(20 * scale))
 
-      // Second line repeats the plain HEX under a richer notation. Formats
-      // that already render as plain HEX (hex itself, and the ones with no
-      // one-line form) would just print it twice.
-      if (f !== 'hex' && findExportFormat(f)?.perColor) {
+      // Second line carries the HEX under notations that do not spell it out.
+      if (!showsHexInline(f)) {
         pCtx.fillStyle = '#718096'
         pCtx.font = `500 ${subFontSize}px -apple-system, BlinkMacSystemFont, sans-serif`
         pCtx.fillText(
