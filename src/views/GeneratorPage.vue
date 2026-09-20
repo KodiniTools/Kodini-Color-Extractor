@@ -13,7 +13,7 @@ const { t } = useI18n()
 // All generator state and behaviour lives in the composable; this view only
 // wires the sub-components together.
 const {
-  harmonyModes,
+  harmonyGroups,
   ADJUST_FIELDS,
   mode,
   count,
@@ -79,9 +79,11 @@ function onModeChange(event) {
           <div class="field-row">
             <label for="gen-harmony">{{ t('genHarmony') }}</label>
             <select id="gen-harmony" :value="mode" class="field-select" @change="onModeChange">
-              <option v-for="m in harmonyModes" :key="m" :value="m">
-                {{ t('genMode_' + m) }}
-              </option>
+              <optgroup v-for="g in harmonyGroups" :key="g.labelKey" :label="t(g.labelKey)">
+                <option v-for="m in g.modes" :key="m" :value="m">
+                  {{ t('genMode_' + m) }}
+                </option>
+              </optgroup>
             </select>
           </div>
 

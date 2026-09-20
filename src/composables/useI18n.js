@@ -153,6 +153,13 @@ const translations = {
     genMode_analogous: 'Analogous',
     genMode_complementary: 'Complementary',
     genMode_triadic: 'Triadic',
+    genMode_pastel: 'Pastel',
+    genMode_neon: 'Neon',
+    genMode_earthy: 'Earthy',
+    genMode_sunset: 'Sunset',
+    genMode_darkui: 'Dark UI',
+    genHarmonyTheory: 'Colour theory',
+    genHarmonyPresets: 'Style presets',
 
     // Landing Page - Features
     feature1Title: 'Drag & Drop Upload',
@@ -413,6 +420,13 @@ const translations = {
     genMode_analogous: 'Analog',
     genMode_complementary: 'Komplementär',
     genMode_triadic: 'Triadisch',
+    genMode_pastel: 'Pastell',
+    genMode_neon: 'Neon',
+    genMode_earthy: 'Erdtöne',
+    genMode_sunset: 'Sonnenuntergang',
+    genMode_darkui: 'Dark UI',
+    genHarmonyTheory: 'Farbtheorie',
+    genHarmonyPresets: 'Stil-Vorlagen',
 
     // Landing Page - Features
     feature1Title: 'Drag & Drop Upload',

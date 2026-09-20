@@ -5,6 +5,7 @@ import {
   ADJUST_FIELDS,
   clampAdjust,
   harmonyModes,
+  harmonyGroups,
   harmonyColors,
   makeColor,
   neutralAdjust,
@@ -440,6 +441,7 @@ export function useColorGenerator() {
   return {
     // constants
     harmonyModes,
+    harmonyGroups,
     ADJUST_FIELDS,
     // state
     mode,
