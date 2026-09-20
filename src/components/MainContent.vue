@@ -38,13 +38,6 @@ function updateRects() {
   if (displayImage.value && imageContainer.value) {
     imageRect.value = displayImage.value.getBoundingClientRect()
     containerRect.value = imageContainer.value.getBoundingClientRect()
-
-    const appCont = imageContainer.value.closest('.app-container')
-    if (appCont) {
-      const appRect = appCont.getBoundingClientRect()
-      const icRect = imageContainer.value.getBoundingClientRect()
-      store.imageCenterY = icRect.top - appRect.top + icRect.height / 2
-    }
   }
 }
 

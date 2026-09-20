@@ -1,10 +1,11 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useKeyboard } from '../composables/useKeyboard'
 import { useToast } from '../composables/useToast'
 import ColorList from '../components/ColorList.vue'
+import PanelSection from '../components/ui/PanelSection.vue'
 import ImageUploader from '../components/ImageUploader.vue'
 import MainContent from '../components/MainContent.vue'
 import ImageEditPanel from '../components/ImageEditPanel.vue'
@@ -21,20 +22,6 @@ useKeyboard()
 
 // Preview modal state
 const showPreviewModal = ref(false)
-
-// Align edit panel's vertical center to the image's vertical center
-const editPanelEl = ref(null)
-const editPanelMarginTop = ref(0)
-
-function alignEditPanel() {
-  if (!editPanelEl.value || !store.imageCenterY) return
-  const panelHeight = editPanelEl.value.$el?.offsetHeight ?? editPanelEl.value.offsetHeight ?? 0
-  editPanelMarginTop.value = Math.max(0, store.imageCenterY - panelHeight / 2)
-}
-
-watch(() => store.imageCenterY, alignEditPanel)
-onMounted(() => window.addEventListener('resize', alignEditPanel))
-onUnmounted(() => window.removeEventListener('resize', alignEditPanel))
 
 const count = computed({
   get: () => store.colorCount,
@@ -109,95 +96,63 @@ function handleDownloadImage() {
     </header>
 
     <div class="app-container">
-      <aside
-        class="sidebar"
-        :style="store.currentImage ? { marginTop: editPanelMarginTop + 'px' } : {}"
-      >
-        <div class="sidebar-header">
-          <p class="subtitle">{{ t('subtitle') }}</p>
+      <aside class="sidebar">
+        <div class="panel-header">
+          <h2 class="panel-title">{{ t('extractorPanelTitle') }}</h2>
         </div>
 
-        <ImageUploader />
+        <PanelSection :title="t('sectionImage')" first>
+          <p class="sidebar-hint">{{ t('subtitle') }}</p>
+          <ImageUploader />
+        </PanelSection>
 
-        <div class="controls">
-          <div class="control-group">
-            <label>{{ t('colorCountLabel') }}</label>
-            <select v-model.number="count">
+        <PanelSection :title="t('sectionSettings')">
+          <div class="field-row">
+            <label for="app-color-count">{{ t('colorCountLabel') }}</label>
+            <select id="app-color-count" v-model.number="count" class="field-select">
               <option v-for="n in 20" :key="n" :value="n">{{ n }}</option>
             </select>
           </div>
 
-          <div class="control-group">
-            <label>{{ t('formatLabel') }}</label>
-            <select v-model="format" class="format-select">
+          <div class="field-row">
+            <label for="app-format">{{ t('formatLabel') }}</label>
+            <select id="app-format" v-model="format" class="field-select format-select">
               <option v-for="f in store.EXPORT_FORMATS" :key="f.key" :value="f.key">
                 {{ t(f.labelKey) }}
               </option>
             </select>
           </div>
-        </div>
+        </PanelSection>
 
-        <div class="palette-section">
-          <h2 class="palette-title">{{ t('paletteTitle') }}</h2>
+        <PanelSection :title="t('paletteTitle')">
           <ColorList />
-        </div>
+        </PanelSection>
 
-        <div v-if="store.hasColors" class="export-section">
-          <div class="export-header">
-            <h3 class="export-title">{{ t('exportTitle') }}</h3>
-            <div class="export-format-selects">
-              <select v-model="imageFormat" class="export-select" :title="t('imageFormatLabel')">
-                <option value="png">PNG</option>
-                <option value="jpeg">JPG</option>
-                <option value="webp">WebP</option>
-              </select>
-              <select v-model="imageSize" class="export-select" :title="t('imageSizeLabel')">
-                <option value="small">400px</option>
-                <option value="medium">800px</option>
-                <option value="large">1200px</option>
-                <option value="xlarge">1600px</option>
-              </select>
-            </div>
+        <PanelSection v-if="store.hasColors" :title="t('exportTitle')">
+          <div class="field-row">
+            <label for="app-image-format">{{ t('imageFormatLabel') }}</label>
+            <select id="app-image-format" v-model="imageFormat" class="field-select">
+              <option value="png">PNG</option>
+              <option value="jpeg">JPG</option>
+              <option value="webp">WebP</option>
+            </select>
+          </div>
+
+          <div class="field-row">
+            <label for="app-image-size">{{ t('imageSizeLabel') }}</label>
+            <select id="app-image-size" v-model="imageSize" class="field-select">
+              <option value="small">400px</option>
+              <option value="medium">800px</option>
+              <option value="large">1200px</option>
+              <option value="xlarge">1600px</option>
+            </select>
           </div>
 
           <div class="export-buttons">
-            <button class="export-btn" @click="handleCopy" :title="t('copyPalette')">
+            <button class="export-btn export-btn-primary" @click="handleDownloadImage">
               <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
-            <button class="export-btn" @click="handleDownloadTxt" :title="t('downloadPalette')">
-              <svg
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-              >
-                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-                <line x1="16" y1="13" x2="8" y2="13"></line>
-                <line x1="16" y1="17" x2="8" y2="17"></line>
-                <polyline points="10 9 9 9 8 9"></polyline>
-              </svg>
-            </button>
-            <button
-              class="export-btn export-btn-primary"
-              @click="handleDownloadImage"
-              :title="t('downloadImage')"
-            >
-              <svg
-                width="18"
-                height="18"
+                width="16"
+                height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
@@ -207,52 +162,79 @@ function handleDownloadImage() {
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
                 <polyline points="21 15 16 10 5 21"></polyline>
               </svg>
+              <span>{{ t('downloadImage') }}</span>
             </button>
-          </div>
-        </div>
-
-        <!-- Cross link to the Color Generator -->
-        <div class="cross-link-section">
-          <ToolCrossLink
-            to="/generator"
-            :text="t('crossLinkToGeneratorText')"
-            :link-text="t('crossLinkToGeneratorCta')"
-          />
-        </div>
-
-        <!-- Donate Section -->
-        <div class="donate-section">
-          <form
-            action="https://www.paypal.com/donate"
-            method="post"
-            target="_blank"
-            class="donate-form"
-          >
-            <input type="hidden" name="hosted_button_id" value="8RGLGQ2BFMHU6" />
-            <button type="submit" class="donate-btn" :title="t('donateTitle')">
+            <button class="export-btn" @click="handleDownloadTxt">
               <svg
-                class="paypal-icon"
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
-                fill="currentColor"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
               >
-                <path
-                  d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.77.77 0 0 1 .757-.64h6.406c2.612 0 4.52.64 5.67 1.903.482.53.832 1.132 1.04 1.79.218.693.27 1.506.153 2.418l-.013.082v.738l.575.326c.46.248.833.548 1.118.902.483.6.793 1.363.918 2.265.13.938.07 2.055-.178 3.32-.286 1.457-.758 2.724-1.4 3.762a6.41 6.41 0 0 1-2.073 2.085 7.99 7.99 0 0 1-2.6 1.06c-.926.208-1.96.312-3.07.312H11.1a.947.947 0 0 0-.935.796l-.048.3-.61 3.865-.038.188a.946.946 0 0 1-.935.796H7.076z"
-                />
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
               </svg>
-              <span>{{ t('donate') }}</span>
+              <span>{{ t('downloadPalette') }}</span>
             </button>
-          </form>
+            <button class="export-btn" @click="handleCopy">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+              </svg>
+              <span>{{ t('copyPalette') }}</span>
+            </button>
+          </div>
+        </PanelSection>
+
+        <!-- Secondary links, kept visually quiet at the foot of the panel -->
+        <div class="sidebar-footer">
+          <div class="cross-link-section">
+            <ToolCrossLink
+              to="/generator"
+              :text="t('crossLinkToGeneratorText')"
+              :link-text="t('crossLinkToGeneratorCta')"
+            />
+          </div>
+
+          <div class="donate-section">
+            <form
+              action="https://www.paypal.com/donate"
+              method="post"
+              target="_blank"
+              class="donate-form"
+            >
+              <input type="hidden" name="hosted_button_id" value="8RGLGQ2BFMHU6" />
+              <button type="submit" class="donate-btn" :title="t('donateTitle')">
+                <svg
+                  class="paypal-icon"
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path
+                    d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.77.77 0 0 1 .757-.64h6.406c2.612 0 4.52.64 5.67 1.903.482.53.832 1.132 1.04 1.79.218.693.27 1.506.153 2.418l-.013.082v.738l.575.326c.46.248.833.548 1.118.902.483.6.793 1.363.918 2.265.13.938.07 2.055-.178 3.32-.286 1.457-.758 2.724-1.4 3.762a6.41 6.41 0 0 1-2.073 2.085 7.99 7.99 0 0 1-2.6 1.06c-.926.208-1.96.312-3.07.312H11.1a.947.947 0 0 0-.935.796l-.048.3-.61 3.865-.038.188a.946.946 0 0 1-.935.796H7.076z"
+                  />
+                </svg>
+                <span>{{ t('donate') }}</span>
+              </button>
+            </form>
+          </div>
         </div>
       </aside>
 
       <MainContent />
-      <ImageEditPanel
-        ref="editPanelEl"
-        :style="store.currentImage ? { marginTop: editPanelMarginTop + 'px' } : {}"
-        @open-preview="showPreviewModal = true"
-      />
+      <ImageEditPanel @open-preview="showPreviewModal = true" />
       <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
       <ToastContainer />
     </div>
@@ -348,146 +330,113 @@ function handleDownloadImage() {
   width: 320px;
   min-width: 320px;
   background: var(--bg-sidebar);
-  padding: 24px;
+  padding: 20px;
   display: flex;
   flex-direction: column;
   border-right: 1px solid var(--border-light);
   overflow-y: auto;
-  max-height: calc(100vh - 53px);
+  /* Anchored to the top of the workspace: the panel is a fixed frame around
+     the canvas, not something that drifts with the image's height. */
+  position: sticky;
+  top: 53px;
+  height: calc(100vh - 53px);
   align-self: flex-start;
   transition:
     background 0.3s ease,
-    border-color 0.3s ease,
-    margin-top 0.3s ease;
+    border-color 0.3s ease;
 }
 
-.sidebar-header {
-  margin-bottom: 24px;
+/* Matches the image panel's header so both sides of the workspace open the
+   same way: panel name, then small-caps sections. */
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 20px;
+  min-height: 30px;
 }
 
-.subtitle {
-  font-size: 13px;
-  color: var(--text-secondary);
+.panel-title {
   margin: 0;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text-primary);
   transition: color 0.3s ease;
 }
 
-.controls {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin: 20px 0;
+.sidebar-hint {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-secondary);
+  transition: color 0.3s ease;
 }
 
-.control-group {
+/* Label left, control right — the same row shape the image panel uses, so a
+   setting reads the same on both sides of the workspace. */
+.field-row {
   display: flex;
-  flex-direction: column;
-  gap: 6px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
 }
 
-.control-group label {
+.field-row label {
   font-size: 13px;
   font-weight: 500;
   color: var(--text-secondary);
   transition: color 0.3s ease;
 }
 
-.control-group select {
-  padding: 10px 12px;
+.field-select {
+  /* One fixed control column: every select lines up on the same right edge
+     instead of sizing to its longest option. */
+  flex: 0 0 auto;
+  width: 58%;
+  min-width: 0;
+  padding: 7px 10px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
-  font-size: 14px;
   background: var(--bg-input);
   color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
 }
 
-.control-group select:focus {
+.field-select:hover {
+  border-color: var(--border-hover);
+}
+
+.field-select:focus {
   outline: none;
   border-color: var(--selection-color);
   box-shadow: 0 0 0 3px var(--selection-glow);
 }
 
-.control-group select:hover {
-  border-color: var(--border-hover);
-}
-
-.palette-section {
-  flex: 1;
-  margin-top: 20px;
-}
-
-.palette-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0 0 12px 0;
-  transition: color 0.3s ease;
-}
-
-.export-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-light);
-  transition: border-color 0.3s ease;
-}
-
-.export-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 12px;
-}
-
-.export-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin: 0;
-  transition: color 0.3s ease;
-}
-
-.export-format-selects {
-  display: flex;
-  gap: 6px;
-}
-
-.export-select {
-  padding: 6px 8px;
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  font-size: 11px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.export-select:hover {
-  border-color: var(--border-hover);
-}
-
-.export-select:focus {
-  outline: none;
-  border-color: var(--selection-color);
-}
-
 .export-buttons {
   display: flex;
+  flex-direction: column;
   gap: 8px;
+  margin-top: 2px;
 }
 
 .export-btn {
-  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  gap: 8px;
+  padding: 9px 12px;
   border: 1px solid var(--border-color);
   border-radius: 8px;
   background: var(--bg-input);
-  color: var(--text-secondary);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
 }
@@ -495,7 +444,6 @@ function handleDownloadImage() {
 .export-btn:hover {
   background: var(--bg-hover);
   border-color: var(--border-hover);
-  color: var(--text-primary);
 }
 
 .export-btn-primary {
@@ -507,22 +455,24 @@ function handleDownloadImage() {
 .export-btn-primary:hover {
   background: var(--btn-primary-hover);
   border-color: var(--btn-primary-hover);
+  color: var(--btn-primary-text);
 }
 
-/* Cross link to the generator */
-.cross-link-section {
+/* Secondary links sit at the foot of the panel, pushed down and quieted so
+   they never compete with the tool's own controls. */
+.sidebar-footer {
   margin-top: auto;
   padding-top: 20px;
+}
+
+.cross-link-section {
+  padding-top: 18px;
   border-top: 1px solid var(--border-light);
   transition: border-color 0.3s ease;
 }
 
-/* Donate Section */
 .donate-section {
-  margin-top: 20px;
-  padding-top: 20px;
-  border-top: 1px solid var(--border-light);
-  transition: border-color 0.3s ease;
+  margin-top: 14px;
 }
 
 .donate-form {
@@ -574,7 +524,12 @@ function handleDownloadImage() {
   .sidebar {
     width: 100%;
     min-width: 100%;
+    /* Stacked layout: the panel is a normal block again, so it must not stay
+       pinned to a viewport-height frame. */
+    position: static;
+    height: auto;
     max-height: none;
+    overflow-y: visible;
     border-right: none;
     border-bottom: 1px solid var(--border-light);
   }
@@ -622,38 +577,6 @@ function handleDownloadImage() {
 
   .sidebar {
     padding: 12px;
-  }
-
-  .sidebar-header {
-    margin-bottom: 16px;
-  }
-
-  .controls {
-    gap: 12px;
-    margin: 16px 0;
-  }
-
-  .control-group select {
-    padding: 12px;
-    font-size: 15px;
-    min-height: 44px;
-  }
-
-  .export-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 8px;
-  }
-
-  .export-format-selects {
-    width: 100%;
-  }
-
-  .export-select {
-    padding: 8px 10px;
-    font-size: 13px;
-    min-height: 36px;
-    flex: 1;
   }
 
   .export-btn {
