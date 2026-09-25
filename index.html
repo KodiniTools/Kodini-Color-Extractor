@@ -18,15 +18,10 @@
     <meta name="color-scheme" content="light dark" />
     <meta name="format-detection" content="telephone=no" />
 
-    <!-- Canonical & language alternates -->
-    <link rel="canonical" href="https://kodinitools.com/kodini-color-extractor/" />
-    <link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/" />
-    <link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/" />
-    <link
-      rel="alternate"
-      hreflang="x-default"
-      href="https://kodinitools.com/kodini-color-extractor/"
-    />
+    <!-- Canonical & hreflang: bewusst NICHT statisch gesetzt. Die SPA liefert fuer
+         jede Route dieselbe index.html aus; ein statisches Canonical wuerde /app,
+         /generator und /faq als Duplikat der Startseite markieren. useSeo.js setzt
+         Canonical und hreflang pro Route (Google rendert JavaScript). -->
 
     <!-- Icons & PWA (shared kodinitools.com brand assets, served from site root) -->
     <link
