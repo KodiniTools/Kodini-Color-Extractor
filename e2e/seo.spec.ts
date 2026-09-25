@@ -44,7 +44,7 @@ test.describe('SEO head management', () => {
     const data = JSON.parse(jsonld!)
     expect(data['@type']).toBe('FAQPage')
     expect(Array.isArray(data.mainEntity)).toBe(true)
-    expect(data.mainEntity.length).toBe(8)
+    expect(data.mainEntity.length).toBe(10)
     expect(data.mainEntity[0]['@type']).toBe('Question')
     expect(data.mainEntity[0].acceptedAnswer['@type']).toBe('Answer')
   })
