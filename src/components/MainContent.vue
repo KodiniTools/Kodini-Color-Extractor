@@ -65,7 +65,6 @@ const {
   showZoom,
   zoomPosition,
   startDrag,
-  stopDrag,
   getIndicatorStyle,
   cleanup: cleanupDrag,
 } = useCanvasDrag({

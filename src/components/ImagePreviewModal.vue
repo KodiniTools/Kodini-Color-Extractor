@@ -3,7 +3,7 @@ import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 
-const props = defineProps({
+defineProps({
   show: Boolean,
 })
 

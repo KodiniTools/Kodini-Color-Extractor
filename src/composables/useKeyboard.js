@@ -95,7 +95,7 @@ export function useKeyboard() {
         }
       }
       toast.info(t('noImageInClipboard'))
-    } catch (err) {
+    } catch {
       // Clipboard API not supported or permission denied
       toast.error(t('clipboardError'))
     }

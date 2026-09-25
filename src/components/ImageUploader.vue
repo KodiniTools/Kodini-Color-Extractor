@@ -1,10 +1,8 @@
 <script setup>
 import { ref } from 'vue'
 import { usePaletteStore } from '../stores/palette'
-import { useI18n } from '../composables/useI18n'
 
 const store = usePaletteStore()
-const { t } = useI18n()
 const fileInput = ref(null)
 const isDragging = ref(false)
 const isProcessing = ref(false)
