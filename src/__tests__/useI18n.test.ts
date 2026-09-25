@@ -11,9 +11,9 @@ describe('useI18n', () => {
     const { useI18n } = await import('../composables/useI18n')
     const { t } = useI18n()
     const requiredKeys = [
-      'title',
+      'extractorPanelTitle',
       'subtitle',
-      'uploadText',
+      'genTitle',
       'formatLabel',
       'paletteTitle',
       'copiedToClipboard',

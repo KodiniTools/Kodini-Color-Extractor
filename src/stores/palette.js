@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
-import { ref, computed, watch } from 'vue'
+import { rgbToHslRounded as rgbToHsl } from '../lib/core/colorGenerator'
+import { ref, computed } from 'vue'
 import {
   EXPORT_FORMATS,
   buildPaletteExport,
@@ -29,10 +30,10 @@ export const usePaletteStore = defineStore('palette', () => {
 
   // Available export sizes (width in pixels, height auto-calculated)
   const exportSizes = {
-    small: { label: 'Small (400px)', width: 400 },
-    medium: { label: 'Medium (800px)', width: 800 },
-    large: { label: 'Large (1200px)', width: 1200 },
-    xlarge: { label: 'XL (1600px)', width: 1600 },
+    small: { width: 400 },
+    medium: { width: 800 },
+    large: { width: 1200 },
+    xlarge: { width: 1600 },
   }
 
   // Image adjustment settings
@@ -154,7 +155,7 @@ export const usePaletteStore = defineStore('palette', () => {
 
     const ctx = filteredCanvasRef.value.getContext('2d')
 
-    colors.value = colors.value.map((color, index) => {
+    colors.value = colors.value.map((color) => {
       if (!color.position) return color
 
       const imgX = Math.max(
@@ -175,39 +176,6 @@ export const usePaletteStore = defineStore('palette', () => {
 
       return { r, g, b, hex, hsl, position: color.position }
     })
-  }
-
-  function rgbToHsl(r, g, b) {
-    r /= 255
-    g /= 255
-    b /= 255
-    const max = Math.max(r, g, b)
-    const min = Math.min(r, g, b)
-    let h, s
-    const l = (max + min) / 2
-
-    if (max === min) {
-      h = s = 0
-    } else {
-      const d = max - min
-      s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
-      switch (max) {
-        case r:
-          h = ((g - b) / d + (g < b ? 6 : 0)) / 6
-          break
-        case g:
-          h = ((b - r) / d + 2) / 6
-          break
-        case b:
-          h = ((r - g) / d + 4) / 6
-          break
-      }
-    }
-    return {
-      h: Math.round(h * 360),
-      s: Math.round(s * 100),
-      l: Math.round(l * 100),
-    }
   }
 
   /**
@@ -333,16 +301,6 @@ export const usePaletteStore = defineStore('palette', () => {
     }
   }
 
-  function updateColorAt(index, newHex) {
-    if (index < 0 || index >= colors.value.length) return
-    const hex = newHex.startsWith('#') ? newHex : `#${newHex}`
-    const r = parseInt(hex.slice(1, 3), 16)
-    const g = parseInt(hex.slice(3, 5), 16)
-    const b = parseInt(hex.slice(5, 7), 16)
-    const hsl = rgbToHsl(r, g, b)
-    colors.value[index] = { r, g, b, hex, hsl }
-  }
-
   // Extracted colors carry their own rounded HSL — pass it through instead of
   // deriving it again, so the displayed values never shift.
   function toEntry(color) {
@@ -371,11 +329,6 @@ export const usePaletteStore = defineStore('palette', () => {
   // actually needs (.css, .scss, .js, .json — .txt for the plain notations).
   function downloadPalette() {
     return downloadPaletteFile(buildExport())
-  }
-
-  // Former name, kept so existing callers keep working.
-  function downloadTxt() {
-    downloadPalette()
   }
 
   async function copyPalette() {
@@ -501,11 +454,6 @@ export const usePaletteStore = defineStore('palette', () => {
     link.click()
   }
 
-  // Keep downloadPng as alias for backwards compatibility
-  function downloadPng() {
-    downloadImage()
-  }
-
   return {
     colors,
     currentImage,
@@ -539,9 +487,7 @@ export const usePaletteStore = defineStore('palette', () => {
     updateColorFromPosition,
     getPixelZoomData,
     getFormatted,
-    downloadTxt,
     downloadImage,
-    downloadPng,
     copyPalette,
     rgbToHsl,
   }

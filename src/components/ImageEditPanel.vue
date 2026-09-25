@@ -1,5 +1,4 @@
 <script setup>
-import { computed } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import NumberSpinner from './ui/NumberSpinner.vue'
@@ -28,42 +27,8 @@ const { t } = useI18n()
 
 const emit = defineEmits(['open-preview'])
 
-const zoom = computed({
-  get: () => store.imageAdjustments.zoom,
-  set: (val) => store.setImageAdjustment('zoom', val),
-})
-
-const brightness = computed({
-  get: () => store.imageAdjustments.brightness,
-  set: (val) => store.setImageAdjustment('brightness', val),
-})
-
-const contrast = computed({
-  get: () => store.imageAdjustments.contrast,
-  set: (val) => store.setImageAdjustment('contrast', val),
-})
-
-const saturation = computed({
-  get: () => store.imageAdjustments.saturation,
-  set: (val) => store.setImageAdjustment('saturation', val),
-})
-
-const hue = computed({
-  get: () => store.imageAdjustments.hue,
-  set: (val) => store.setImageAdjustment('hue', val),
-})
-
-const blur = computed({
-  get: () => store.imageAdjustments.blur,
-  set: (val) => store.setImageAdjustment('blur', val),
-})
-
-const grayscale = computed({
-  get: () => store.imageAdjustments.grayscale,
-  set: (val) => store.setImageAdjustment('grayscale', val),
-})
-
-const defaults = {
+// Neutral value per slider — what its reset button returns to.
+const DEFAULTS = {
   zoom: 100,
   brightness: 100,
   contrast: 100,
@@ -73,22 +38,26 @@ const defaults = {
   grayscale: 0,
 }
 
-const isModified = computed(() => ({
-  zoom: zoom.value !== defaults.zoom,
-  brightness: brightness.value !== defaults.brightness,
-  contrast: contrast.value !== defaults.contrast,
-  saturation: saturation.value !== defaults.saturation,
-  hue: hue.value !== defaults.hue,
-  blur: blur.value !== defaults.blur,
-  grayscale: grayscale.value !== defaults.grayscale,
-}))
+// Panel layout: which sliders go into which section, in display order.
+const SECTIONS = [
+  { titleKey: 'adjustmentsTitle', keys: ['zoom', 'brightness', 'contrast', 'saturation', 'hue'] },
+  { titleKey: 'effectsTitle', keys: ['blur', 'grayscale'] },
+]
+
+function value(key) {
+  return store.imageAdjustments[key]
+}
+
+function setValue(key, val) {
+  store.setImageAdjustment(key, val)
+}
+
+function isModified(key) {
+  return value(key) !== DEFAULTS[key]
+}
 
 function resetAll() {
   store.resetImageAdjustments()
-}
-
-function resetSlider(prop) {
-  store.setImageAdjustment(prop, defaults[prop])
 }
 
 function clearImage() {
@@ -147,16 +116,26 @@ function clearImage() {
       </div>
     </div>
 
-    <PanelSection :title="t('adjustmentsTitle')" first>
-      <div class="slider-group">
-        <label class="slider-label">{{ t('zoom') }}</label>
+    <PanelSection
+      v-for="(section, i) in SECTIONS"
+      :key="section.titleKey"
+      :title="t(section.titleKey)"
+      :first="i === 0"
+    >
+      <div v-for="key in section.keys" :key="key" class="slider-group">
+        <label class="slider-label">{{ t(key) }}</label>
         <div class="slider-value-group">
-          <NumberSpinner v-model="zoom" v-bind="RANGES.zoom" :label="t('zoom')" />
+          <NumberSpinner
+            :model-value="value(key)"
+            v-bind="RANGES[key]"
+            :label="t(key)"
+            @update:model-value="setValue(key, $event)"
+          />
           <button
             class="reset-btn"
-            :class="{ active: isModified.zoom }"
-            @click="resetSlider('zoom')"
+            :class="{ active: isModified(key) }"
             :title="t('reset')"
+            @click="setValue(key, DEFAULTS[key])"
           >
             <svg
               width="12"
@@ -171,189 +150,14 @@ function clearImage() {
             </svg>
           </button>
         </div>
-        <input v-model.number="zoom" type="range" v-bind="sliderAttrs('zoom')" class="slider" />
-      </div>
-
-      <div class="slider-group">
-        <label class="slider-label">{{ t('brightness') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="brightness" v-bind="RANGES.brightness" :label="t('brightness')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.brightness }"
-            @click="resetSlider('brightness')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
+        <!-- Same as v-model.number: range inputs fire `input` while dragging. -->
         <input
-          v-model.number="brightness"
           type="range"
-          v-bind="sliderAttrs('brightness')"
+          v-bind="sliderAttrs(key)"
+          :value="value(key)"
           class="slider"
-        />
-      </div>
-
-      <div class="slider-group">
-        <label class="slider-label">{{ t('contrast') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="contrast" v-bind="RANGES.contrast" :label="t('contrast')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.contrast }"
-            @click="resetSlider('contrast')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
-        <input
-          v-model.number="contrast"
-          type="range"
-          v-bind="sliderAttrs('contrast')"
-          class="slider"
-        />
-      </div>
-
-      <div class="slider-group">
-        <label class="slider-label">{{ t('saturation') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="saturation" v-bind="RANGES.saturation" :label="t('saturation')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.saturation }"
-            @click="resetSlider('saturation')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
-        <input
-          v-model.number="saturation"
-          type="range"
-          v-bind="sliderAttrs('saturation')"
-          class="slider"
-        />
-      </div>
-
-      <div class="slider-group">
-        <label class="slider-label">{{ t('hue') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="hue" v-bind="RANGES.hue" :label="t('hue')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.hue }"
-            @click="resetSlider('hue')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
-        <input
-          v-model.number="hue"
-          type="range"
-          v-bind="sliderAttrs('hue')"
-          class="slider slider-hue"
-        />
-      </div>
-    </PanelSection>
-
-    <PanelSection :title="t('effectsTitle')">
-      <div class="slider-group">
-        <label class="slider-label">{{ t('blur') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="blur" v-bind="RANGES.blur" :label="t('blur')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.blur }"
-            @click="resetSlider('blur')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
-        <input v-model.number="blur" type="range" v-bind="sliderAttrs('blur')" class="slider" />
-      </div>
-
-      <div class="slider-group">
-        <label class="slider-label">{{ t('grayscale') }}</label>
-        <div class="slider-value-group">
-          <NumberSpinner v-model="grayscale" v-bind="RANGES.grayscale" :label="t('grayscale')" />
-          <button
-            class="reset-btn"
-            :class="{ active: isModified.grayscale }"
-            @click="resetSlider('grayscale')"
-            :title="t('reset')"
-          >
-            <svg
-              width="12"
-              height="12"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-            >
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-              <path d="M3 3v5h5" />
-            </svg>
-          </button>
-        </div>
-        <input
-          v-model.number="grayscale"
-          type="range"
-          v-bind="sliderAttrs('grayscale')"
-          class="slider"
+          :class="{ 'slider-hue': key === 'hue' }"
+          @input="setValue(key, Number($event.target.value))"
         />
       </div>
     </PanelSection>
