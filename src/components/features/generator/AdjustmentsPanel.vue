@@ -1,7 +1,7 @@
 <script setup>
 import { useI18n } from '../../../composables/useI18n'
 import { displayHex } from '../../../lib/core/colorGenerator'
-import NumberSpinner from '../../ui/NumberSpinner.vue'
+import SliderField from '../../ui/SliderField.vue'
 import PanelSection from '../../ui/PanelSection.vue'
 
 const { t } = useI18n()
@@ -45,11 +45,6 @@ function fieldValue(f) {
   const v = Number(props.activeAdjust[f.key])
   return Number.isFinite(v) ? v : f.def
 }
-
-/** True while the field differs from neutral — enables its reset button. */
-function isFieldModified(f) {
-  return fieldValue(f) !== f.def
-}
 </script>
 
 <template>
@@ -57,57 +52,45 @@ function isFieldModified(f) {
   <aside class="gen-adjust">
     <div class="panel-header">
       <h2 class="panel-title">{{ t('genAdjustments') }}</h2>
-      <div class="adjust-tools">
-        <button
-          class="adjust-icon-btn"
-          :disabled="!canUndo"
-          :title="t('undo')"
-          :aria-label="t('undo')"
-          @click="emit('undo')"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="M9 14 4 9l5-5" />
-            <path d="M4 9h11a5 5 0 0 1 0 10h-1" />
-          </svg>
-        </button>
-        <button
-          class="adjust-icon-btn"
-          :disabled="!canRedo"
-          :title="t('redo')"
-          :aria-label="t('redo')"
-          @click="emit('redo')"
-        >
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path d="m15 14 5-5-5-5" />
-            <path d="M20 9H9a5 5 0 0 0 0 10h1" />
-          </svg>
-        </button>
-        <button
-          class="adjust-reset"
-          :disabled="!hasActiveAdjust || activeLocked"
-          @click="emit('reset')"
-        >
-          {{ t('reset') }}
-        </button>
-      </div>
+    </div>
+
+    <div class="history-actions">
+      <button
+        class="btn-history"
+        :disabled="!canUndo"
+        :title="t('undoTitle')"
+        @click="emit('undo')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 7v6h6" />
+          <path d="M3 13C5.33 7.5 10 4 16 4a9 9 0 0 1 0 18H8" />
+        </svg>
+        {{ t('undo') }}
+      </button>
+      <button
+        class="btn-history"
+        :disabled="!canRedo"
+        :title="t('redoTitle')"
+        @click="emit('redo')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M21 7v6h-6" />
+          <path d="M21 13C18.67 7.5 14 4 8 4a9 9 0 0 0 0 18h8" />
+        </svg>
+        {{ t('redo') }}
+      </button>
+      <button
+        class="btn-history btn-reset"
+        :disabled="!hasActiveAdjust || activeLocked"
+        :title="t('reset')"
+        @click="emit('reset')"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
+        {{ t('reset') }}
+      </button>
     </div>
 
     <p v-if="activeLocked" class="adjust-locked-note">{{ t('genLockedHint') }}</p>
@@ -192,63 +175,26 @@ function isFieldModified(f) {
     </PanelSection>
 
     <PanelSection :title="t('genSectionFilters')">
-      <div class="adjust-sliders" :class="{ 'adjust-sliders--disabled': activeLocked }">
-        <div v-for="f in adjustFields" :key="f.key" class="adjust-field">
-          <label class="adjust-field-label" :for="`adjust-slider-${f.key}`">
-            {{ fieldLabel(f) }}
-          </label>
-
-          <div class="adjust-field-tools">
-            <!-- Number spinner: type an exact value or hold the arrows -->
-            <NumberSpinner
-              :model-value="fieldValue(f)"
-              :min="f.min"
-              :max="f.max"
-              :step="f.step || 1"
-              :unit="f.unit"
-              :disabled="activeLocked"
-              :label="fieldLabel(f)"
-              @update:model-value="emit('set-adjust', f.key, $event)"
-            />
-
-            <!-- Per-field reset: back to this control's neutral value only -->
-            <button
-              type="button"
-              class="adjust-field-reset"
-              :class="{ 'adjust-field-reset--active': isFieldModified(f) }"
-              :disabled="activeLocked || !isFieldModified(f)"
-              :title="t('genResetField').replace('{label}', fieldLabel(f))"
-              :aria-label="t('genResetField').replace('{label}', fieldLabel(f))"
-              @click="emit('reset-field', f.key)"
-            >
-              <svg
-                width="13"
-                height="13"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="2"
-                stroke-linecap="round"
-                stroke-linejoin="round"
-              >
-                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
-                <path d="M3 3v5h5" />
-              </svg>
-            </button>
-          </div>
-
-          <input
-            :id="`adjust-slider-${f.key}`"
-            class="adjust-slider"
-            type="range"
-            :min="f.min"
-            :max="f.max"
-            :step="f.step || 1"
-            :value="fieldValue(f)"
-            :disabled="activeLocked"
-            @input="emit('set-adjust', f.key, $event.target.value)"
-          />
-        </div>
+      <div class="adjust-sliders">
+        <!-- Slider, number spinner (type or hold the arrows) and a reset to
+           this control's neutral value only -->
+        <SliderField
+          v-for="f in adjustFields"
+          :key="f.key"
+          class="adjust-field"
+          :model-value="fieldValue(f)"
+          :min="f.min"
+          :max="f.max"
+          :step="f.step || 1"
+          :unit="f.unit"
+          :default-value="f.def"
+          :disabled="activeLocked"
+          :label="fieldLabel(f)"
+          :input-id="`adjust-slider-${f.key}`"
+          :variant="f.key === 'hue' ? 'hue' : 'default'"
+          @update:model-value="emit('set-adjust', f.key, $event)"
+          @reset="emit('reset-field', f.key)"
+        />
       </div>
     </PanelSection>
   </aside>
@@ -377,72 +323,10 @@ function isFieldModified(f) {
   transform: none;
 }
 
-/* Undo / redo / reset grouped together at the right of the adjustments bar */
-.adjust-tools {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-/* Subtle icon buttons for undo/redo — quiet until hovered, dimmed when there
-   is nothing to step to. */
-.adjust-icon-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.adjust-icon-btn:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
-.adjust-icon-btn:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.adjust-reset {
-  padding: 7px 16px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.adjust-reset:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
-.adjust-reset:disabled {
-  opacity: 0.45;
-  cursor: default;
-}
-
 .adjust-sliders {
   display: grid;
   grid-template-columns: 1fr;
   gap: 14px;
-}
-
-.adjust-sliders--disabled {
-  opacity: 0.5;
 }
 
 .adjust-locked-note {
@@ -562,119 +446,11 @@ function isFieldModified(f) {
   color: var(--btn-primary-text);
 }
 
-/* One control = label, slider, tools. A grid so the same markup is a two-row
-   block in a narrow card and a single row once there is width for it. */
-.adjust-field {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-template-areas:
-    'label tools'
-    'slider slider';
-  align-items: center;
-  gap: 6px 10px;
-  min-height: 30px;
-}
-
-.adjust-field-label {
-  grid-area: label;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-}
-
-.adjust-field-tools {
-  grid-area: tools;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Per-field reset — quiet until the field leaves its neutral value */
-.adjust-field-reset {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 26px;
-  height: 26px;
-  padding: 0;
-  border: 1px solid transparent;
-  border-radius: 7px;
-  background: transparent;
-  color: var(--text-tertiary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.adjust-field-reset:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
-}
-
-.adjust-field-reset--active:not(:disabled) {
-  color: var(--btn-primary-bg);
-}
-
-.adjust-field-reset:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-.adjust-slider {
-  grid-area: slider;
-  width: 100%;
-  min-width: 0;
-  height: 6px;
-  -webkit-appearance: none;
-  appearance: none;
-  border-radius: 999px;
-  background: var(--bg-hover);
-  cursor: pointer;
-  outline: none;
-}
-
-.adjust-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--btn-primary-bg);
-  border: 2px solid var(--bg-secondary);
-  box-shadow: 0 1px 4px var(--shadow-medium);
-  cursor: pointer;
-}
-
-.adjust-slider::-moz-range-thumb {
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  background: var(--btn-primary-bg);
-  border: 2px solid var(--bg-secondary);
-  cursor: pointer;
-}
-
-.adjust-slider:focus-visible {
-  box-shadow: 0 0 0 3px var(--selection-glow);
-}
-
-.adjust-slider:disabled {
-  cursor: not-allowed;
-}
-
-/* Wide screens: each control fits on one line, so the four filters sit in a
-   single row instead of a 2x2 block of stacked pairs. */
+/* Wide screens: a wider panel gives the sliders a longer, finer track. */
 @media (min-width: 1600px) {
   .gen-adjust {
     width: 400px;
     min-width: 400px;
-  }
-
-  .adjust-field {
-    grid-template-columns: 92px 1fr auto;
-    grid-template-areas: 'label slider tools';
-    gap: 10px;
   }
 }
 

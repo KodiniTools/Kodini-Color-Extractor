@@ -53,6 +53,11 @@
 
   --shadow-soft: rgba(0, 57, 113, 0.08);
   --shadow-medium: rgba(0, 57, 113, 0.12);
+
+  /* Slider (Visualizer pattern): muted-to-accent track, bordered thumb */
+  --slider-track-from: #7a8fa5;
+  --slider-track-to: #c9984d;
+  --slider-thumb: #c9984d;
 }
 
 [data-theme='dark'] {
@@ -87,6 +92,10 @@
 
   --shadow-soft: rgba(0, 0, 0, 0.3);
   --shadow-medium: rgba(0, 0, 0, 0.4);
+
+  --slider-track-from: #7a8fa5;
+  --slider-track-to: #c9984d;
+  --slider-thumb: #f8e1a9;
 }
 
 html,
@@ -297,6 +306,66 @@ select {
   background: var(--btn-primary-hover);
   border-color: var(--btn-primary-hover);
   color: var(--btn-primary-text);
+}
+
+/* Undo / redo / reset row (Visualizer pattern): equal-width, labelled
+   buttons with a small icon, used by both tools' adjustment panels. */
+.history-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 18px;
+}
+
+/* Content-sized, sharing the spare width; a narrow panel wraps the row
+   instead of clipping a label. */
+.btn-history {
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 7px 6px;
+  border: 1px solid var(--border-color);
+  border-radius: 5px;
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 9.5px;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-history svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+.btn-history:hover:not(:disabled) {
+  background: var(--bg-hover);
+  border-color: var(--border-hover);
+  color: var(--border-hover);
+}
+
+.btn-history:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.btn-history.btn-reset:hover:not(:disabled) {
+  border-color: var(--accent-bg);
+  color: var(--accent-bg);
+}
+
+@media (max-width: 480px) {
+  .btn-history {
+    min-height: 40px;
+  }
 }
 
 /* Secondary links sit at the foot of the panel, pushed down and quieted so

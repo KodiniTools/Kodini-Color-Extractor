@@ -216,20 +216,25 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 </template>
 
 <style scoped>
+/* Compact number field in the Visualizer's style: 22px high, bordered,
+   monospace. The arrows are custom (not the native spin buttons) because
+   they carry the slow-then-fast press-and-hold. */
 .spin {
+  flex: none;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
-  gap: 2px;
-  padding: 1px 2px 1px 6px;
+  width: 66px;
+  height: 22px;
+  padding: 0 0 0 4px;
   border: 1px solid var(--border-color);
-  border-radius: 7px;
+  border-radius: 4px;
   background: var(--bg-input);
-  transition: all 0.2s ease;
+  transition: border-color 0.15s ease;
 }
 
 .spin:focus-within {
-  border-color: var(--border-hover);
-  box-shadow: 0 0 0 3px var(--selection-glow);
+  border-color: var(--accent-bg);
 }
 
 .spin--disabled {
@@ -237,15 +242,17 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 }
 
 .spin-input {
-  width: 38px;
+  flex: 1 1 auto;
+  width: 100%;
+  min-width: 0;
   padding: 0;
   border: none;
   background: transparent;
   color: var(--text-primary);
-  font-family: inherit;
-  font-size: 12px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.66rem;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
+  line-height: 1.3;
   text-align: right;
   outline: none;
   /* Native arrows are hidden in favour of the custom ones below. */
@@ -265,40 +272,68 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 }
 
 .spin-unit {
-  font-size: 11px;
-  font-weight: 600;
+  flex: none;
+  margin-left: 1px;
+  font-family: 'Courier New', monospace;
+  font-size: 0.6rem;
   color: var(--text-tertiary);
 }
 
 .spin-arrows {
+  flex: none;
   display: flex;
   flex-direction: column;
+  align-self: stretch;
   margin-left: 2px;
+  border-left: 1px solid var(--border-color);
 }
 
 .spin-arrow {
+  flex: 1 1 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 20px;
-  height: 13px;
+  width: 14px;
+  min-height: 0;
   padding: 0;
   border: none;
-  border-radius: 4px;
   background: transparent;
   color: var(--text-tertiary);
   cursor: pointer;
   touch-action: none;
-  transition: all 0.15s ease;
+  transition:
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.spin-arrow svg {
+  width: 8px;
+  height: 8px;
 }
 
 .spin-arrow:hover:not(:disabled) {
   background: var(--bg-hover);
-  color: var(--text-primary);
+  color: var(--accent-bg);
 }
 
 .spin-arrow:disabled {
   opacity: 0.3;
   cursor: default;
+}
+
+/* Touch: taller field so the arrows stay hittable. */
+@media (max-width: 768px) {
+  .spin {
+    width: 72px;
+    height: 28px;
+  }
+
+  .spin-input {
+    font-size: 0.75rem;
+  }
+
+  .spin-arrow {
+    width: 18px;
+  }
 }
 </style>
