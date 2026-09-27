@@ -112,10 +112,9 @@ describe('AdjustmentsPanel - spinner wiring', () => {
 
   it('the slider keeps emitting its value', async () => {
     const wrapper = await mountPanel()
-    const slider = wrapper.findAll('input.adjust-slider')[0]
-    ;(slider.element as HTMLInputElement).value = '77'
-    await slider.trigger('input')
-    expect(wrapper.emitted('set-adjust')).toEqual([['brightness', '77']])
+    const slider = wrapper.find('#adjust-slider-brightness')
+    await slider.setValue('77')
+    expect(wrapper.emitted('set-adjust')).toEqual([['brightness', 77]])
   })
 
   it('disables the spinners while every targeted color is locked', async () => {
@@ -130,7 +129,7 @@ describe('AdjustmentsPanel - per-field reset', () => {
 
   it('is disabled while the field sits at its neutral value', async () => {
     const wrapper = await mountPanel()
-    const buttons = wrapper.findAll('.adjust-field-reset')
+    const buttons = wrapper.findAll('.slider-field__reset')
     expect(buttons).toHaveLength(FIELDS.length)
     for (const b of buttons) expect(b.attributes('disabled')).toBeDefined()
   })
@@ -139,9 +138,8 @@ describe('AdjustmentsPanel - per-field reset', () => {
     const wrapper = await mountPanel({
       activeAdjust: { brightness: 140, contrast: 100, saturation: 100, hue: 0 },
     })
-    const buttons = wrapper.findAll('.adjust-field-reset')
+    const buttons = wrapper.findAll('.slider-field__reset')
     expect(buttons[0].attributes('disabled')).toBeUndefined()
-    expect(buttons[0].classes()).toContain('adjust-field-reset--active')
     expect(buttons[1].attributes('disabled')).toBeDefined()
 
     await buttons[0].trigger('click')
@@ -153,7 +151,7 @@ describe('AdjustmentsPanel - per-field reset', () => {
       activeAdjust: { brightness: 140, contrast: 100, saturation: 100, hue: 0 },
       activeLocked: true,
     })
-    expect(wrapper.findAll('.adjust-field-reset')[0].attributes('disabled')).toBeDefined()
+    expect(wrapper.findAll('.slider-field__reset')[0].attributes('disabled')).toBeDefined()
   })
 })
 

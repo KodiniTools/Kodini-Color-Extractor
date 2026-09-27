@@ -33,6 +33,8 @@ const translations = {
     resetAll: 'Reset all',
     undo: 'Undo',
     redo: 'Redo',
+    undoTitle: 'Undo (Ctrl+Z)',
+    redoTitle: 'Redo (Ctrl+Y)',
     deleteImage: 'Delete image',
     // Toast messages
     copiedToClipboard: 'Color copied to clipboard',
@@ -287,6 +289,8 @@ const translations = {
     resetAll: 'Alles zurücksetzen',
     undo: 'Rückgängig',
     redo: 'Wiederholen',
+    undoTitle: 'Rückgängig (Strg+Z)',
+    redoTitle: 'Wiederholen (Strg+Y)',
     deleteImage: 'Bild löschen',
     // Toast messages
     copiedToClipboard: 'Farbe in Zwischenablage kopiert',
