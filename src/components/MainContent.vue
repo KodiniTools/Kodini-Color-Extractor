@@ -213,13 +213,13 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  background: var(--bg-secondary);
-  transition: background 0.3s ease;
+  padding: var(--ds-space-10);
+  background: var(--ds-surface-0);
+  transition: var(--app-transition-colors);
 }
 
 .main-content.file-dragging {
-  background: var(--bg-hover);
+  background: var(--ds-accent-soft);
 }
 
 .main-content-inner {
@@ -232,6 +232,8 @@ onUnmounted(() => {
   max-width: 1000px;
 }
 
+/* The canvas frame: a flat panel surface with a dashed 1 px border that
+   marks it as the drop zone. */
 .image-container {
   position: relative;
   width: 100%;
@@ -240,19 +242,16 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-primary);
-  border-radius: 12px;
-  border: 2px dashed var(--border-color);
+  background: var(--ds-surface-1);
+  border-radius: var(--ds-radius-lg);
+  border: var(--ds-border-width) dashed var(--ds-border-strong);
   overflow: hidden;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: var(--app-transition-colors);
 }
 
 .image-container.file-dragging {
-  border-color: var(--selection-color);
-  border-width: 3px;
-  background: var(--bg-hover);
+  border-color: var(--ds-accent);
+  background: var(--ds-accent-soft);
 }
 
 /* Capture touch gestures (single-finger pan / two-finger pinch-zoom)
@@ -273,128 +272,89 @@ onUnmounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  border-radius: 8px;
+  border-radius: var(--ds-radius-md);
   user-select: none;
   -webkit-user-drag: none;
 }
 
+/* Colour markers on the image: a white ring with a thin dark edge so they
+   read on any photo. Selected adds the accent ring; nothing pulses. */
 .color-indicator {
   position: absolute;
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 3px solid white;
-  box-shadow:
-    0 2px 8px var(--shadow-medium),
-    0 0 0 1px var(--shadow-soft);
+  border: 3px solid #ffffff;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
   cursor: grab;
   z-index: 10;
   transition:
-    transform 0.15s ease,
-    border-color 0.15s ease;
-  animation: pulse 2s ease-in-out infinite;
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease);
   /* Touch optimization */
   touch-action: none;
   -webkit-touch-callout: none;
   -webkit-tap-highlight-color: transparent;
 }
 
-@keyframes pulse {
-  0%,
-  100% {
-    box-shadow:
-      0 2px 8px var(--shadow-medium),
-      0 0 0 1px var(--shadow-soft),
-      0 0 0 0 rgba(255, 255, 255, 0.4);
-  }
-  50% {
-    box-shadow:
-      0 2px 8px var(--shadow-medium),
-      0 0 0 1px var(--shadow-soft),
-      0 0 0 8px rgba(255, 255, 255, 0);
-  }
-}
-
 .color-indicator:hover {
-  transform: scale(1.15);
-  box-shadow:
-    0 4px 12px var(--shadow-medium),
-    0 0 0 1px var(--shadow-soft);
+  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
 }
 
 .color-indicator.selected {
-  border-color: var(--selection-color);
-  border-width: 4px;
-  transform: scale(1.1);
-  animation: pulse-selected 1.5s ease-in-out infinite;
-}
-
-@keyframes pulse-selected {
-  0%,
-  100% {
-    box-shadow:
-      0 0 0 3px var(--selection-glow),
-      0 4px 12px var(--shadow-medium),
-      0 0 0 0 var(--selection-glow);
-  }
-  50% {
-    box-shadow:
-      0 0 0 3px var(--selection-glow),
-      0 4px 12px var(--shadow-medium),
-      0 0 0 10px transparent;
-  }
+  border-color: #ffffff;
+  box-shadow:
+    0 0 0 2px var(--ds-accent),
+    0 0 0 3px rgba(0, 0, 0, 0.35);
 }
 
 .color-indicator.dragging {
   cursor: grabbing;
-  transform: scale(1.2);
   z-index: 100;
-  animation: none;
 }
 
 .placeholder {
   text-align: center;
-  padding: 40px;
+  padding: var(--ds-space-10);
 }
 
 .placeholder-icon {
-  color: var(--text-tertiary);
-  margin-bottom: 20px;
-  transition: color 0.3s ease;
+  color: var(--ds-text-3);
+  margin-bottom: var(--ds-space-4);
 }
 
 .placeholder-text {
-  font-size: 18px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  margin: 0 0 8px 0;
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading);
+  color: var(--ds-text);
+  margin: 0 0 var(--ds-space-1) 0;
 }
 
 .placeholder-hint {
-  font-size: 14px;
-  color: var(--text-tertiary);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-3);
   margin: 0;
-  transition: color 0.3s ease;
 }
 
 @media (max-width: 900px) {
   .main-content {
-    padding: 20px;
+    padding: var(--ds-space-5);
   }
 }
 
 @media (max-width: 480px) {
   .main-content {
-    padding: 12px;
+    padding: var(--ds-space-3);
   }
 
   .image-container {
-    border-radius: 8px;
+    border-radius: var(--ds-radius-md);
   }
 
   .placeholder {
-    padding: 24px 16px;
+    padding: var(--ds-space-6) var(--ds-space-4);
   }
 
   .placeholder-icon svg {
@@ -403,11 +363,11 @@ onUnmounted(() => {
   }
 
   .placeholder-text {
-    font-size: 16px;
+    font-size: var(--ds-text-md);
   }
 
   .placeholder-hint {
-    font-size: 12px;
+    font-size: var(--ds-text-xs);
   }
 }
 </style>

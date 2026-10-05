@@ -126,14 +126,14 @@ function handleDownloadImage() {
           </div>
 
           <div class="export-buttons">
-            <button class="export-btn export-btn-primary" @click="handleDownloadImage">
+            <button class="export-btn" @click="handleDownloadImage">
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -148,7 +148,7 @@ function handleDownloadImage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
@@ -163,7 +163,7 @@ function handleDownloadImage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -182,31 +182,6 @@ function handleDownloadImage() {
               :link-text="t('crossLinkToGeneratorCta')"
             />
           </div>
-
-          <div class="donate-section">
-            <form
-              action="https://www.paypal.com/donate"
-              method="post"
-              target="_blank"
-              class="donate-form"
-            >
-              <input type="hidden" name="hosted_button_id" value="8RGLGQ2BFMHU6" />
-              <button type="submit" class="donate-btn" :title="t('donateTitle')">
-                <svg
-                  class="paypal-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.77.77 0 0 1 .757-.64h6.406c2.612 0 4.52.64 5.67 1.903.482.53.832 1.132 1.04 1.79.218.693.27 1.506.153 2.418l-.013.082v.738l.575.326c.46.248.833.548 1.118.902.483.6.793 1.363.918 2.265.13.938.07 2.055-.178 3.32-.286 1.457-.758 2.724-1.4 3.762a6.41 6.41 0 0 1-2.073 2.085 7.99 7.99 0 0 1-2.6 1.06c-.926.208-1.96.312-3.07.312H11.1a.947.947 0 0 0-.935.796l-.048.3-.61 3.865-.038.188a.946.946 0 0 1-.935.796H7.076z"
-                  />
-                </svg>
-                <span>{{ t('donate') }}</span>
-              </button>
-            </form>
-          </div>
         </div>
       </aside>
 
@@ -220,57 +195,7 @@ function handleDownloadImage() {
 
 <style scoped>
 .cross-link-section {
-  padding-top: 18px;
-  border-top: 1px solid var(--border-light);
-  transition: border-color 0.3s ease;
-}
-
-.donate-section {
-  margin-top: 14px;
-}
-
-.donate-form {
-  display: flex;
-}
-
-.donate-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  padding: 10px 16px;
-  background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.donate-btn:hover {
-  background: var(--bg-hover);
-  border-color: #0070ba;
-  color: #0070ba;
-}
-
-.donate-btn:hover .paypal-icon {
-  color: #0070ba;
-}
-
-.paypal-icon {
-  transition: color 0.2s ease;
-}
-
-/* Wide screens: spend some of the empty canvas margin on the panel so the
-   colour cards and settings breathe instead of wrapping. */
-@media (max-width: 480px) {
-  .donate-btn {
-    padding: 12px 16px;
-    font-size: 14px;
-    min-height: 44px;
-  }
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-width) solid var(--ds-border);
 }
 </style>

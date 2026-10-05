@@ -61,7 +61,7 @@ async function processFile(file) {
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.75"
       >
         <path d="M21 12a9 9 0 1 1-6.219-8.56" />
       </svg>
@@ -74,7 +74,7 @@ async function processFile(file) {
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.75"
       >
         <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
         <polyline points="17 8 12 3 7 8" />
@@ -85,32 +85,39 @@ async function processFile(file) {
 </template>
 
 <style scoped>
+/* The primary action of the extractor panel: the one gold surface. */
 .upload-area {
-  background: var(--accent-bg);
-  color: var(--accent-text);
-  border: none;
-  border-radius: 8px;
-  padding: 16px 24px;
-  text-align: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  height: var(--ds-control-lg);
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  padding: 0 var(--ds-space-5);
+  text-align: center;
+  cursor: pointer;
+  transition: var(--app-transition-colors);
 }
 
 .upload-area:hover {
-  background: var(--accent-hover);
-  transform: translateY(-1px);
+  background: var(--ds-accent-hover);
+}
+
+.upload-area:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .upload-area.dragging {
-  background: var(--accent-hover);
-  box-shadow: 0 0 0 3px var(--selection-glow);
+  background: var(--ds-accent-hover);
+  box-shadow: var(--ds-focus-ring);
 }
 
 .upload-area.processing {
-  background: var(--text-tertiary);
+  background: var(--ds-surface-3);
+  color: var(--ds-text-3);
   cursor: wait;
 }
 
@@ -125,10 +132,11 @@ async function processFile(file) {
 }
 
 .upload-icon {
-  width: 24px;
-  height: 24px;
+  width: var(--ds-icon-md);
+  height: var(--ds-icon-md);
 }
 
+/* The loading icon is the only thing that keeps moving. */
 .upload-icon.spinning {
   animation: spin 1s linear infinite;
 }
@@ -144,8 +152,7 @@ async function processFile(file) {
 
 @media (max-width: 480px) {
   .upload-area {
-    padding: 14px 18px;
-    min-height: 44px;
+    min-height: var(--ds-row-height);
   }
 }
 </style>

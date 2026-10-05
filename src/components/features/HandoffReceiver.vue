@@ -49,7 +49,7 @@ function removeHandoffParam() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="1.75"
           >
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
             <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -78,33 +78,39 @@ function removeHandoffParam() {
 </template>
 
 <style scoped>
+/* A banner above the workspace: flat panel surface, one border below. */
 .handoff-banner {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  padding: 12px 20px;
-  background: var(--bg-sidebar, #f8f9fa);
-  border-bottom: 2px solid var(--selection-color, #014f99);
+  gap: var(--ds-space-4);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  background: var(--ds-surface-1);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
   flex-wrap: wrap;
 }
 
 .handoff-content {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-3);
 }
 
 .handoff-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 8px;
-  background: var(--selection-glow, rgba(1, 79, 153, 0.1));
-  color: var(--selection-color, #014f99);
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-accent-soft);
+  color: var(--ds-text);
   flex-shrink: 0;
+}
+
+.handoff-icon svg {
+  width: var(--ds-icon-md);
+  height: var(--ds-icon-md);
 }
 
 .handoff-text {
@@ -114,75 +120,82 @@ function removeHandoffParam() {
 }
 
 .handoff-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: var(--text-primary, #003971);
+  font-size: var(--ds-text-md);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading);
+  color: var(--ds-text);
 }
 
 .handoff-from {
-  font-size: 12px;
-  color: var(--text-secondary, #6b7280);
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
 }
 
 .handoff-actions {
   display: flex;
-  gap: 8px;
+  gap: var(--ds-space-2);
   flex-shrink: 0;
 }
 
 .handoff-btn {
-  padding: 8px 16px;
-  border-radius: 6px;
-  font-size: 13px;
-  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-md);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
-  border: 1px solid transparent;
+  transition: var(--app-transition-colors);
+  border: var(--ds-border-width) solid transparent;
+}
+
+.handoff-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .handoff-btn-dismiss {
-  background: transparent;
-  border-color: var(--border-color, #d1d5db);
-  color: var(--text-secondary, #6b7280);
+  background: var(--ds-surface-2);
+  border-color: var(--ds-border-strong);
+  color: var(--ds-text);
 }
 
 .handoff-btn-dismiss:hover {
-  background: var(--bg-hover, #f3f4f6);
-  border-color: var(--border-hover, #9ca3af);
+  background: var(--ds-surface-3);
 }
 
 .handoff-btn-accept {
-  background: var(--btn-primary-bg, #014f99);
-  color: var(--btn-primary-text, #ffffff);
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+  font-weight: var(--ds-weight-semibold);
 }
 
 .handoff-btn-accept:hover {
-  background: var(--btn-primary-hover, #013d77);
+  background: var(--ds-accent-hover);
 }
 
-/* Transition */
-.handoff-banner-enter-active {
-  transition: all 0.3s ease-out;
-}
-
+/* Transition: fade plus 8 px from above. */
+.handoff-banner-enter-active,
 .handoff-banner-leave-active {
-  transition: all 0.2s ease-in;
+  transition:
+    opacity var(--ds-duration-slow) var(--ds-ease),
+    transform var(--ds-duration-slow) var(--ds-ease);
 }
 
-.handoff-banner-enter-from {
-  opacity: 0;
-  transform: translateY(-10px);
-}
-
+.handoff-banner-enter-from,
 .handoff-banner-leave-to {
   opacity: 0;
-  transform: translateY(-10px);
+  transform: translateY(-8px);
 }
 
 @media (max-width: 600px) {
   .handoff-banner {
-    padding: 10px 12px;
-    gap: 10px;
+    padding: var(--ds-space-2) var(--ds-space-3);
+    gap: var(--ds-space-2);
   }
 
   .handoff-actions {

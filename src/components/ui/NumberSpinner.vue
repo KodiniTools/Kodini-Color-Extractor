@@ -216,25 +216,28 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 </template>
 
 <style scoped>
-/* Compact number field in the Visualizer's style: 22px high, bordered,
-   monospace. The arrows are custom (not the native spin buttons) because
-   they carry the slow-then-fast press-and-hold. */
+/* Compact number field, 28 px high (control-sm), bordered like every field.
+   The arrows are custom (not the native spin buttons) because they carry the
+   slow-then-fast press-and-hold. */
 .spin {
   flex: none;
   box-sizing: border-box;
   display: flex;
   align-items: center;
-  width: 66px;
-  height: 22px;
-  padding: 0 0 0 4px;
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  background: var(--bg-input);
-  transition: border-color 0.15s ease;
+  width: 64px;
+  height: var(--ds-control-sm);
+  padding: 0 0 0 var(--ds-space-2);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface-2);
+  transition:
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease);
 }
 
 .spin:focus-within {
-  border-color: var(--accent-bg);
+  border-color: var(--ds-accent);
+  box-shadow: var(--ds-focus-ring);
 }
 
 .spin--disabled {
@@ -248,11 +251,12 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--text-primary);
-  font-family: 'Courier New', monospace;
-  font-size: 0.66rem;
-  font-weight: 600;
-  line-height: 1.3;
+  color: var(--ds-text);
+  font: inherit;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
   text-align: right;
   outline: none;
   /* Native arrows are hidden in favour of the custom ones below. */
@@ -268,15 +272,14 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 
 .spin-input:disabled {
   cursor: not-allowed;
-  color: var(--text-tertiary);
+  color: var(--ds-text-3);
 }
 
 .spin-unit {
   flex: none;
   margin-left: 1px;
-  font-family: 'Courier New', monospace;
-  font-size: 0.6rem;
-  color: var(--text-tertiary);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-3);
 }
 
 .spin-arrows {
@@ -284,8 +287,8 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
   display: flex;
   flex-direction: column;
   align-self: stretch;
-  margin-left: 2px;
-  border-left: 1px solid var(--border-color);
+  margin-left: var(--ds-space-1);
+  border-left: var(--ds-border-width) solid var(--ds-border-strong);
 }
 
 .spin-arrow {
@@ -293,17 +296,15 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 14px;
+  width: 16px;
   min-height: 0;
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--text-tertiary);
+  color: var(--ds-text-3);
   cursor: pointer;
   touch-action: none;
-  transition:
-    color 0.15s ease,
-    background 0.15s ease;
+  transition: var(--app-transition-colors);
 }
 
 .spin-arrow svg {
@@ -312,28 +313,28 @@ const downLabel = computed(() => t('genStepDown').replace('{label}', props.label
 }
 
 .spin-arrow:hover:not(:disabled) {
-  background: var(--bg-hover);
-  color: var(--accent-bg);
+  background: var(--ds-surface-3);
+  color: var(--ds-text);
 }
 
 .spin-arrow:disabled {
-  opacity: 0.3;
+  opacity: 0.45;
   cursor: default;
 }
 
-/* Touch: taller field so the arrows stay hittable. */
-@media (max-width: 768px) {
+/* Touch: a taller field so the arrows stay hittable. */
+@media (pointer: coarse) {
   .spin {
     width: 72px;
-    height: 28px;
+    height: var(--ds-control-md);
   }
 
   .spin-input {
-    font-size: 0.75rem;
+    font-size: var(--ds-text-sm);
   }
 
   .spin-arrow {
-    width: 18px;
+    width: 20px;
   }
 }
 </style>
