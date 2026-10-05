@@ -126,14 +126,14 @@ function handleDownloadImage() {
           </div>
 
           <div class="export-buttons">
-            <button class="export-btn export-btn-primary" @click="handleDownloadImage">
+            <button class="export-btn" @click="handleDownloadImage">
               <svg
                 width="16"
                 height="16"
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
                 <circle cx="8.5" cy="8.5" r="1.5"></circle>
@@ -148,7 +148,7 @@ function handleDownloadImage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
                 <polyline points="7 10 12 15 17 10" />
@@ -163,7 +163,7 @@ function handleDownloadImage() {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -220,57 +220,57 @@ function handleDownloadImage() {
 
 <style scoped>
 .cross-link-section {
-  padding-top: 18px;
-  border-top: 1px solid var(--border-light);
-  transition: border-color 0.3s ease;
+  padding-top: var(--ds-space-4);
+  border-top: var(--ds-border-width) solid var(--ds-border);
 }
 
 .donate-section {
-  margin-top: 14px;
+  margin-top: var(--ds-space-3);
 }
 
 .donate-form {
   display: flex;
 }
 
+/* Ghost button: quiet until hovered, no brand colour. */
 .donate-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: var(--ds-space-2);
   width: 100%;
-  padding: 10px 16px;
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
   background: transparent;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
+  color: var(--ds-text-2);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .donate-btn:hover {
-  background: var(--bg-hover);
-  border-color: #0070ba;
-  color: #0070ba;
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
 }
 
-.donate-btn:hover .paypal-icon {
-  color: #0070ba;
+.donate-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .paypal-icon {
-  transition: color 0.2s ease;
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
 }
 
-/* Wide screens: spend some of the empty canvas margin on the panel so the
-   colour cards and settings breathe instead of wrapping. */
 @media (max-width: 480px) {
   .donate-btn {
-    padding: 12px 16px;
-    font-size: 14px;
-    min-height: 44px;
+    min-height: var(--ds-row-height);
+    font-size: var(--ds-text-md);
   }
 }
 </style>

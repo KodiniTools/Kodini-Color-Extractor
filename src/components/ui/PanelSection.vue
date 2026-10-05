@@ -22,14 +22,13 @@ defineProps({
 </template>
 
 <style scoped>
-/* One section rhythm for every sidebar panel: a quiet caps label, a hairline
+/* One section rhythm for every sidebar panel: an eyebrow label, a hairline
    above it, and a fixed gap to the controls below. Both the extractor sidebar
    and the image panel use it so the two sides read as one system. */
 .panel-section {
-  padding-top: 18px;
-  margin-top: 18px;
-  border-top: 1px solid var(--border-light);
-  transition: border-color 0.3s ease;
+  padding-top: var(--ds-space-4);
+  margin-top: var(--ds-space-4);
+  border-top: var(--ds-border-width) solid var(--ds-border);
 }
 
 .panel-section--first {
@@ -42,30 +41,31 @@ defineProps({
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 12px;
-  min-height: 24px;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-3);
+  min-height: var(--ds-control-sm);
 }
 
+/* Eyebrow: 12 px, semibold, uppercase. */
 .panel-section-title {
   margin: 0;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.09em;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading);
+  letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--text-tertiary);
-  transition: color 0.3s ease;
+  color: var(--ds-text-2);
 }
 
 .panel-section-actions {
   display: flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--ds-space-1);
 }
 
 .panel-section-body {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: var(--ds-space-3);
 }
 </style>

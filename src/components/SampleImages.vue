@@ -74,7 +74,7 @@ async function loadSampleImage(sample) {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="1.75"
           >
             <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
             <circle cx="8.5" cy="8.5" r="1.5" />
@@ -90,36 +90,48 @@ async function loadSampleImage(sample) {
 .sample-images-container {
   width: 100%;
   max-width: 800px;
-  margin-bottom: 16px;
+  margin-bottom: var(--ds-space-4);
 }
 
 .sample-label {
-  font-size: 13px;
-  color: var(--text-secondary);
-  margin: 0 0 8px 0;
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
+  margin: 0 0 var(--ds-space-2) 0;
 }
 
 .sample-images {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
-  gap: 8px;
+  gap: var(--ds-space-2);
 }
 
+/* Thumbnail: one border, the selected one wears the 2 px ring with a 2 px
+   gap in the page surface. Hover changes the border, never the size. */
 .sample-thumbnail {
   position: relative;
   aspect-ratio: 1;
-  border: 2px solid var(--border-color);
-  border-radius: 8px;
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-sm);
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--ds-surface-2);
   padding: 0;
-  transition: all 0.2s ease;
+  transition:
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease),
+    opacity var(--ds-duration) var(--ds-ease);
 }
 
 .sample-thumbnail.selected {
-  border-color: var(--selection-color);
-  box-shadow: 0 0 0 3px var(--selection-glow);
+  border-color: var(--ds-accent);
+  box-shadow:
+    0 0 0 2px var(--ds-surface-0),
+    0 0 0 4px var(--ds-accent);
+}
+
+.sample-thumbnail:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .sample-thumbnail img {
@@ -135,9 +147,9 @@ async function loadSampleImage(sample) {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-secondary);
-  color: var(--text-tertiary);
-  transition: opacity 0.2s ease;
+  background: var(--ds-surface-2);
+  color: var(--ds-text-3);
+  transition: opacity var(--ds-duration) var(--ds-ease);
 }
 
 /* Hide placeholder when image is loaded */
@@ -151,19 +163,17 @@ async function loadSampleImage(sample) {
 }
 
 .sample-thumbnail.loaded:hover {
-  border-color: var(--selection-color);
-  transform: scale(1.05);
+  border-color: var(--ds-border-strong);
 }
 
 /* Styles for unavailable images */
 .sample-thumbnail.not-available {
   cursor: default;
-  opacity: 0.5;
+  opacity: 0.4;
 }
 
 .sample-thumbnail.not-available:hover {
-  transform: none;
-  border-color: var(--border-color);
+  border-color: var(--ds-border);
 }
 
 .sample-thumbnail:not(.loaded):not(.not-available) {
@@ -171,7 +181,7 @@ async function loadSampleImage(sample) {
 }
 
 .sample-thumbnail:hover:not(.not-available) .placeholder-overlay {
-  background: var(--bg-hover);
+  background: var(--ds-surface-3);
 }
 
 /* Responsive: 6 columns on smaller screens */
@@ -189,7 +199,7 @@ async function loadSampleImage(sample) {
 @media (max-width: 600px) {
   .sample-images {
     grid-template-columns: repeat(4, 1fr);
-    gap: 6px;
+    gap: var(--ds-space-1);
   }
 
   /* Show only 4 thumbnails on mobile */
@@ -200,16 +210,12 @@ async function loadSampleImage(sample) {
 
 @media (max-width: 480px) {
   .sample-images-container {
-    margin-bottom: 12px;
+    margin-bottom: var(--ds-space-3);
   }
 
   .sample-label {
-    font-size: 12px;
-    margin: 0 0 6px 0;
-  }
-
-  .sample-thumbnail {
-    border-radius: 6px;
+    font-size: var(--ds-text-xs);
+    margin: 0 0 var(--ds-space-1) 0;
   }
 }
 </style>

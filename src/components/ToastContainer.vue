@@ -65,108 +65,92 @@ const { toasts, remove } = useToast()
 <style scoped>
 .toast-container {
   position: fixed;
-  bottom: 24px;
-  right: 24px;
-  z-index: 9999;
+  bottom: var(--ds-space-4);
+  right: var(--ds-space-4);
+  z-index: var(--ds-z-toast);
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--ds-space-2);
   pointer-events: none;
 }
 
+/* A notification: flat surface, status as a 3 px line and the icon's colour,
+   the only shadow outside of modals. */
 .toast {
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 12px 16px;
-  border-radius: 8px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  box-shadow: 0 4px 20px var(--shadow-medium);
-  color: var(--text-primary);
-  font-size: 14px;
-  font-weight: 500;
+  gap: var(--ds-space-3);
+  max-width: 400px;
+  padding: var(--ds-space-3) var(--ds-space-4);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-left: 3px solid var(--ds-info);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-1);
+  color: var(--ds-text);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  line-height: var(--ds-leading);
+  box-shadow: var(--ds-shadow-overlay);
   pointer-events: auto;
   cursor: pointer;
-  max-width: 320px;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .toast:hover {
-  transform: translateX(-4px);
-}
-
-.toast.success {
-  background: var(--accent-bg);
-  color: var(--accent-text);
-  border-color: var(--accent-hover);
-}
-
-.toast.error {
-  background: #fee2e2;
-  color: #991b1b;
-  border-color: #fecaca;
-}
-
-[data-theme='dark'] .toast.error {
-  background: #450a0a;
-  color: #fecaca;
-  border-color: #7f1d1d;
-}
-
-.toast.info {
-  background: var(--bg-secondary);
-  color: var(--text-primary);
+  background: var(--ds-surface-2);
 }
 
 .toast-icon {
   flex-shrink: 0;
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  color: var(--ds-info);
+}
+
+.toast.success {
+  border-left-color: var(--ds-success);
+}
+
+.toast.success .toast-icon {
+  color: var(--ds-success);
+}
+
+.toast.error {
+  border-left-color: var(--ds-danger);
+}
+
+.toast.error .toast-icon {
+  color: var(--ds-danger);
 }
 
 .toast-message {
   flex: 1;
+  min-width: 0;
 }
 
-/* Transitions */
-.toast-enter-active {
-  animation: toast-in 0.3s ease-out;
-}
-
+/* Transitions: fade plus 16 px from the right. */
+.toast-enter-active,
 .toast-leave-active {
-  animation: toast-out 0.2s ease-in forwards;
+  transition:
+    opacity var(--ds-duration-slow) var(--ds-ease),
+    transform var(--ds-duration-slow) var(--ds-ease);
 }
 
 .toast-move {
-  transition: transform 0.3s ease;
+  transition: transform var(--ds-duration-slow) var(--ds-ease);
 }
 
-@keyframes toast-in {
-  from {
-    opacity: 0;
-    transform: translateX(100%);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-@keyframes toast-out {
-  from {
-    opacity: 1;
-    transform: translateX(0);
-  }
-  to {
-    opacity: 0;
-    transform: translateX(100%);
-  }
+.toast-enter-from,
+.toast-leave-to {
+  opacity: 0;
+  transform: translateX(16px);
 }
 
 @media (max-width: 480px) {
   .toast-container {
-    bottom: 16px;
-    right: 16px;
-    left: 16px;
+    bottom: var(--ds-space-2);
+    right: var(--ds-space-2);
+    left: var(--ds-space-2);
   }
 
   .toast {

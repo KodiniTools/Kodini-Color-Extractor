@@ -28,15 +28,15 @@ const { t } = useI18n()
 .landing-nav {
   position: relative;
   z-index: 50;
-  background: var(--bg-primary);
-  border-bottom: 1px solid var(--border-light);
-  transition: all 0.3s ease;
+  background: var(--ds-surface-1);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
+  transition: var(--app-transition-colors);
 }
 
 .nav-container {
-  max-width: 1200px;
+  max-width: var(--ds-container);
   margin: 0 auto;
-  padding: 16px 24px;
+  padding: var(--ds-space-3) var(--ds-space-6);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -45,55 +45,60 @@ const { t } = useI18n()
 .nav-links {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ds-space-2);
 }
 
 .nav-link {
-  padding: 8px 16px;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
   text-decoration: none;
-  color: var(--text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-  border-radius: 6px;
-  transition: all 0.2s ease;
+  color: var(--ds-text-2);
+  font-size: var(--ds-text-md);
+  font-weight: var(--ds-weight-medium);
+  border-radius: var(--ds-radius-sm);
+  transition: var(--app-transition-colors);
 }
 
 .nav-link:hover {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ds-text);
+  background: var(--ds-surface-2);
+}
+
+.nav-link:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .nav-link.router-link-active {
-  color: var(--text-primary);
-  background: var(--bg-hover);
+  color: var(--ds-text);
+  background: var(--ds-surface-2);
 }
 
 @media (max-width: 768px) {
   .nav-container {
-    padding: 12px 16px;
+    padding: var(--ds-space-2) var(--ds-space-4);
   }
 
   .nav-links {
-    gap: 4px;
+    gap: var(--ds-space-1);
   }
 
   .nav-link {
-    padding: 6px 10px;
-    font-size: 13px;
+    padding: 0 var(--ds-space-3);
+    font-size: var(--ds-text-sm);
   }
 }
 
 @media (max-width: 480px) {
   .nav-container {
-    padding: 10px 12px;
+    padding: var(--ds-space-2) var(--ds-space-3);
   }
 
   .nav-link {
-    padding: 8px 10px;
-    font-size: 12px;
-    min-height: 36px;
-    display: flex;
-    align-items: center;
+    padding: 0 var(--ds-space-2);
+    font-size: var(--ds-text-xs);
   }
 }
 </style>

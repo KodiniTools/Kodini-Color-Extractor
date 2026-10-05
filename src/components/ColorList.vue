@@ -89,7 +89,7 @@ function hideTooltip() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="1.75"
           >
             <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
             <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -136,29 +136,30 @@ function hideTooltip() {
 .color-list {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: var(--ds-space-2);
 }
 
+/* A selectable row: flat input surface, hover darkens, selected is the soft
+   accent fill with a 1 px accent border. */
 .color-item {
   display: flex;
   align-items: center;
-  background: var(--bg-secondary);
-  border-radius: 8px;
-  border: 1px solid var(--border-light);
-  padding: 10px 12px;
+  background: var(--ds-surface-2);
+  border-radius: var(--ds-radius-md);
+  border: var(--ds-border-width) solid var(--ds-border);
+  padding: var(--ds-space-2) var(--ds-space-3);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .color-item:hover {
-  background-color: var(--bg-hover);
-  border-color: var(--border-hover);
+  background: var(--ds-surface-3);
+  border-color: var(--ds-border-strong);
 }
 
 .color-item.selected {
-  border-color: var(--selection-color);
-  box-shadow: 0 0 0 2px var(--selection-glow);
-  background-color: var(--bg-hover);
+  background: var(--ds-accent-soft);
+  border-color: var(--ds-accent);
 }
 
 .color-item.placeholder {
@@ -166,19 +167,18 @@ function hideTooltip() {
 }
 
 .color-item.placeholder:hover {
-  background: var(--bg-secondary);
-  border-color: var(--border-light);
+  background: var(--ds-surface-2);
+  border-color: var(--ds-border);
 }
 
 .color-swatch {
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  margin-right: 12px;
-  border: 1px solid var(--border-light);
-  background: var(--text-tertiary);
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  border-radius: var(--ds-radius-sm);
+  margin-right: var(--ds-space-3);
+  border: var(--ds-border-width) solid var(--ds-border);
+  background: var(--ds-surface-3);
   flex-shrink: 0;
-  transition: border-color 0.2s ease;
 }
 
 .color-info {
@@ -187,56 +187,69 @@ function hideTooltip() {
 }
 
 .color-primary {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
-  margin-bottom: 2px;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  line-height: var(--ds-leading);
+  color: var(--ds-text);
   word-break: break-all;
-  transition: color 0.2s ease;
 }
 
 .color-secondary {
-  font-size: 11px;
-  color: var(--text-secondary);
-  transition: color 0.2s ease;
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
 }
 
+/* Ghost icon button, 28 px. */
 .copy-btn {
-  background: transparent;
-  border: none;
-  padding: 6px;
-  cursor: pointer;
-  color: var(--text-tertiary);
-  border-radius: 4px;
-  transition: all 0.2s ease;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: var(--ds-control-sm);
+  height: var(--ds-control-sm);
+  padding: 0;
+  background: transparent;
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-text-2);
+  cursor: pointer;
+  transition: var(--app-transition-colors);
+}
+
+.copy-btn svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
 }
 
 .copy-btn:hover {
-  background: var(--btn-secondary-bg);
-  color: var(--text-primary);
+  background: var(--ds-surface-1);
+  color: var(--ds-text);
+}
+
+.copy-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .placeholder .color-primary,
 .placeholder .color-secondary {
-  color: var(--text-tertiary);
+  color: var(--ds-text-3);
 }
 
-/* Tooltip styles */
+/* Tooltip: an overlay, so it carries the overlay shadow. */
 .color-tooltip {
   position: fixed;
-  z-index: 10000;
+  z-index: var(--ds-z-dialog);
   transform: translate(-50%, -100%);
   display: flex;
   align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  background: var(--bg-secondary);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  box-shadow: 0 4px 20px var(--shadow-medium);
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-2) var(--ds-space-3);
+  background: var(--ds-surface-1);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-md);
+  box-shadow: var(--ds-shadow-overlay);
   pointer-events: none;
 }
 
@@ -248,16 +261,16 @@ function hideTooltip() {
   transform: translateX(-50%) rotate(45deg);
   width: 10px;
   height: 10px;
-  background: var(--bg-secondary);
-  border-right: 1px solid var(--border-color);
-  border-bottom: 1px solid var(--border-color);
+  background: var(--ds-surface-1);
+  border-right: var(--ds-border-width) solid var(--ds-border);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
 }
 
 .tooltip-swatch {
-  width: 28px;
-  height: 28px;
-  border-radius: 4px;
-  border: 1px solid var(--border-light);
+  width: var(--ds-control-sm);
+  height: var(--ds-control-sm);
+  border-radius: var(--ds-radius-sm);
+  border: var(--ds-border-width) solid var(--ds-border);
   flex-shrink: 0;
 }
 
@@ -268,46 +281,27 @@ function hideTooltip() {
 }
 
 .tooltip-hex {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  font-variant-numeric: tabular-nums;
+  color: var(--ds-text);
   text-transform: uppercase;
 }
 
 .tooltip-hint {
-  font-size: 11px;
-  color: var(--text-tertiary);
+  font-size: var(--ds-text-xs);
+  color: var(--ds-text-3);
 }
 
-/* Tooltip transitions */
-.tooltip-enter-active {
-  animation: tooltip-in 0.15s ease-out;
-}
-
+/* Tooltip transitions: fade only. */
+.tooltip-enter-active,
 .tooltip-leave-active {
-  animation: tooltip-out 0.1s ease-in forwards;
+  transition: opacity var(--ds-duration) var(--ds-ease);
 }
 
-@keyframes tooltip-in {
-  from {
-    opacity: 0;
-    transform: translate(-50%, -90%);
-  }
-  to {
-    opacity: 1;
-    transform: translate(-50%, -100%);
-  }
-}
-
-@keyframes tooltip-out {
-  from {
-    opacity: 1;
-    transform: translate(-50%, -100%);
-  }
-  to {
-    opacity: 0;
-    transform: translate(-50%, -90%);
-  }
+.tooltip-enter-from,
+.tooltip-leave-to {
+  opacity: 0;
 }
 
 @media (max-width: 768px) {
@@ -318,27 +312,18 @@ function hideTooltip() {
 
 @media (max-width: 480px) {
   .color-item {
-    padding: 10px;
+    padding: var(--ds-space-2);
   }
 
   .color-swatch {
     width: 32px;
     height: 32px;
-    margin-right: 10px;
-  }
-
-  .color-primary {
-    font-size: 13px;
-  }
-
-  .color-secondary {
-    font-size: 12px;
+    margin-right: var(--ds-space-2);
   }
 
   .copy-btn {
-    padding: 8px;
-    min-width: 36px;
-    min-height: 36px;
+    width: var(--ds-control-md);
+    height: var(--ds-control-md);
   }
 }
 </style>

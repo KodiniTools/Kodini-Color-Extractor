@@ -83,156 +83,91 @@ function onRangeInput(event) {
         :disabled="disabled || isAtDefault"
         @click="emit('reset')"
       >
-        ↺
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.75"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+          <path d="M3 3v5h5" />
+        </svg>
       </button>
     </div>
   </div>
 </template>
 
 <style scoped>
-/* Label above, then one row: slider · spinner · reset (Visualizer layout). */
+/* Label above, then one row: slider · spinner · reset. The range input itself
+   is styled globally in main.css (#app input[type='range']). */
 .slider-control {
   display: flex;
   flex-direction: column;
-  gap: 5px;
+  gap: var(--ds-space-1);
   min-width: 0;
 }
 
 .slider-control--disabled {
-  opacity: 0.55;
+  opacity: 0.6;
 }
 
 .slider-control__label {
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
 }
 
 .slider-field {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: var(--ds-space-2);
   width: 100%;
   min-width: 0;
 }
 
-/* Thin gradient track, small bordered thumb. */
 .slider-field__range {
   flex: 1 1 auto;
   min-width: 0;
-  height: 3px;
-  margin: 0;
-  border-radius: 2px;
-  background: linear-gradient(90deg, var(--slider-track-from) 0%, var(--slider-track-to) 100%);
-  outline: none;
-  cursor: pointer;
-  -webkit-appearance: none;
-  appearance: none;
 }
 
-.slider-field__range--hue {
-  background: linear-gradient(
-    to right,
-    hsl(0, 100%, 50%),
-    hsl(60, 100%, 50%),
-    hsl(120, 100%, 50%),
-    hsl(180, 100%, 50%),
-    hsl(240, 100%, 50%),
-    hsl(300, 100%, 50%),
-    hsl(360, 100%, 50%)
-  );
-}
-
-.slider-field__range::-webkit-slider-thumb {
-  -webkit-appearance: none;
-  appearance: none;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  background: var(--slider-thumb);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-  transition: transform 0.15s ease;
-}
-
-.slider-field__range::-webkit-slider-thumb:hover {
-  transform: scale(1.15);
-}
-
-.slider-field__range::-moz-range-thumb {
-  width: 12px;
-  height: 12px;
-  box-sizing: border-box;
-  border-radius: 50%;
-  background: var(--slider-thumb);
-  border: 2px solid #fff;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
-  cursor: pointer;
-}
-
-.slider-field__range:focus-visible {
-  box-shadow: 0 0 0 3px var(--selection-glow);
-}
-
-.slider-field__range:disabled {
-  cursor: not-allowed;
-}
-
+/* Ghost icon button, 28 px: quiet until hovered, danger-free. */
 .slider-field__reset {
   flex: none;
-  width: 22px;
-  height: 22px;
-  padding: 0;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--bg-input);
-  border: 1px solid var(--border-color);
-  border-radius: 4px;
-  color: var(--text-tertiary);
-  font-size: 0.8rem;
-  line-height: 1;
+  width: var(--ds-control-sm);
+  height: var(--ds-control-sm);
+  padding: 0;
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-sm);
+  background: transparent;
+  color: var(--ds-text-2);
   cursor: pointer;
-  transition:
-    color 0.15s ease,
-    border-color 0.15s ease;
+  transition: var(--app-transition-colors);
+}
+
+.slider-field__reset svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
 }
 
 .slider-field__reset:hover:not(:disabled) {
-  color: var(--accent-bg);
-  border-color: var(--accent-bg);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
 }
 
 .slider-field__reset:focus-visible {
-  outline: 2px solid var(--accent-bg);
-  outline-offset: 1px;
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .slider-field__reset:disabled {
-  opacity: 0.35;
-  cursor: default;
-}
-
-/* Touch: bigger thumb and reset target. */
-@media (max-width: 768px) {
-  .slider-field__range::-webkit-slider-thumb {
-    width: 20px;
-    height: 20px;
-  }
-
-  .slider-field__range::-moz-range-thumb {
-    width: 20px;
-    height: 20px;
-  }
-
-  .slider-field__reset {
-    width: 28px;
-    height: 28px;
-    font-size: 0.95rem;
-  }
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 </style>

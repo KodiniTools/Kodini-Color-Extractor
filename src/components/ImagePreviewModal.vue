@@ -96,7 +96,7 @@ onUnmounted(() => {
                 viewBox="0 0 24 24"
                 fill="none"
                 stroke="currentColor"
-                stroke-width="2"
+                stroke-width="1.75"
               >
                 <line x1="18" y1="6" x2="6" y2="18"></line>
                 <line x1="6" y1="6" x2="18" y2="18"></line>
@@ -140,7 +140,7 @@ onUnmounted(() => {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    stroke-width="1.75"
                   >
                     <polyline points="15 18 9 12 15 6"></polyline>
                   </svg>
@@ -150,7 +150,7 @@ onUnmounted(() => {
                     viewBox="0 0 24 24"
                     fill="none"
                     stroke="currentColor"
-                    stroke-width="2"
+                    stroke-width="1.75"
                   >
                     <polyline points="9 18 15 12 9 6"></polyline>
                   </svg>
@@ -169,29 +169,31 @@ onUnmounted(() => {
 </template>
 
 <style scoped>
+/* Modal: a dim backdrop, a flat panel with the overlay shadow. */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1000;
-  padding: 20px;
+  z-index: var(--ds-z-backdrop);
+  padding: var(--ds-space-5);
 }
 
 .modal-content {
-  background: var(--bg-sidebar);
-  border-radius: 16px;
+  background: var(--ds-surface-1);
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
   max-width: 90vw;
   max-height: 90vh;
   width: auto;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: var(--ds-shadow-overlay);
   overflow: hidden;
 }
 
@@ -199,37 +201,52 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--border-light);
+  gap: var(--ds-space-2);
+  padding: var(--ds-space-3) var(--ds-space-5);
+  border-bottom: var(--ds-border-width) solid var(--ds-border);
 }
 
 .modal-title {
-  font-size: 18px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading);
+  color: var(--ds-text);
   margin: 0;
 }
 
+/* Ghost icon button, 36 px. */
 .close-btn {
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 8px;
-  padding: 8px;
-  cursor: pointer;
-  color: var(--btn-secondary-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  padding: 0;
+  background: transparent;
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-text-2);
+  cursor: pointer;
+  transition: var(--app-transition-colors);
+}
+
+.close-btn svg {
+  width: var(--ds-icon-md);
+  height: var(--ds-icon-md);
 }
 
 .close-btn:hover {
-  background: var(--btn-secondary-hover);
-  color: var(--btn-primary-text);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+}
+
+.close-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .modal-body {
-  padding: 20px;
+  padding: var(--ds-space-5);
   overflow: auto;
 }
 
@@ -237,9 +254,9 @@ onUnmounted(() => {
   position: relative;
   cursor: ew-resize;
   user-select: none;
-  border-radius: 8px;
+  border-radius: var(--ds-radius-md);
   overflow: hidden;
-  background: var(--bg-primary);
+  background: var(--ds-surface-2);
 }
 
 .image-wrapper {
@@ -269,25 +286,26 @@ onUnmounted(() => {
   object-fit: contain;
 }
 
+/* Labels sit on the photo, so they keep a fixed dark tint and white type. */
 .image-label {
   position: absolute;
-  bottom: 12px;
-  padding: 6px 12px;
+  bottom: var(--ds-space-3);
+  padding: var(--ds-space-1) var(--ds-space-3);
   background: rgba(0, 0, 0, 0.7);
-  color: white;
-  font-size: 12px;
-  font-weight: 600;
-  border-radius: 6px;
+  color: #ffffff;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  border-radius: var(--ds-radius-sm);
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.06em;
 }
 
 .before-label {
-  left: 12px;
+  left: var(--ds-space-3);
 }
 
 .after-label {
-  right: 12px;
+  right: var(--ds-space-3);
 }
 
 .slider-line {
@@ -295,9 +313,8 @@ onUnmounted(() => {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: white;
+  background: #ffffff;
   transform: translateX(-50%);
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
 }
 
 .slider-handle {
@@ -305,20 +322,20 @@ onUnmounted(() => {
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 44px;
-  height: 44px;
-  background: white;
+  width: var(--ds-row-height);
+  height: var(--ds-row-height);
+  background: #ffffff;
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
-  color: #333;
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  color: var(--ds-on-accent);
 }
 
 .slider-handle svg {
-  width: 16px;
-  height: 16px;
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
 }
 
 .slider-handle svg:first-child {
@@ -331,21 +348,22 @@ onUnmounted(() => {
 
 .no-adjustments-hint {
   text-align: center;
-  color: var(--text-tertiary);
-  font-size: 13px;
-  margin-top: 12px;
+  color: var(--ds-text-3);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  margin-top: var(--ds-space-3);
   margin-bottom: 0;
 }
 
-/* Transitions */
+/* Transitions: fade, the panel rises 8 px. */
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity 0.25s ease;
+  transition: opacity var(--ds-duration-slow) var(--ds-ease);
 }
 
 .modal-enter-active .modal-content,
 .modal-leave-active .modal-content {
-  transition: transform 0.25s ease;
+  transition: transform var(--ds-duration-slow) var(--ds-ease);
 }
 
 .modal-enter-from,
@@ -355,12 +373,12 @@ onUnmounted(() => {
 
 .modal-enter-from .modal-content,
 .modal-leave-to .modal-content {
-  transform: scale(0.95);
+  transform: translateY(8px);
 }
 
 @media (max-width: 768px) {
   .modal-overlay {
-    padding: 10px;
+    padding: var(--ds-space-2);
   }
 
   .modal-content {
@@ -373,45 +391,30 @@ onUnmounted(() => {
   }
 
   .modal-header {
-    padding: 12px 16px;
+    padding: var(--ds-space-3) var(--ds-space-4);
   }
 
   .modal-body {
-    padding: 12px;
+    padding: var(--ds-space-3);
   }
 
   .close-btn {
-    padding: 10px;
-    min-height: 44px;
-    min-width: 44px;
-  }
-
-  .slider-handle {
-    width: 44px;
-    height: 44px;
-  }
-
-  .slider-handle svg {
-    width: 14px;
-    height: 14px;
+    width: var(--ds-row-height);
+    height: var(--ds-row-height);
   }
 }
 
 @media (max-width: 480px) {
   .modal-overlay {
-    padding: 8px;
+    padding: var(--ds-space-2);
   }
 
   .modal-header {
-    padding: 10px 12px;
-  }
-
-  .modal-title {
-    font-size: 16px;
+    padding: var(--ds-space-2) var(--ds-space-3);
   }
 
   .modal-body {
-    padding: 8px;
+    padding: var(--ds-space-2);
   }
 
   .image-wrapper img {
@@ -419,8 +422,7 @@ onUnmounted(() => {
   }
 
   .image-label {
-    font-size: 11px;
-    padding: 4px 8px;
+    padding: var(--ds-space-1) var(--ds-space-2);
   }
 }
 </style>

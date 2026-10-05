@@ -19,17 +19,18 @@ defineExpose({ canvas })
 </template>
 
 <style scoped>
+/* The magnifier floats over the photo: white ring, overlay shadow. */
 .pixel-zoom {
   position: absolute;
   width: 120px;
   height: 120px;
-  border: 3px solid white;
+  border: 3px solid #ffffff;
   border-radius: 50%;
-  box-shadow: 0 4px 20px var(--shadow-medium);
+  box-shadow: var(--ds-shadow-overlay);
   pointer-events: none;
-  z-index: 1000;
+  z-index: var(--ds-z-backdrop);
   overflow: hidden;
-  background: var(--bg-secondary);
+  background: var(--ds-surface-1);
 }
 
 .pixel-zoom canvas {
@@ -47,10 +48,9 @@ defineExpose({ canvas })
   left: 50%;
   width: 4px;
   height: 4px;
-  background: var(--text-primary);
-  border: 1px solid white;
+  background: var(--ds-text);
+  border: 1px solid #ffffff;
   transform: translate(-50%, -50%);
-  border-radius: 1px;
 }
 
 @media (max-width: 480px) {

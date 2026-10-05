@@ -1,136 +1,174 @@
+/* ==========================================================================
+   Kodini Color Extractor · Globale Basis-Styles
+   --------------------------------------------------------------------------
+   Tokens: src/design-system/tokens-v2.css (--ds-*, gemeinsam mit Collage Maker
+   und Playlist Generator). Komponenten nutzen keine festen Farbwerte und keine
+   eigenen Radien, Schatten oder Dauern; alles kommt aus den Tokens.
+   Hier steht nur, was keiner Komponente gehört: Schrift, Reset, Body, die
+   Workspace-Shell beider Tools, Range-Slider, Touch, Bewegung.
+   ========================================================================== */
+
+@import '../design-system/tokens-v2.css';
+
+/* === Schrift: Supreme in den drei genutzten Gewichten (500 = Medium,
+   600 und 700 fallen auf Bold), gebündelt aus src/assets/fonts. === */
 @font-face {
   font-family: 'Supreme';
-  src: url('/fonts/Supreme-Regular.woff2') format('woff2');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
+  src: url('./fonts/Supreme-Regular.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Supreme';
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/Supreme-Medium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Supreme';
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+  src: url('./fonts/Supreme-Bold.woff2') format('woff2');
 }
 
+/* === Reset === */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
+/* === App-eigene Composite-Werte (keine geteilten Tokens) === */
 :root {
-  /* Color Palette */
-  --color-accent: #c9984d;
-  --color-1: #c9984d;
-  --color-2: #014f99;
-  --color-3: #003971;
-  --color-4: #f8e1a9;
-  --color-5: #f9f2d5;
-
-  /* Light Theme */
-  --bg-primary: #f5f4d6;
-  --bg-secondary: #ffffff;
-  --bg-sidebar: linear-gradient(180deg, #f5f4d6 0%, #ece6b5 100%);
-  --bg-input: #ffffff;
-  --bg-hover: #ece8c0;
-
-  --text-primary: #003971;
-  --text-secondary: #014f99;
-  --text-tertiary: #7a8fa5;
-  --text-on-accent: #003971;
-
-  --border-color: #c9984d;
-  --border-light: #f8e1a9;
-  --border-hover: #014f99;
-
-  --btn-primary-bg: #014f99;
-  --btn-primary-hover: #003971;
-  --btn-primary-text: #f5f4d6;
-  --btn-secondary-bg: #f8e1a9;
-  --btn-secondary-hover: #c9984d;
-  --btn-secondary-text: #003971;
-
-  --accent-bg: #c9984d;
-  --accent-hover: #b5873f;
-  --accent-text: #003971;
-
-  --selection-color: #014f99;
-  --selection-glow: rgba(1, 79, 153, 0.2);
-
-  --shadow-soft: rgba(0, 57, 113, 0.08);
-  --shadow-medium: rgba(0, 57, 113, 0.12);
-
-  /* Slider (Visualizer pattern): muted-to-accent track, bordered thumb */
-  --slider-track-from: #7a8fa5;
-  --slider-track-to: #c9984d;
-  --slider-thumb: #c9984d;
+  /* Hover und Zustände animieren nur Farbe: Tailwinds transition-colors. */
+  --app-transition-colors:
+    background-color var(--ds-duration) var(--ds-ease),
+    border-color var(--ds-duration) var(--ds-ease), color var(--ds-duration) var(--ds-ease);
+  /* Abstand zur fixen globalen Navigation von kodinitools.com. */
+  --app-nav-height: 60px;
+  color-scheme: light;
 }
 
-[data-theme='dark'] {
-  --bg-primary: #1a1a2e;
-  --bg-secondary: #16213e;
-  --bg-sidebar: linear-gradient(180deg, #1a1a2e 0%, #16213e 100%);
-  --bg-input: #16213e;
-  --bg-hover: #1f2b47;
-
-  --text-primary: #f9f2d5;
-  --text-secondary: #f8e1a9;
-  --text-tertiary: #7a8fa5;
-  --text-on-accent: #003971;
-
-  --border-color: #014f99;
-  --border-light: #1f2b47;
-  --border-hover: #c9984d;
-
-  --btn-primary-bg: #c9984d;
-  --btn-primary-hover: #f8e1a9;
-  --btn-primary-text: #003971;
-  --btn-secondary-bg: #1f2b47;
-  --btn-secondary-hover: #014f99;
-  --btn-secondary-text: #f9f2d5;
-
-  --accent-bg: #c9984d;
-  --accent-hover: #f8e1a9;
-  --accent-text: #003971;
-
-  --selection-color: #c9984d;
-  --selection-glow: rgba(201, 152, 77, 0.25);
-
-  --shadow-soft: rgba(0, 0, 0, 0.3);
-  --shadow-medium: rgba(0, 0, 0, 0.4);
-
-  --slider-track-from: #7a8fa5;
-  --slider-track-to: #c9984d;
-  --slider-thumb: #f8e1a9;
+:root[data-theme='dark'] {
+  color-scheme: dark;
 }
 
+/* === Body === */
 html,
 body {
-  font-family: 'Supreme', sans-serif;
-  background: var(--bg-primary);
-  color: var(--text-primary);
+  font-family: var(--ds-font-sans);
+  font-size: var(--ds-text-lg);
+  line-height: var(--ds-leading);
+  background: var(--ds-surface-0);
+  color: var(--ds-text);
   min-height: 100vh;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition:
-    background 0.3s ease,
-    color 0.3s ease;
+    background-color var(--ds-duration-slow) var(--ds-ease),
+    color var(--ds-duration-slow) var(--ds-ease);
 }
 
 #app {
   min-height: 100vh;
-  padding-top: 60px; /* Space for global navigation */
+  padding-top: var(--app-nav-height);
 }
 
-button {
-  font-family: inherit;
-}
-
-select {
+button,
+select,
+input {
   font-family: inherit;
 }
 
 @media (max-width: 480px) {
-  #app {
-    padding-top: 50px;
+  :root {
+    --app-nav-height: 50px;
   }
+}
 
-  .app-container {
-    --workspace-top: 50px;
+/* === Touch: kein grauer Tap-Highlight, keine Klickverzögerung === */
+#app button,
+#app [role='button'],
+#app select,
+#app input[type='range'],
+#app input[type='color'] {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+/* === Range-Slider im System-Look: Spur in Rahmenfarbe, Daumen in Akzent,
+   Fokus-Ring. Vertikales Scrollen bleibt möglich. === */
+#app input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 6px;
+  margin: 0;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-border-strong);
+  outline: none;
+  touch-action: pan-y;
+  cursor: pointer;
+}
+#app input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: var(--ds-accent);
+  border: 2px solid var(--ds-surface-1);
+  cursor: pointer;
+}
+#app input[type='range']::-moz-range-thumb {
+  width: 14px;
+  height: 14px;
+  box-sizing: border-box;
+  border-radius: 50%;
+  background: var(--ds-accent);
+  border: 2px solid var(--ds-surface-1);
+  cursor: pointer;
+}
+#app input[type='range']::-moz-range-track {
+  height: 6px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-border-strong);
+}
+#app input[type='range']:focus-visible {
+  box-shadow: var(--ds-focus-ring);
+}
+#app input[type='range']:disabled {
+  cursor: not-allowed;
+}
+/* Der Farbton-Regler zeigt den Farbkreis: der einzige Verlauf im System,
+   weil er den Wert selbst abbildet. */
+#app input[type='range'].slider-field__range--hue {
+  background: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
+}
+
+@media (pointer: coarse) {
+  #app input[type='range'] {
+    height: 8px;
+  }
+  #app input[type='range']::-webkit-slider-thumb {
+    width: 20px;
+    height: 20px;
+  }
+  #app input[type='range']::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
   }
 }
 
@@ -138,63 +176,59 @@ select {
    The two-sidebar workspace used by both tools: a compact header, a left
    settings panel, the canvas in the middle and a panel on the right. Global
    rather than per-page so the extractor and the generator cannot drift
-   apart — that drift is what made them look like different products. */
+   apart. Panels are flat --ds-surface-1 with a 1 px border; the canvas sits
+   on the page surface. */
 
 .app-page {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background: var(--bg-primary);
-  transition: background 0.3s ease;
+  background: var(--ds-surface-0);
 }
 
-/* App Container */
 .app-container {
   display: flex;
   flex: 1;
   /* Sticky panels have to clear the site's fixed global navigation, which is
-     the same space #app reserves above the app. Sticking any higher puts them
-     behind that bar once the page scrolls. */
-  --workspace-top: 60px;
+     the same space #app reserves above the app. */
+  --workspace-top: var(--app-nav-height);
 }
 
 .sidebar {
   width: 320px;
   min-width: 320px;
-  background: var(--bg-sidebar);
-  padding: 20px;
+  background: var(--ds-surface-1);
+  padding: var(--ds-space-5);
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border-light);
+  border-right: var(--ds-border-width) solid var(--ds-border);
   overflow-y: auto;
   /* Anchored to the top of the workspace: the panel is a fixed frame around
      the canvas, not something that drifts with the image's height. */
   position: sticky;
-  top: var(--workspace-top, 53px);
-  height: calc(100vh - var(--workspace-top, 53px));
+  top: var(--workspace-top, 60px);
+  height: calc(100vh - var(--workspace-top, 60px));
   align-self: flex-start;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: var(--app-transition-colors);
 }
 
 /* Matches the image panel's header so both sides of the workspace open the
-   same way: panel name, then small-caps sections. */
+   same way: panel name, then eyebrow sections. */
 .panel-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  margin-bottom: 20px;
-  min-height: 30px;
+  gap: var(--ds-space-2);
+  margin-bottom: var(--ds-space-5);
+  min-height: var(--ds-control-md);
 }
 
 .panel-title {
   margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--text-primary);
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-semibold);
+  line-height: var(--ds-leading);
+  color: var(--ds-text);
 }
 
 /* The middle column of the workspace. */
@@ -204,23 +238,28 @@ select {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 40px;
-  background: var(--bg-secondary);
-  transition: background 0.3s ease;
+  padding: var(--ds-space-10);
+  background: var(--ds-surface-0);
 }
 
 @media (max-width: 900px) {
   .workspace-main {
-    padding: 20px 16px;
+    padding: var(--ds-space-5) var(--ds-space-4);
   }
 }
 
 .sidebar-hint {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
+}
+
+.sidebar-note {
+  margin: 0;
+  font-size: var(--ds-text-xs);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-3);
 }
 
 /* Label left, control right — the same row shape the image panel uses, so a
@@ -229,14 +268,13 @@ select {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
+  gap: var(--ds-space-2);
 }
 
 .field-row label {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-secondary);
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-text-2);
 }
 
 .field-select {
@@ -245,134 +283,152 @@ select {
   flex: 0 0 auto;
   width: 58%;
   min-width: 0;
-  padding: 7px 10px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-input);
-  color: var(--text-primary);
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-3);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: var(--ds-text-md);
+  font-weight: var(--ds-weight-medium);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition:
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease);
 }
 
 .field-select:hover {
-  border-color: var(--border-hover);
+  border-color: var(--ds-text-3);
 }
 
-.field-select:focus {
+.field-select:focus-visible {
   outline: none;
-  border-color: var(--selection-color);
-  box-shadow: 0 0 0 3px var(--selection-glow);
+  border-color: var(--ds-accent);
+  box-shadow: var(--ds-focus-ring);
+}
+
+.field-select:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .export-buttons {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-top: 2px;
+  gap: var(--ds-space-2);
 }
 
+/* Secondary button: flat --ds-surface-2 with a strong border. */
 .export-btn {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 9px 12px;
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
-  background: var(--bg-input);
-  color: var(--text-primary);
+  gap: var(--ds-space-2);
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
   font-family: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-size: var(--ds-text-md);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
-.export-btn:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
+.export-btn svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+  flex-shrink: 0;
 }
 
+.export-btn:hover:not(:disabled) {
+  background: var(--ds-surface-3);
+}
+
+.export-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
+}
+
+.export-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* Primary button: the one gold surface of a view. */
 .export-btn-primary {
-  background: var(--btn-primary-bg);
-  border-color: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
+  background: var(--ds-accent);
+  border-color: transparent;
+  color: var(--ds-on-accent);
+  font-weight: var(--ds-weight-semibold);
 }
 
-.export-btn-primary:hover {
-  background: var(--btn-primary-hover);
-  border-color: var(--btn-primary-hover);
-  color: var(--btn-primary-text);
+.export-btn-primary:hover:not(:disabled) {
+  background: var(--ds-accent-hover);
 }
 
-/* Undo / redo / reset row (Visualizer pattern): equal-width, labelled
-   buttons with a small icon, used by both tools' adjustment panels. */
+/* Undo / redo / reset row: equal-width small buttons with a 16 px icon, used
+   by both tools' adjustment panels. */
 .history-actions {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 18px;
+  gap: var(--ds-space-1);
+  margin-bottom: var(--ds-space-4);
 }
 
 /* Content-sized, sharing the spare width; a narrow panel wraps the row
    instead of clipping a label. */
 .btn-history {
   flex: 1 1 auto;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 4px;
-  padding: 7px 6px;
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  background: var(--bg-input);
-  color: var(--text-primary);
+  gap: var(--ds-space-1);
+  height: var(--ds-control-sm);
+  padding: 0 var(--ds-space-2);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-sm);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
   font-family: inherit;
-  font-size: 9.5px;
-  font-weight: 600;
-  letter-spacing: 0.03em;
-  text-transform: uppercase;
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .btn-history svg {
-  width: 11px;
-  height: 11px;
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
   flex-shrink: 0;
 }
 
 .btn-history:hover:not(:disabled) {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--border-hover);
+  background: var(--ds-surface-3);
+}
+
+.btn-history:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .btn-history:disabled {
-  opacity: 0.35;
+  opacity: 0.45;
   cursor: not-allowed;
-}
-
-.btn-history.btn-reset:hover:not(:disabled) {
-  border-color: var(--accent-bg);
-  color: var(--accent-bg);
-}
-
-@media (max-width: 480px) {
-  .btn-history {
-    min-height: 40px;
-  }
 }
 
 /* Secondary links sit at the foot of the panel, pushed down and quieted so
    they never compete with the tool's own controls. */
 .sidebar-footer {
   margin-top: auto;
-  padding-top: 20px;
+  padding-top: var(--ds-space-5);
 }
 
 @media (min-width: 1600px) {
@@ -403,21 +459,29 @@ select {
     max-height: none;
     overflow-y: visible;
     border-right: none;
-    border-bottom: 1px solid var(--border-light);
-  }
-
-  .sidebar {
-    padding: 16px;
+    border-bottom: var(--ds-border-width) solid var(--ds-border);
+    padding: var(--ds-space-4);
   }
 }
 
 @media (max-width: 480px) {
   .sidebar {
-    padding: 12px;
+    padding: var(--ds-space-3);
   }
 
   .export-btn {
-    padding: 14px;
-    min-height: 44px;
+    min-height: var(--ds-row-height);
+  }
+}
+
+/* === Reduzierte Bewegung === */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

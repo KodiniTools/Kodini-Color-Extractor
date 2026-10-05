@@ -61,7 +61,7 @@ function fieldValue(f) {
         :title="t('undoTitle')"
         @click="emit('undo')"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M3 7v6h6" />
           <path d="M3 13C5.33 7.5 10 4 16 4a9 9 0 0 1 0 18H8" />
         </svg>
@@ -73,7 +73,7 @@ function fieldValue(f) {
         :title="t('redoTitle')"
         @click="emit('redo')"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M21 7v6h-6" />
           <path d="M21 13C18.67 7.5 14 4 8 4a9 9 0 0 0 0 18h8" />
         </svg>
@@ -85,7 +85,7 @@ function fieldValue(f) {
         :title="t('reset')"
         @click="emit('reset')"
       >
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
           <path d="M3 3v5h5" />
         </svg>
@@ -201,117 +201,132 @@ function fieldValue(f) {
 </template>
 
 <style scoped>
-/* Adjustments panel — a compact, centered control card */
-/* Right-hand panel of the workspace, matching the extractor's image panel. */
+/* Right-hand panel of the workspace, matching the extractor's image panel:
+   flat surface, one border, sticky beside the canvas. */
 .gen-adjust {
   width: 320px;
   min-width: 320px;
-  background: var(--bg-sidebar);
-  padding: 20px;
+  background: var(--ds-surface-1);
+  padding: var(--ds-space-5);
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--border-light);
+  border-left: var(--ds-border-width) solid var(--ds-border);
   overflow-y: auto;
   position: sticky;
-  top: var(--workspace-top, 53px);
-  height: calc(100vh - var(--workspace-top, 53px));
+  top: var(--workspace-top, 60px);
+  height: calc(100vh - var(--workspace-top, 60px));
   align-self: flex-start;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: var(--app-transition-colors);
 }
 
 .adjust-scope {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--ds-space-3);
   flex-wrap: wrap;
 }
 
 .scope-tabs {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ds-space-2);
   flex-wrap: wrap;
 }
 
 /* Live count of selected colors, updates as the selection changes */
 .scope-count {
-  padding: 4px 10px;
-  border-radius: 999px;
-  background: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-  font-size: 12px;
-  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  height: 20px;
+  padding: 0 calc(var(--ds-space-2) - 1px);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface-2);
+  color: var(--ds-text-2);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 
+/* Scope toggle: a pill; "on" shows as the primary surface. */
 .scope-tab {
-  padding: 7px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ds-control-sm);
+  padding: 0 var(--ds-space-3);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface-2);
+  color: var(--ds-text-2);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .scope-tab:hover {
-  border-color: var(--border-hover);
-  color: var(--text-primary);
+  background: var(--ds-surface-3);
+  color: var(--ds-text);
+}
+
+.scope-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .scope-tab--active {
-  background: var(--btn-primary-bg);
-  border-color: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
+  background: var(--ds-accent);
+  border-color: transparent;
+  color: var(--ds-on-accent);
+  font-weight: var(--ds-weight-semibold);
 }
 
-/* Keep the filled button's light label readable on hover (the generic
-   .scope-tab:hover would otherwise darken the text onto the dark fill). */
 .scope-tab--active:not(.scope-tab--muted):hover {
-  background: var(--btn-primary-hover);
-  border-color: var(--btn-primary-hover);
-  color: var(--btn-primary-text);
+  background: var(--ds-accent-hover);
+  color: var(--ds-on-accent);
 }
 
-/* "All colors" looks deactivated while individual colors are locked.
-   Kept as an unfilled toggle so the label stays high-contrast in light mode. */
+/* "All colors" looks deactivated while individual colors are locked:
+   an unfilled, dashed toggle. */
 .scope-tab--muted {
-  background: var(--bg-hover);
-  border-color: var(--border-color);
+  background: var(--ds-surface-2);
+  border-color: var(--ds-border-strong);
   border-style: dashed;
-  color: var(--text-secondary);
+  color: var(--ds-text-2);
+  font-weight: var(--ds-weight-medium);
 }
 
 .scope-tab--muted:hover {
-  color: var(--text-primary);
-  border-color: var(--border-hover);
+  color: var(--ds-text);
+  background: var(--ds-surface-3);
 }
 
+/* Color dots: a 1 px ring in rest, the ink colour when active. */
 .scope-dot {
   width: 26px;
   height: 26px;
   padding: 0;
-  border: 2px solid transparent;
+  border: 2px solid var(--ds-surface-1);
   border-radius: 50%;
   cursor: pointer;
-  box-shadow: 0 0 0 1px var(--border-light);
+  box-shadow: 0 0 0 1px var(--ds-border-strong);
   transition:
-    transform 0.15s ease,
-    border-color 0.15s ease;
+    border-color var(--ds-duration) var(--ds-ease),
+    box-shadow var(--ds-duration) var(--ds-ease);
 }
 
 .scope-dot:hover {
-  transform: scale(1.12);
+  box-shadow: 0 0 0 1px var(--ds-text-3);
+}
+
+.scope-dot:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .scope-dot--active {
-  border-color: var(--text-primary);
-  transform: scale(1.12);
+  box-shadow: 0 0 0 2px var(--ds-text);
 }
 
 .scope-dot--locked {
@@ -319,49 +334,57 @@ function fieldValue(f) {
   cursor: not-allowed;
 }
 
-.scope-dot--locked:hover {
-  transform: none;
-}
-
 .adjust-sliders {
   display: grid;
   grid-template-columns: 1fr;
-  gap: 14px;
+  gap: var(--ds-space-3);
 }
 
 .adjust-locked-note {
-  margin: 0 0 12px;
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-tertiary);
+  margin: 0 0 var(--ds-space-3);
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-3);
 }
 
 /* Colour picker row */
 .adjust-picker {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--ds-space-2);
   flex-wrap: wrap;
-  min-height: 34px;
+  min-height: var(--ds-control-md);
 }
 
 .adjust-picker-label {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  color: var(--ds-text-2);
 }
 
 /* Native colour input rendered as a small square swatch */
 .color-well {
   position: relative;
   display: inline-block;
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  border: 1px solid var(--border-color);
-  box-shadow: inset 0 0 0 2px var(--bg-secondary);
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  border-radius: var(--ds-radius-md);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  box-shadow: inset 0 0 0 2px var(--ds-surface-1);
   cursor: pointer;
   overflow: hidden;
+  transition: border-color var(--ds-duration) var(--ds-ease);
+}
+
+.color-well:hover {
+  border-color: var(--ds-text-3);
+}
+
+.color-well:focus-within {
+  border-color: var(--ds-accent);
+  box-shadow:
+    inset 0 0 0 2px var(--ds-surface-1),
+    var(--ds-focus-ring);
 }
 
 .color-well input[type='color'] {
@@ -376,15 +399,15 @@ function fieldValue(f) {
   opacity: 0;
 }
 
-/* No colour selected yet: show the well as an inert, striped placeholder */
+/* No colour selected yet: the well is an inert, striped placeholder */
 .color-well--disabled {
   cursor: not-allowed;
   background: repeating-linear-gradient(
     45deg,
-    var(--bg-hover),
-    var(--bg-hover) 5px,
-    var(--bg-secondary) 5px,
-    var(--bg-secondary) 10px
+    var(--ds-surface-3),
+    var(--ds-surface-3) 5px,
+    var(--ds-surface-1) 5px,
+    var(--ds-surface-1) 10px
   );
 }
 
@@ -393,57 +416,56 @@ function fieldValue(f) {
 }
 
 .adjust-picker-hex {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-secondary);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-text);
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.04em;
 }
 
 .adjust-picker-hint {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-tertiary);
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-3);
 }
 
-/* Selection actions — "Copy selected" and "Clear selection". Pushed to the
+/* Selection actions: "Copy selected" and "Clear selection". Pushed to the
    far right of the picker row; only shown while colors are selected. */
 .adjust-actions {
   margin-left: auto;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: var(--ds-space-2);
   flex-wrap: wrap;
 }
 
+/* Secondary pills: the scope toggle already holds the view's gold. */
 .adjust-action-btn {
-  padding: 6px 14px;
-  border: 1px solid var(--border-color);
-  border-radius: 999px;
-  background: var(--bg-input);
-  color: var(--text-secondary);
-  font-size: 13px;
-  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  height: var(--ds-control-sm);
+  padding: 0 var(--ds-space-3);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-surface-2);
+  color: var(--ds-text);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  line-height: 1;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: var(--app-transition-colors);
 }
 
 .adjust-action-btn:hover {
-  background: var(--bg-hover);
-  border-color: var(--border-hover);
-  color: var(--text-primary);
+  background: var(--ds-surface-3);
+}
+
+.adjust-action-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 .adjust-action-btn--primary {
-  background: var(--btn-primary-bg);
-  border-color: var(--btn-primary-bg);
-  color: var(--btn-primary-text);
-}
-
-.adjust-action-btn--primary:hover {
-  background: var(--btn-primary-hover);
-  border-color: var(--btn-primary-hover);
-  color: var(--btn-primary-text);
+  font-weight: var(--ds-weight-semibold);
 }
 
 /* Wide screens: a wider panel gives the sliders a longer, finer track. */
@@ -465,13 +487,13 @@ function fieldValue(f) {
     max-height: none;
     overflow-y: visible;
     border-left: none;
-    border-top: 1px solid var(--border-light);
+    border-top: var(--ds-border-width) solid var(--ds-border);
   }
 }
 
 @media (max-width: 700px) {
   .gen-adjust {
-    padding: 16px;
+    padding: var(--ds-space-4);
   }
 }
 </style>

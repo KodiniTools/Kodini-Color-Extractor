@@ -13,9 +13,22 @@
     <meta name="robots" content="index, follow" />
     <meta name="author" content="KodiniTools" />
     <meta name="application-name" content="Kodini Color Extractor" />
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#111111" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#f6f5f1" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0a1324" media="(prefers-color-scheme: dark)" />
     <meta name="color-scheme" content="light dark" />
+    <!-- Theme vor dem ersten Paint setzen (Tokens: Light auf :root, Dark über data-theme),
+         damit Dark-Nutzer keinen hellen Flash sehen. Die globale Navigation übernimmt danach. -->
+    <script>
+      try {
+        var storedTheme = localStorage.getItem('theme')
+        document.documentElement.setAttribute(
+          'data-theme',
+          storedTheme === 'dark' ? 'dark' : 'light'
+        )
+      } catch (e) {
+        document.documentElement.setAttribute('data-theme', 'light')
+      }
+    </script>
     <meta name="format-detection" content="telephone=no" />
 
     <!-- Canonical & hreflang: bewusst NICHT statisch gesetzt. Die SPA liefert fuer
@@ -96,7 +109,7 @@
       href="https://kodinitools.com/android-icon-192x192.png"
     />
     <link rel="manifest" href="https://kodinitools.com/site.webmanifest" />
-    <meta name="msapplication-TileColor" content="#111111" />
+    <meta name="msapplication-TileColor" content="#0a1324" />
     <meta name="msapplication-TileImage" content="https://kodinitools.com/mstile-150x150.png" />
 
     <!-- Open Graph -->

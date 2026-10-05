@@ -67,7 +67,7 @@ function clearImage() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="1.75"
           >
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
             <circle cx="12" cy="12" r="3" />
@@ -80,7 +80,7 @@ function clearImage() {
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            stroke-width="2"
+            stroke-width="1.75"
           >
             <polyline points="3 6 5 6 21 6" />
             <path
@@ -95,7 +95,7 @@ function clearImage() {
 
     <div class="history-actions">
       <button class="btn-history btn-reset reset-all-btn" :title="t('resetAll')" @click="resetAll">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
           <path d="M3 3v5h5" />
         </svg>
@@ -130,61 +130,62 @@ function clearImage() {
 .edit-panel {
   width: 280px;
   min-width: 280px;
-  background: var(--bg-sidebar);
-  padding: 24px;
+  background: var(--ds-surface-1);
+  padding: var(--ds-space-5);
   display: flex;
   flex-direction: column;
-  border-left: 1px solid var(--border-light);
+  border-left: var(--ds-border-width) solid var(--ds-border);
   overflow-y: auto;
   /* Anchored to the top of the workspace, like the left sidebar. */
   position: sticky;
-  top: var(--workspace-top, 53px);
-  height: calc(100vh - var(--workspace-top, 53px));
+  top: var(--workspace-top, 60px);
+  height: calc(100vh - var(--workspace-top, 60px));
   align-self: flex-start;
-  transition:
-    background 0.3s ease,
-    border-color 0.3s ease;
+  transition: var(--app-transition-colors);
 }
 
 .header-buttons {
   display: flex;
-  gap: 6px;
+  gap: var(--ds-space-2);
 }
 
-.preview-btn {
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 6px;
-  padding: 6px 8px;
-  cursor: pointer;
-  color: var(--btn-secondary-text);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-}
-
-.preview-btn:hover {
-  background: var(--accent-bg);
-  color: var(--btn-primary-text);
-}
-
+/* Secondary icon buttons, 36 px; delete speaks through its colour, never a
+   red surface. */
+.preview-btn,
 .delete-btn {
-  background: var(--btn-secondary-bg);
-  border: none;
-  border-radius: 6px;
-  padding: 6px 8px;
-  cursor: pointer;
-  color: var(--btn-secondary-text);
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: all 0.2s ease;
+  width: var(--ds-control-md);
+  height: var(--ds-control-md);
+  padding: 0;
+  background: var(--ds-surface-2);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-text);
+  cursor: pointer;
+  transition: var(--app-transition-colors);
+}
+
+.preview-btn svg,
+.delete-btn svg {
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
+}
+
+.preview-btn:hover,
+.delete-btn:hover {
+  background: var(--ds-surface-3);
 }
 
 .delete-btn:hover {
-  background: #ef4444;
-  color: white;
+  color: var(--ds-danger);
+}
+
+.preview-btn:focus-visible,
+.delete-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 /* Wide screens leave several hundred pixels of empty margin around the
@@ -196,7 +197,7 @@ function clearImage() {
   }
 
   .edit-panel :deep(.panel-section-body) {
-    gap: 16px;
+    gap: var(--ds-space-4);
   }
 }
 
@@ -210,30 +211,29 @@ function clearImage() {
     max-height: none;
     overflow-y: visible;
     border-left: none;
-    border-top: 1px solid var(--border-light);
+    border-top: var(--ds-border-width) solid var(--ds-border);
   }
 }
 
 @media (max-width: 768px) {
   .edit-panel {
-    padding: 16px;
+    padding: var(--ds-space-4);
   }
 
   .panel-header {
-    margin-bottom: 16px;
+    margin-bottom: var(--ds-space-4);
   }
 }
 
 @media (max-width: 480px) {
   .edit-panel {
-    padding: 12px;
+    padding: var(--ds-space-3);
   }
 
   .preview-btn,
   .delete-btn {
-    padding: 8px 10px;
-    min-height: 40px;
-    min-width: 40px;
+    width: var(--ds-row-height);
+    height: var(--ds-row-height);
   }
 }
 </style>

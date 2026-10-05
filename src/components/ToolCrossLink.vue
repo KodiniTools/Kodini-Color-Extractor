@@ -26,7 +26,7 @@ defineProps({
         viewBox="0 0 24 24"
         fill="none"
         stroke="currentColor"
-        stroke-width="2"
+        stroke-width="1.75"
         stroke-linecap="round"
         stroke-linejoin="round"
         aria-hidden="true"
@@ -44,37 +44,37 @@ defineProps({
   flex-wrap: wrap;
   align-items: center;
   justify-content: center;
-  gap: 4px 8px;
+  gap: var(--ds-space-1) var(--ds-space-2);
   margin: 0;
-  font-size: 13px;
-  line-height: 1.5;
-  color: var(--text-tertiary);
-  transition: color 0.3s ease;
+  font-size: var(--ds-text-sm);
+  line-height: var(--ds-leading);
+  color: var(--ds-text-2);
 }
 
 .tool-cross-link-anchor {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  color: var(--text-secondary);
-  font-weight: 500;
+  gap: var(--ds-space-1);
+  color: var(--ds-link);
+  font-weight: var(--ds-weight-medium);
   text-decoration: none;
-  border-bottom: 1px solid transparent;
-  transition: all 0.2s ease;
+  border-bottom: var(--ds-border-width) solid transparent;
+  transition: var(--app-transition-colors);
 }
 
-.tool-cross-link-anchor:hover,
-.tool-cross-link-anchor:focus-visible {
-  color: var(--text-primary);
+.tool-cross-link-anchor:hover {
+  color: var(--ds-accent);
   border-bottom-color: currentColor;
+}
+
+.tool-cross-link-anchor:focus-visible {
   outline: none;
+  border-radius: var(--ds-radius-sm);
+  box-shadow: var(--ds-focus-ring);
 }
 
 .tool-cross-link-icon {
-  transition: transform 0.2s ease;
-}
-
-.tool-cross-link-anchor:hover .tool-cross-link-icon {
-  transform: translateX(2px);
+  width: var(--ds-icon-sm);
+  height: var(--ds-icon-sm);
 }
 </style>
