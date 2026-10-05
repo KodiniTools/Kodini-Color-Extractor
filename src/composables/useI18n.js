@@ -45,9 +45,6 @@ const translations = {
     // Keyboard hints
     // Tooltips
     doubleClickToCopy: 'Double-click to copy',
-    // Donate
-    donate: 'support this project',
-    donateTitle: 'Donate via PayPal',
     // Sample images
     sampleImagesLabel: 'Try with sample images:',
     sampleImageHint: 'Click to load this sample image',
@@ -301,9 +298,6 @@ const translations = {
     // Keyboard hints
     // Tooltips
     doubleClickToCopy: 'Doppelklick zum Kopieren',
-    // Donate
-    donate: 'Projekt unterstützen',
-    donateTitle: 'Spenden via PayPal',
     // Sample images
     sampleImagesLabel: 'Mit Beispielbildern testen:',
     sampleImageHint: 'Klicken um dieses Beispielbild zu laden',

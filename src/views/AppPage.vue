@@ -182,31 +182,6 @@ function handleDownloadImage() {
               :link-text="t('crossLinkToGeneratorCta')"
             />
           </div>
-
-          <div class="donate-section">
-            <form
-              action="https://www.paypal.com/donate"
-              method="post"
-              target="_blank"
-              class="donate-form"
-            >
-              <input type="hidden" name="hosted_button_id" value="8RGLGQ2BFMHU6" />
-              <button type="submit" class="donate-btn" :title="t('donateTitle')">
-                <svg
-                  class="paypal-icon"
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="currentColor"
-                >
-                  <path
-                    d="M7.076 21.337H2.47a.641.641 0 0 1-.633-.74L4.944 3.72a.77.77 0 0 1 .757-.64h6.406c2.612 0 4.52.64 5.67 1.903.482.53.832 1.132 1.04 1.79.218.693.27 1.506.153 2.418l-.013.082v.738l.575.326c.46.248.833.548 1.118.902.483.6.793 1.363.918 2.265.13.938.07 2.055-.178 3.32-.286 1.457-.758 2.724-1.4 3.762a6.41 6.41 0 0 1-2.073 2.085 7.99 7.99 0 0 1-2.6 1.06c-.926.208-1.96.312-3.07.312H11.1a.947.947 0 0 0-.935.796l-.048.3-.61 3.865-.038.188a.946.946 0 0 1-.935.796H7.076z"
-                  />
-                </svg>
-                <span>{{ t('donate') }}</span>
-              </button>
-            </form>
-          </div>
         </div>
       </aside>
 
@@ -222,55 +197,5 @@ function handleDownloadImage() {
 .cross-link-section {
   padding-top: var(--ds-space-4);
   border-top: var(--ds-border-width) solid var(--ds-border);
-}
-
-.donate-section {
-  margin-top: var(--ds-space-3);
-}
-
-.donate-form {
-  display: flex;
-}
-
-/* Ghost button: quiet until hovered, no brand colour. */
-.donate-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--ds-space-2);
-  width: 100%;
-  height: var(--ds-control-md);
-  padding: 0 var(--ds-space-4);
-  background: transparent;
-  border: var(--ds-border-width) solid var(--ds-border-strong);
-  border-radius: var(--ds-radius-md);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-medium);
-  line-height: 1;
-  color: var(--ds-text-2);
-  cursor: pointer;
-  transition: var(--app-transition-colors);
-}
-
-.donate-btn:hover {
-  background: var(--ds-surface-2);
-  color: var(--ds-text);
-}
-
-.donate-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
-}
-
-.paypal-icon {
-  width: var(--ds-icon-sm);
-  height: var(--ds-icon-sm);
-}
-
-@media (max-width: 480px) {
-  .donate-btn {
-    min-height: var(--ds-row-height);
-    font-size: var(--ds-text-md);
-  }
 }
 </style>
