@@ -108,7 +108,7 @@ function hideTooltip() {
     </template>
 
     <!-- Tooltip -->
-    <Teleport to="body">
+    <Teleport to="#app-layer">
       <Transition name="tooltip">
         <div
           v-if="hoveredIndex !== null && store.colors[hoveredIndex]"

@@ -20,6 +20,19 @@ setzt `html[data-theme]`; ein Inline-Skript in `index.html` setzt den Wert vor d
 `localStorage.theme`, damit Dark-Nutzer keinen hellen Flash sehen. `color-scheme` folgt dem Theme,
 damit native Selects und Scrollbalken passen.
 
+## SSI-Partials
+
+Globale Navigation, Footer und Cookie-Banner von kodinitools.com sind SSI-Partials, die als direkte
+Kinder von `<body>` außerhalb von `#app` landen und eigene Flächen mitbringen. `src/assets/main.css`
+gleicht sie an wie der Collage Maker: Hintergründe werden durchsichtig, damit `--ds-surface-0`
+durchscheint, Text kommt aus `--ds-text`, Links aus `--ds-link` mit Hover in `--ds-accent`,
+Dropdowns und Untermenüs bekommen wieder `--ds-surface-1`, Hamburger-Balken folgen der Textfarbe.
+Das Cookie-Banner behält seine eigene Fläche.
+
+Teleportierte Oberflächen (Toasts, Tooltip, Modal) gehen deshalb nie nach `<body>`, sondern nach
+`#app-layer`, das direkt nach `#app` in `index.html` steht und von den Partial-Regeln ausgenommen
+ist. `src/__tests__/ssiPartials.test.ts` prüft beides.
+
 ## Regeln
 
 - **Eine Goldfläche pro Ansicht.** `--ds-accent` füllt genau eine Primäraktion (Upload im Extractor,
