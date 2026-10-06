@@ -83,7 +83,7 @@ onUnmounted(() => {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="#app-layer">
     <Transition name="modal">
       <div v-if="show" class="modal-overlay" @click.self="emit('close')">
         <div class="modal-content">

@@ -5,7 +5,7 @@ const { toasts, remove } = useToast()
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="#app-layer">
     <div class="toast-container">
       <TransitionGroup name="toast">
         <div

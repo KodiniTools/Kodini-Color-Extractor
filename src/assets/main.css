@@ -5,7 +5,8 @@
    und Playlist Generator). Komponenten nutzen keine festen Farbwerte und keine
    eigenen Radien, Schatten oder Dauern; alles kommt aus den Tokens.
    Hier steht nur, was keiner Komponente gehört: Schrift, Reset, Body, die
-   Workspace-Shell beider Tools, Range-Slider, Touch, Bewegung.
+   Angleichung der SSI-Partials, die Workspace-Shell beider Tools,
+   Range-Slider, Touch, Bewegung.
    ========================================================================== */
 
 @import '../design-system/tokens-v2.css';
@@ -87,6 +88,111 @@ input {
   :root {
     --app-nav-height: 50px;
   }
+}
+
+/* ─── SSI-Partials (globale Navigation, Footer, Cookie-Banner) ─────────────
+   kodinitools.com fügt nav.html, footer.html und cookie-banner.html als
+   direkte Kinder von <body> ein, außerhalb von #app. Sie bringen eigene
+   Flächen mit (die Navigation im Light-Theme gelb). Wie im Collage Maker
+   werden ihre Hintergründe durchsichtig, damit --ds-surface-0 durchscheint,
+   und ihre Textfarben kommen aus den Tokens. Da die Variablen mit
+   html[data-theme] wechseln, braucht es keine Dark-Varianten.
+   Ausgenommen sind #app, #app-layer (teleportierte Toasts, Tooltip, Modal)
+   und das Cookie-Banner, das seine eigene Fläche behält. */
+
+/* Wurzel jedes Partials: normale Spezifität. */
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie']) {
+  background-color: transparent !important;
+}
+
+/* Alle Nachfahren: :where() hat Spezifität 0, damit die Wiederherstellung
+   der Menüflächen und Hamburger-Balken unten gewinnt. */
+:where(
+    body
+      > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+        [class*='cookie']
+      ):not([id*='cookie'])
+  )
+  :where(*:not(.cookie-banner):not(.cookie-consent):not([class*='cookie']):not([id*='cookie'])) {
+  background-color: transparent !important;
+}
+
+/* Dropdowns und Untermenüs der Navigation bekommen wieder eine feste Fläche. */
+body
+  > :not(#app):not(#app-layer):not(script)
+  :is(
+    [class*='drop'],
+    [class*='sub-menu'],
+    [class*='submenu'],
+    [class*='popup'],
+    [class*='popover'],
+    [class*='megamenu']
+  ) {
+  background-color: var(--ds-surface-1) !important;
+}
+
+/* Hamburger-Menü: leere Spans sind Balken, die über background-color
+   gezeichnet werden; Icons in Buttons und Umschaltern folgen der Textfarbe. */
+body > :not(#app):not(#app-layer):not(script) span:empty {
+  background-color: currentColor !important;
+  border-color: currentColor !important;
+}
+body
+  > :not(#app):not(#app-layer):not(script)
+  :is(button, [aria-expanded], [role='button'])
+  svg
+  :is(line, path, rect) {
+  stroke: currentColor !important;
+  fill: currentColor !important;
+}
+/* Bootstrap-Toggler (Icon als background-image) per Filter an das Theme anpassen. */
+body > :not(#app):not(#app-layer):not(script) [class*='toggler-icon'] {
+  filter: brightness(0) saturate(100%) !important;
+}
+:root[data-theme='dark'] body > :not(#app):not(#app-layer):not(script) [class*='toggler-icon'] {
+  filter: brightness(0) saturate(100%) invert(1) !important;
+}
+
+/* Textfarben aus den Tokens: Text --ds-text, Links --ds-link, Hover --ds-accent. */
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie']),
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie'])
+  *:not([class*='cookie']):not([id*='cookie']) {
+  color: var(--ds-text) !important;
+}
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie'])
+  a:not([class*='cookie']):not([id*='cookie']),
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie'])
+  a:not([class*='cookie']):not([id*='cookie'])
+  * {
+  color: var(--ds-link) !important;
+}
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie'])
+  a:hover:not([class*='cookie']):not([id*='cookie']),
+body
+  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
+    [class*='cookie']
+  ):not([id*='cookie'])
+  a:hover:not([class*='cookie']):not([id*='cookie'])
+  * {
+  color: var(--ds-accent) !important;
 }
 
 /* === Touch: kein grauer Tap-Highlight, keine Klickverzögerung === */
