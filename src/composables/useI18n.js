@@ -81,6 +81,8 @@ const translations = {
       'A free, privacy-focused tool that runs entirely in your browser. No uploads, no tracking - just pure color extraction.',
     heroCta: 'Start Extracting Colors',
     heroCtaSecondary: 'Open Color Generator',
+    heroImageAlt:
+      'Example result: a rainy forest road covered in autumn leaves, with the seven-color palette extracted from it below, from cream and terracotta to amber, olive and near-black.',
 
     // Cross links between the extractor app and the generator
     crossLinkToGeneratorText: 'No image at hand?',
@@ -334,6 +336,8 @@ const translations = {
       'Ein kostenloses, datenschutzfreundliches Tool, das vollständig in deinem Browser läuft. Keine Uploads, kein Tracking - nur reine Farbextraktion.',
     heroCta: 'Farben extrahieren',
     heroCtaSecondary: 'Farbgenerator öffnen',
+    heroImageAlt:
+      'Beispielergebnis: eine regennasse Waldstraße mit Herbstlaub, darunter die daraus extrahierte Palette mit sieben Farben von Creme und Terrakotta über Bernstein und Oliv bis Fast-Schwarz.',
 
     // Querverweise zwischen Extractor-App und Generator
     crossLinkToGeneratorText: 'Kein Bild zur Hand?',
