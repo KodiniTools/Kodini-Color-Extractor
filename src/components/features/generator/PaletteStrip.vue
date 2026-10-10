@@ -86,16 +86,18 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 </template>
 
 <style scoped>
-/* Fills the middle of the workspace the way the extractor's canvas does:
-   flat, bordered, no shadow. */
+/* Sits at the top of the workspace at half its height, flat, bordered, no
+   shadow. align-self keeps the top edge where the full-height strip started
+   instead of letting the shared, centring workspace shell move it down. */
 .palette-strip {
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
+  align-self: flex-start;
   display: grid;
   grid-template-columns: repeat(var(--cols), minmax(0, 1fr));
-  min-height: 340px;
-  height: 100%;
+  min-height: 170px;
+  height: 50%;
   gap: 0;
   border: var(--ds-border-width) solid var(--ds-border);
   border-radius: var(--ds-radius-lg);
