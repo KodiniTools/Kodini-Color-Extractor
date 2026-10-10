@@ -7,6 +7,7 @@ const { t } = useI18n()
 // Public asset served under the app base path (resolved at runtime, not
 // bundled) so the URL stays correct on every route.
 const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-example.png'
+const heroImage = import.meta.env.BASE_URL + 'landingpage-colorextractor.webp'
 </script>
 
 <template>
@@ -15,17 +16,31 @@ const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-examp
 
     <!-- Hero Section -->
     <section class="hero">
-      <div class="hero-content">
-        <h1 class="hero-title">{{ t('heroTitle') }}</h1>
-        <p class="hero-subtitle">{{ t('heroSubtitle') }}</p>
-        <div class="hero-actions">
-          <router-link to="/app" class="hero-cta">
-            {{ t('heroCta') }}
-          </router-link>
-          <router-link to="/generator" class="hero-cta hero-cta-secondary">
-            {{ t('heroCtaSecondary') }}
-          </router-link>
+      <div class="hero-intro">
+        <div class="hero-content">
+          <h1 class="hero-title">{{ t('heroTitle') }}</h1>
+          <p class="hero-subtitle">{{ t('heroSubtitle') }}</p>
+          <div class="hero-actions">
+            <router-link to="/app" class="hero-cta">
+              {{ t('heroCta') }}
+            </router-link>
+            <router-link to="/generator" class="hero-cta hero-cta-secondary">
+              {{ t('heroCtaSecondary') }}
+            </router-link>
+          </div>
         </div>
+
+        <!-- Above the fold: loaded eagerly with high priority (LCP candidate). -->
+        <figure class="hero-media">
+          <img
+            class="hero-image"
+            :src="heroImage"
+            :alt="t('heroImageAlt')"
+            width="1200"
+            height="908"
+            fetchpriority="high"
+          />
+        </figure>
       </div>
 
       <!-- Feature Cards Grid -->
@@ -147,9 +162,34 @@ const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-examp
   text-align: center;
 }
 
-.hero-content {
-  max-width: 700px;
+/* Text left, extracted-palette example right; stacks below 900px. */
+.hero-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--ds-space-12);
+  align-items: center;
+  max-width: 1100px;
   margin: 0 auto var(--ds-space-12);
+  text-align: left;
+}
+
+.hero-content {
+  max-width: 560px;
+}
+
+.hero-media {
+  margin: 0;
+  border: var(--ds-border-width) solid var(--ds-border);
+  border-radius: var(--ds-radius-lg);
+  overflow: hidden;
+  background: var(--ds-surface-1);
+  transition: var(--app-transition-colors);
+}
+
+.hero-image {
+  display: block;
+  width: 100%;
+  height: auto;
 }
 
 /* The hero is the largest type in the system: 32 px, bold, tight. */
@@ -172,7 +212,7 @@ const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-examp
 .hero-actions {
   display: flex;
   gap: var(--ds-space-3);
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
@@ -519,6 +559,21 @@ const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-examp
 
 /* Responsive */
 @media (max-width: 900px) {
+  .hero-intro {
+    grid-template-columns: 1fr;
+    gap: var(--ds-space-8);
+    max-width: 640px;
+    text-align: center;
+  }
+
+  .hero-content {
+    max-width: none;
+  }
+
+  .hero-actions {
+    justify-content: center;
+  }
+
   .feature-cards {
     grid-template-columns: 1fr;
     max-width: 400px;
@@ -567,7 +622,8 @@ const generatorImage = import.meta.env.BASE_URL + 'color-palette-generator-examp
     padding: var(--ds-space-8) var(--ds-space-3);
   }
 
-  .hero-content {
+  .hero-intro {
+    gap: var(--ds-space-6);
     margin: 0 auto var(--ds-space-8);
   }
 
