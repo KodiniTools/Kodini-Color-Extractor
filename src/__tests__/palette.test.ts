@@ -1,51 +1,38 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { setActivePinia, createPinia } from 'pinia'
+import { rgbToHslRounded } from '../lib/core/colorGenerator'
 
-describe('palette store - rgbToHsl', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-    vi.resetModules()
-  })
-
-  it('converts pure red (255,0,0) correctly', async () => {
-    const { usePaletteStore } = await import('../stores/palette')
-    const store = usePaletteStore()
-    const hsl = store.rgbToHsl(255, 0, 0)
+// The store labels extracted colors with the rounded HSL from colorGenerator.
+describe('rgbToHslRounded', () => {
+  it('converts pure red (255,0,0) correctly', () => {
+    const hsl = rgbToHslRounded(255, 0, 0)
     expect(hsl.h).toBe(0)
     expect(hsl.s).toBe(100)
     expect(hsl.l).toBe(50)
   })
 
-  it('converts pure green (0,255,0) correctly', async () => {
-    const { usePaletteStore } = await import('../stores/palette')
-    const store = usePaletteStore()
-    const hsl = store.rgbToHsl(0, 255, 0)
+  it('converts pure green (0,255,0) correctly', () => {
+    const hsl = rgbToHslRounded(0, 255, 0)
     expect(hsl.h).toBe(120)
     expect(hsl.s).toBe(100)
     expect(hsl.l).toBe(50)
   })
 
-  it('converts pure blue (0,0,255) correctly', async () => {
-    const { usePaletteStore } = await import('../stores/palette')
-    const store = usePaletteStore()
-    const hsl = store.rgbToHsl(0, 0, 255)
+  it('converts pure blue (0,0,255) correctly', () => {
+    const hsl = rgbToHslRounded(0, 0, 255)
     expect(hsl.h).toBe(240)
     expect(hsl.s).toBe(100)
     expect(hsl.l).toBe(50)
   })
 
-  it('converts white (255,255,255) correctly', async () => {
-    const { usePaletteStore } = await import('../stores/palette')
-    const store = usePaletteStore()
-    const hsl = store.rgbToHsl(255, 255, 255)
+  it('converts white (255,255,255) correctly', () => {
+    const hsl = rgbToHslRounded(255, 255, 255)
     expect(hsl.s).toBe(0)
     expect(hsl.l).toBe(100)
   })
 
-  it('converts black (0,0,0) correctly', async () => {
-    const { usePaletteStore } = await import('../stores/palette')
-    const store = usePaletteStore()
-    const hsl = store.rgbToHsl(0, 0, 0)
+  it('converts black (0,0,0) correctly', () => {
+    const hsl = rgbToHslRounded(0, 0, 0)
     expect(hsl.s).toBe(0)
     expect(hsl.l).toBe(0)
   })

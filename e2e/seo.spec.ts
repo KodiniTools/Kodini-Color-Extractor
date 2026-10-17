@@ -60,7 +60,11 @@ test.describe('SEO head management', () => {
     await page.goto('/kodini-color-extractor/app/gallery')
     // Router may redirect on handoff data; without it we land on the gallery
     if (page.url().includes('/app/gallery')) {
-      expect(await attr(page, 'meta[name="robots"]', 'content')).toBe('noindex, follow')
+      // Pages load lazily, so wait for the route's SEO tags instead of reading once.
+      await expect(page.locator('meta[name="robots"]')).toHaveAttribute(
+        'content',
+        'noindex, follow'
+      )
     }
   })
 })
