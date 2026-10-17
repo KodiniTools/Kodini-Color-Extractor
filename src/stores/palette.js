@@ -12,6 +12,8 @@ import {
 } from '../lib/core/paletteExport'
 
 let filterDebounceTimer = null
+// Bumped on every extractColors call, so only the latest request writes colors.
+let extractionId = 0
 
 export const usePaletteStore = defineStore('palette', () => {
   const colors = ref([])
@@ -59,6 +61,7 @@ export const usePaletteStore = defineStore('palette', () => {
   }
 
   function clearImage() {
+    extractionId++ // drop any extraction still running for the old image
     currentImage.value = null
     colors.value = []
     imageData.value = null
@@ -178,35 +181,13 @@ export const usePaletteStore = defineStore('palette', () => {
     })
   }
 
-  /**
-   * Returns pixel coordinates for `count` dots arranged in centred horizontal
-   * rows of up to 5 dots each, aligned to the middle of the image.
-   */
-  function getCenteredGridPositions(count, width, height) {
-    const COLS = 5
-    const numRows = Math.ceil(count / COLS)
-    const colGap = width / (COLS + 1)
-    const rowGap = numRows === 1 ? 0 : Math.min(height * 0.12, 70)
-    const startY = height / 2 - ((numRows - 1) * rowGap) / 2
-
-    return Array.from({ length: count }, (_, i) => {
-      const row = Math.floor(i / COLS)
-      const col = i % COLS
-      const dotsInRow = Math.min(COLS, count - row * COLS)
-      const rowWidth = (dotsInRow - 1) * colGap
-      const rowStartX = (width - rowWidth) / 2
-      return {
-        x: Math.round(rowStartX + col * colGap),
-        y: Math.round(startY + row * rowGap),
-      }
-    })
-  }
-
   function extractColors(imgSrc) {
+    const requestId = ++extractionId
     return new Promise((resolve) => {
       const img = new Image()
       img.crossOrigin = 'anonymous'
       img.onload = () => {
+        if (requestId !== extractionId) return resolve(colors.value)
         const canvas = document.createElement('canvas')
         const ctx = canvas.getContext('2d')
 
@@ -232,15 +213,23 @@ export const usePaletteStore = defineStore('palette', () => {
         const worker = new Worker(new URL('../workers/colorExtractor.worker.js', import.meta.url), {
           type: 'module',
         })
-        worker.postMessage(
-          { pixelBuffer, width: canvas.width, height: canvas.height, colorCount: colorCount.value },
-          [pixelBuffer]
-        )
+        worker.postMessage({ pixelBuffer, width: canvas.width, colorCount: colorCount.value }, [
+          pixelBuffer,
+        ])
         worker.onmessage = ({ data: { sorted } }) => {
           worker.terminate()
-          const positions = getCenteredGridPositions(sorted.length, canvas.width, canvas.height)
-          // Assign grid positions, then re-sample pixel colors at those positions
-          colors.value = sorted.map((c, i) => ({ ...c, position: positions[i] }))
+          // A newer extraction started meanwhile: its result wins.
+          if (requestId !== extractionId) return resolve(colors.value)
+          // Each dominant color sits on a real pixel of that color; re-sample
+          // there so active image adjustments apply right away.
+          colors.value = sorted.map(({ r, g, b, hex, hsl, position }) => ({
+            r,
+            g,
+            b,
+            hex,
+            hsl,
+            position,
+          }))
           updateAllColorsFromFilteredCanvas()
           resolve(colors.value)
         }
@@ -249,6 +238,7 @@ export const usePaletteStore = defineStore('palette', () => {
           resolve([])
         }
       }
+      img.onerror = () => resolve([])
       img.src = imgSrc
     })
   }
