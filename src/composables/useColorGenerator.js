@@ -341,7 +341,7 @@ export function useColorGenerator() {
     )
     try {
       await navigator.clipboard.writeText(value)
-      toast.success(t('genCopied').replace('{hex}', value))
+      toast.success(t('genCopied', { hex: value }))
     } catch {
       toast.error(t('clipboardError'))
     }
@@ -368,7 +368,7 @@ export function useColorGenerator() {
     if (!hexes.length) return
     try {
       await navigator.clipboard.writeText(hexes.join(', '))
-      toast.success(t('genCopiedSelected').replace('{n}', hexes.length))
+      toast.success(t('genCopiedSelected', { n: hexes.length }))
     } catch {
       toast.error(t('clipboardError'))
     }
@@ -393,7 +393,7 @@ export function useColorGenerator() {
   function downloadPalette() {
     const file = buildPaletteExport(exportFormatKey.value, exportEntries())
     if (!downloadPaletteFile(file)) return
-    toast.success(t('genDownloaded').replace('{file}', file.filename))
+    toast.success(t('genDownloaded', { file: file.filename }))
     recordUse()
   }
 
@@ -470,9 +470,7 @@ export function useColorGenerator() {
     // Fills any missing slots (fewer than MIN_COUNT colors) and records the
     // history step; locked colors stay as they are.
     generate()
-    toast.success(
-      hexes.length > MAX_COUNT ? t('genLinkTruncated').replace('{n}', MAX_COUNT) : message
-    )
+    toast.success(hexes.length > MAX_COUNT ? t('genLinkTruncated', { n: MAX_COUNT }) : message)
   }
 
   // Copy a link that reopens the generator with the displayed colors.

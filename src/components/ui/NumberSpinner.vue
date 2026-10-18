@@ -141,8 +141,8 @@ function startHold(direction) {
 
 onUnmounted(stopHold)
 
-const upLabel = computed(() => t('genStepUp').replace('{label}', props.label))
-const downLabel = computed(() => t('genStepDown').replace('{label}', props.label))
+const upLabel = computed(() => t('genStepUp', { label: props.label }))
+const downLabel = computed(() => t('genStepDown', { label: props.label }))
 </script>
 
 <template>

@@ -19,7 +19,7 @@ const report = computed(() => colorVisionReport(props.colors))
 const normal = computed(() => report.value[0]?.colors.map((c) => c.hex) ?? [])
 
 function issuesLabel(row) {
-  return t('visionIssues').replace('{n}', String(row.confusable.length))
+  return t('visionIssues', { n: row.confusable.length })
 }
 </script>
 

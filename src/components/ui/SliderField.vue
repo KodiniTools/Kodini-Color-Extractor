@@ -40,7 +40,7 @@ const isAtDefault = computed(() => hasDefault.value && props.modelValue === prop
 const resetTitle = computed(() =>
   hasDefault.value ? `${t('reset')} (${props.defaultValue}${props.unit})` : ''
 )
-const resetLabel = computed(() => t('genResetField').replace('{label}', props.label))
+const resetLabel = computed(() => t('genResetField', { label: props.label }))
 
 function onRangeInput(event) {
   const n = Number(event.target.value)
