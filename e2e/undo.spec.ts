@@ -37,36 +37,26 @@ test.describe('Extractor undo/redo', () => {
   })
 
   test('Ctrl+Z puts a dragged color point back', async ({ page }) => {
-    const first = page.locator('.color-primary').first()
-    const before = await first.textContent()
     const point = page.locator('.color-indicator').first()
-    const box = await point.boundingBox()
-    if (!box) throw new Error('color point not visible')
+    // Mouse events only land inside the viewport.
+    await point.scrollIntoViewIfNeeded()
+    const start = await point.boundingBox()
     const image = await page.locator('.preview-image').boundingBox()
-    if (!image) throw new Error('image not visible')
+    if (!start || !image) throw new Error('color point or image not visible')
+    const pointX = async () => (await point.boundingBox())?.x ?? NaN
 
-    // Drag the point to the far corner of the image, a different color.
-    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2)
+    // Drag the point to the top-left of the image. Moves are applied on the
+    // next animation frame, so wait for the point to follow before releasing.
+    await page.mouse.move(start.x + start.width / 2, start.y + start.height / 2)
     await page.mouse.down()
-    const targets = [
-      [image.x + 5, image.y + 5],
-      [image.x + image.width - 5, image.y + image.height - 5],
-    ]
-    let moved = false
-    for (const [x, y] of targets) {
-      await page.mouse.move(x, y, { steps: 8 })
-      if ((await first.textContent()) !== before) {
-        moved = true
-        break
-      }
-    }
+    await page.mouse.move(image.x + 20, Math.max(image.y, 0) + 20, { steps: 8 })
+    await expect.poll(pointX).toBeLessThan(start.x - 50)
     await page.mouse.up()
-    expect(moved).toBe(true)
-    const after = await first.textContent()
+    const dragged = await pointX()
 
     await page.keyboard.press('Control+z')
-    await expect(first).toHaveText(before ?? '')
+    await expect.poll(pointX).toBeCloseTo(start.x, 0)
     await page.keyboard.press('Control+y')
-    await expect(first).toHaveText(after ?? '')
+    await expect.poll(pointX).toBeCloseTo(dragged, 0)
   })
 })
