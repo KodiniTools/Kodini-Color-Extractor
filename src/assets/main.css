@@ -50,6 +50,8 @@
     border-color var(--ds-duration) var(--ds-ease), color var(--ds-duration) var(--ds-ease);
   /* Abstand zur fixen globalen Navigation von kodinitools.com. */
   --app-nav-height: 60px;
+  /* Abdunklung hinter Dialogen, in beiden Themes gleich. */
+  --app-scrim: rgb(0 0 0 / 0.5);
   color-scheme: light;
 }
 

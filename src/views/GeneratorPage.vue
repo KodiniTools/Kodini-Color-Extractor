@@ -1,4 +1,5 @@
 <script setup>
+import { computed, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useColorGenerator } from '../composables/useColorGenerator'
 import ToastContainer from '../components/ToastContainer.vue'
@@ -7,6 +8,8 @@ import LandingNav from '../components/LandingNav.vue'
 import PanelSection from '../components/ui/PanelSection.vue'
 import AdjustmentsPanel from '../components/features/generator/AdjustmentsPanel.vue'
 import PaletteStrip from '../components/features/generator/PaletteStrip.vue'
+import ContrastDialog from '../components/ContrastDialog.vue'
+import { displayHex } from '../lib/core/colorGenerator'
 
 const { t } = useI18n()
 
@@ -51,6 +54,10 @@ const {
   undo,
   redo,
 } = useColorGenerator()
+
+// The contrast check works on the colors as shown, adjustments included.
+const showContrast = ref(false)
+const paletteHexes = computed(() => palette.value.map(displayHex))
 
 // Changing the harmony updates the mode and regenerates in one go.
 function onModeChange(event) {
@@ -165,6 +172,20 @@ function onModeChange(event) {
               </svg>
               <span>{{ t('genCopyLink') }}</span>
             </button>
+            <button class="export-btn" @click="showContrast = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+              </svg>
+              <span>{{ t('contrastOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -216,6 +237,7 @@ function onModeChange(event) {
         @redo="redo"
       />
 
+      <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
       <ToastContainer />
     </div>
   </div>
