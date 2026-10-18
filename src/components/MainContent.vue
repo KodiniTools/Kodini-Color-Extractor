@@ -169,7 +169,7 @@ onUnmounted(() => {
               selected: store.selectedColorIndex === index,
               dragging: isDragging && dragIndex === index,
             }"
-            :style="getIndicatorStyle(color, index)"
+            :style="getIndicatorStyle(color)"
             @mousedown="startDragWithRects($event, index)"
             @touchstart.prevent="startDragWithRects($event, index)"
             @click.stop="selectColor(index)"
@@ -284,8 +284,8 @@ onUnmounted(() => {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  border: 3px solid #ffffff;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  border: 3px solid var(--app-overlay-light);
+  box-shadow: 0 0 0 1px var(--app-overlay-edge);
   cursor: grab;
   z-index: 10;
   transition:
@@ -298,14 +298,14 @@ onUnmounted(() => {
 }
 
 .color-indicator:hover {
-  box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 2px var(--app-overlay-edge);
 }
 
 .color-indicator.selected {
-  border-color: #ffffff;
+  border-color: var(--app-overlay-light);
   box-shadow:
     0 0 0 2px var(--ds-accent),
-    0 0 0 3px rgba(0, 0, 0, 0.35);
+    0 0 0 3px var(--app-overlay-edge);
 }
 
 .color-indicator.dragging {

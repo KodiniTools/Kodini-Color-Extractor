@@ -50,8 +50,31 @@
     border-color var(--ds-duration) var(--ds-ease), color var(--ds-duration) var(--ds-ease);
   /* Abstand zur fixen globalen Navigation von kodinitools.com. */
   --app-nav-height: 60px;
-  /* Abdunklung hinter Dialogen, in beiden Themes gleich. */
+
+  /* Feste Farben für Elemente über beliebigen Bild- und Palettenfarben.
+     Sie hängen nicht am Theme, weil der Untergrund nicht vom Theme kommt. */
+  /* Abdunklung hinter Dialogen. */
   --app-scrim: rgb(0 0 0 / 0.5);
+  /* Ring, Linie und Schrift über Fotos und dunklen Swatches. */
+  --app-overlay-light: #ffffff;
+  /* Dünne dunkle Kante, damit der helle Ring auch auf hellen Fotos sichtbar bleibt. */
+  --app-overlay-edge: rgb(0 0 0 / 0.35);
+  /* Hintergrund der Vorher/Nachher-Beschriftung im Bild. */
+  --app-overlay-label: rgb(0 0 0 / 0.7);
+  /* Neutrale Tönung für Hover und aktive Knöpfe auf Swatches jeder Farbe. */
+  --app-swatch-hover: rgb(127 127 127 / 0.18);
+  --app-swatch-active: rgb(127 127 127 / 0.22);
+  /* Der Farbkreis des Farbton-Reglers. */
+  --app-hue-spectrum: linear-gradient(
+    to right,
+    hsl(0, 100%, 50%),
+    hsl(60, 100%, 50%),
+    hsl(120, 100%, 50%),
+    hsl(180, 100%, 50%),
+    hsl(240, 100%, 50%),
+    hsl(300, 100%, 50%),
+    hsl(360, 100%, 50%)
+  );
   color-scheme: light;
 }
 
@@ -254,16 +277,7 @@ body
 /* Der Farbton-Regler zeigt den Farbkreis: der einzige Verlauf im System,
    weil er den Wert selbst abbildet. */
 #app input[type='range'].slider-field__range--hue {
-  background: linear-gradient(
-    to right,
-    hsl(0, 100%, 50%),
-    hsl(60, 100%, 50%),
-    hsl(120, 100%, 50%),
-    hsl(180, 100%, 50%),
-    hsl(240, 100%, 50%),
-    hsl(300, 100%, 50%),
-    hsl(360, 100%, 50%)
-  );
+  background: var(--app-hue-spectrum);
 }
 
 @media (pointer: coarse) {

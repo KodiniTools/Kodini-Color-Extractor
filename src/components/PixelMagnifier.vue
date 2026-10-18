@@ -24,7 +24,7 @@ defineExpose({ canvas })
   position: absolute;
   width: 120px;
   height: 120px;
-  border: 3px solid #ffffff;
+  border: 3px solid var(--app-overlay-light);
   border-radius: 50%;
   box-shadow: var(--ds-shadow-overlay);
   pointer-events: none;
@@ -49,7 +49,7 @@ defineExpose({ canvas })
   width: 4px;
   height: 4px;
   background: var(--ds-text);
-  border: 1px solid #ffffff;
+  border: 1px solid var(--app-overlay-light);
   transform: translate(-50%, -50%);
 }
 

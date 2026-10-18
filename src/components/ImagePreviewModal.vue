@@ -176,7 +176,7 @@ onUnmounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--app-scrim);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -291,8 +291,8 @@ onUnmounted(() => {
   position: absolute;
   bottom: var(--ds-space-3);
   padding: var(--ds-space-1) var(--ds-space-3);
-  background: rgba(0, 0, 0, 0.7);
-  color: #ffffff;
+  background: var(--app-overlay-label);
+  color: var(--app-overlay-light);
   font-size: var(--ds-text-xs);
   font-weight: var(--ds-weight-semibold);
   border-radius: var(--ds-radius-sm);
@@ -313,7 +313,7 @@ onUnmounted(() => {
   top: 0;
   bottom: 0;
   width: 3px;
-  background: #ffffff;
+  background: var(--app-overlay-light);
   transform: translateX(-50%);
 }
 
@@ -324,12 +324,12 @@ onUnmounted(() => {
   transform: translate(-50%, -50%);
   width: var(--ds-row-height);
   height: var(--ds-row-height);
-  background: #ffffff;
+  background: var(--app-overlay-light);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 0 0 1px var(--app-overlay-edge);
   color: var(--ds-on-accent);
 }
 

@@ -2,300 +2,178 @@
 
 ## Übersicht
 
-Der Kodini Color Extractor ist eine clientseitige Vue 3 Single-Page-Application zur Extraktion von Farbpaletten aus Bildern. Die Anwendung verarbeitet alle Daten lokal im Browser - es gibt kein Backend und keine Datenbank.
+Der Kodini Color Extractor ist eine clientseitige Vue-3-Single-Page-Application auf
+kodinitools.com (Basis-Pfad `/kodini-color-extractor/`). Sie besteht aus zwei Werkzeugen:
+
+- **Extraktor** (`/app`): Er liest die dominanten Farben eines Bildes aus, das hochgeladen, eingefügt oder aus den
+  Beispielbildern gewählt wird. Die Farbpunkte lassen sich auf dem Bild verschieben, das Bild lässt sich anpassen,
+  und die Palette kann als Text oder Bild exportiert werden.
+- **Generator** (`/generator`): Er erzeugt Paletten aus Farbharmonien und Stil-Presets. Farben lassen sich sperren
+  und anpassen, mit Undo/Redo, und die Palette kann exportiert und per Link geteilt werden.
+
+Alle Daten werden lokal im Browser verarbeitet. Es gibt kein Backend und keine Datenbank.
 
 ---
 
 ## Tech-Stack
 
-### Frontend Framework
+| Technologie     | Version (package.json) | Zweck                                                   |
+| --------------- | ---------------------- | ------------------------------------------------------- |
+| Vue 3           | ^3.5                   | UI, Composition API, `<script setup>`-SFCs (JavaScript) |
+| Vue Router      | ^4.6                   | Routing, History-Modus, Seiten als Lazy-Chunks          |
+| Pinia           | ^3.0                   | State des Extraktors (`stores/palette.js`)              |
+| Vite            | ^8.3                   | Dev-Server und Build                                    |
+| Vitest + jsdom  | ^4.1                   | Unit- und Komponententests (`src/__tests__/`)           |
+| Playwright      | ^1.64                  | E2E-Tests (`e2e/`), Chromium                            |
+| ESLint/Prettier | ^10 / ^3.9             | Lint und Formatierung                                   |
+| vue-tsc         | ^3.3                   | Typcheck (`npm run build:check`)                        |
 
-| Technologie | Version | Beschreibung                                   |
-| ----------- | ------- | ---------------------------------------------- |
-| Vue 3       | ^3.4.21 | Reaktives Frontend-Framework (Composition API) |
-| Pinia       | ^2.1.7  | State-Management                               |
-| Vite        | ^5.2.8  | Build-Tool und Dev-Server                      |
+Node: `^20.19.0 || >=22.12.0`. Die CI (`.github/workflows/ci.yml`) führt format:check, lint, build:check, test und
+build aus und startet die E2E-Tests in einem eigenen Job.
 
-### Styling
-
-- **CSS3** mit CSS Custom Properties (Variablen)
-- Scoped Component Styles
-- Light/Dark Theme Support
-
-### Bildverarbeitung
-
-- **HTML5 Canvas API** - Bildanalyse und Farbextraktion
-- **Clipboard API** - Copy/Paste Funktionalität
-- **File API** - Drag & Drop Upload
-
-### Backend
-
-- **Keines** - Vollständig clientseitige Anwendung
-- DSGVO-konform (keine Daten werden an Server gesendet)
-
-### Dependencies (package.json)
-
-```json
-{
-  "dependencies": {
-    "pinia": "^2.1.7",
-    "vue": "^3.4.21"
-  },
-  "devDependencies": {
-    "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.8"
-  }
-}
-```
+Browser-APIs: Canvas (Pixelanalyse, Bildanpassungen, Bildexport), Web Worker (Farbextraktion), Clipboard (Kopieren
+und Einfügen), File API (Drag & Drop).
 
 ---
 
 ## Ordnerstruktur
 
 ```
-Kodini-Color-Extractor/
-├── src/                              # Quellcode
-│   ├── main.js                       # Vue App Entry Point
-│   ├── App.vue                       # Root-Komponente (Layout + Hauptsteuerung)
-│   │
-│   ├── assets/
-│   │   └── main.css                  # Globale Styles mit CSS-Variablen
-│   │
-│   ├── components/                   # Vue Single File Components
-│   │   ├── ImageUploader.vue         # Drag-Drop Upload Interface
-│   │   ├── MainContent.vue           # Bildanzeige mit draggbaren Farbindikatoren
-│   │   ├── ImageEditPanel.vue        # Slider für Zoom, Helligkeit, Kontrast, etc.
-│   │   ├── ColorList.vue             # Anzeige der extrahierten Farbpalette
-│   │   ├── ImagePreviewModal.vue     # Vorher/Nachher Vergleich
-│   │   ├── SampleImages.vue          # Galerie mit Beispielbildern
-│   │   └── ToastContainer.vue        # Benachrichtigungssystem
-│   │
-│   ├── composables/                  # Wiederverwendbare Composition Logic
-│   │   ├── useI18n.js                # Internationalisierung (DE/EN)
-│   │   ├── useKeyboard.js            # Tastaturkürzel-Handler
-│   │   ├── useToast.js               # Toast-Benachrichtigungen
-│   │   └── useTheme.js               # Dark/Light Theme Management
-│   │
-│   └── stores/
-│       └── palette.js                # Pinia Store (zentrale State-Verwaltung)
-│
-├── public/
-│   └── samples/                      # Beispielbilder zum Testen
-│       ├── sample-1.jpg ... sample-8.jpg
-│       └── README.md
-│
-├── index.html                        # HTML Entry Point
-├── vite.config.js                    # Vite Build-Konfiguration
-├── package.json                      # Dependencies und Scripts
-├── .gitignore                        # Git-Ausschlüsse
-├── README.md                         # Projektdokumentation
-└── CONTEXT.md                        # Diese Datei
+src/
+├── main.js                      # App, Pinia, Router
+├── App.vue                      # nur <router-view>
+├── router/index.js              # Routen, Titel, Handoff-Weiterleitung zur Galerie
+├── views/
+│   ├── LandingPage.vue          # /
+│   ├── AppPage.vue              # /app – Extraktor
+│   ├── GeneratorPage.vue        # /generator – Generator
+│   ├── GalleryView.vue          # /app/gallery – Bilder aus anderen Kodini-Tools (noindex)
+│   └── FaqPage.vue              # /faq
+├── components/
+│   ├── ImageUploader.vue, SampleImages.vue, MainContent.vue, PixelMagnifier.vue,
+│   │   ColorList.vue, ImageEditPanel.vue, ImagePreviewModal.vue        # Extraktor
+│   ├── ContrastDialog.vue       # WCAG-Kontrastcheck (Extraktor und Generator)
+│   ├── LandingNav.vue, ToolCrossLink.vue, ToastContainer.vue
+│   ├── features/generator/      # PaletteStrip.vue, AdjustmentsPanel.vue
+│   ├── features/HandoffReceiver.vue
+│   └── ui/                      # PanelSection, SliderField, NumberSpinner
+├── composables/
+│   ├── useColorGenerator.js     # gesamter Generator-State inkl. Undo/Redo, Export, Teilen-Link
+│   ├── useCanvasDrag.js, useCanvasPan.js, useFileDrop.js   # Interaktion auf dem Bild
+│   ├── useKeyboard.js           # Tastaturkürzel des Extraktors
+│   ├── useI18n.js               # DE/EN, Standard de
+│   ├── useSeo.js, useToast.js
+├── lib/core/                    # framework-freie Logik
+│   ├── dominantColors.js        # Histogramm-Extraktion (läuft im Worker)
+│   ├── colorGenerator.js        # Farbkonvertierung, Harmonien, Anpassungen
+│   ├── paletteExport.js         # alle Exportformate, geteilt von Extraktor und Generator
+│   ├── paletteLink.js           # Paletten im URL-Hash (#p=rrggbb-…)
+│   ├── contrast.js              # WCAG-Kontrast, Stufen, Paarvorschläge
+│   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage)
+│   └── seo.js
+├── stores/
+│   ├── palette.js               # Extraktor
+│   └── handoff.js               # empfangene Galerie-Bilder
+├── workers/colorExtractor.worker.js
+├── design-system/               # geteilte --ds-* Tokens, siehe README dort
+└── assets/main.css              # globale Styles, --app-* Tokens
+e2e/                             # Playwright-Specs
+public/samples/                  # 8 Beispielbilder
 ```
-
-### Verzeichnis-Beschreibungen
-
-| Verzeichnis        | Beschreibung                                            |
-| ------------------ | ------------------------------------------------------- |
-| `src/components/`  | UI-Komponenten für spezifische Features                 |
-| `src/composables/` | Wiederverwendbare Logik (i18n, Keyboard, Toasts, Theme) |
-| `src/stores/`      | Pinia Store für zentrales State Management              |
-| `src/assets/`      | Globale CSS-Styles                                      |
-| `public/samples/`  | 8 Beispielbilder zum Testen der Anwendung               |
 
 ---
 
-## Datenbankschema / Datenmodelle
+## Datenmodell
 
-Da es sich um eine reine Client-Anwendung handelt, gibt es **keine Datenbank**. Alle Daten werden im Browser-Speicher über den Pinia Store verwaltet.
+Es gibt keine Datenbank. Der Extraktor hält seinen State im Pinia-Store, der Generator in `useColorGenerator`.
 
-### Haupt-State (stores/palette.js)
+### Extraktor (`stores/palette.js`)
 
-```javascript
-{
-  // Extrahierte Farben
-  colors: Array<Color>,
-
-  // Bildverarbeitung
-  currentImage: string,                    // Base64 Data URL
-  imageData: ImageData,                    // Canvas ImageData Objekt
-  originalImageSize: ImageSize,
-
-  // Einstellungen
-  colorCount: number,                      // Anzahl zu extrahierender Farben (1-20)
-
-  // Canvas-Referenzen
-  canvasRef: HTMLCanvasElement,
-  filteredCanvasRef: HTMLCanvasElement,
-
-  // Export-Einstellungen
-  downloadFormat: DownloadFormat,
-  imageExportFormat: ImageFormat,
-  imageExportSize: ExportSize,
-
-  // Bildanpassungen
-  imageAdjustments: ImageAdjustments,
-  panPosition: Position,
-
-  // UI-State
-  selectedColorIndex: number
-}
-```
-
-### Typ-Definitionen
-
-#### Color
+| State                           | Inhalt                                                                     |
+| ------------------------------- | -------------------------------------------------------------------------- |
+| `colors`                        | `Color[]`, nach Häufigkeit sortiert                                        |
+| `currentImage`                  | Data-URL des geladenen Bildes                                              |
+| `colorCount`                    | 1–20, Standard 5                                                           |
+| `selectedColorIndex`            | ausgewählte Farbe, `-1` für keine                                          |
+| `originalImageSize`             | `{ width, height }`                                                        |
+| `imageAdjustments`              | `zoom`, `brightness`, `contrast`, `saturation`, `hue`, `blur`, `grayscale` |
+| `panPosition`                   | `{ x, y }`                                                                 |
+| `downloadFormat`                | Schlüssel aus `EXPORT_FORMATS` (paletteExport.js)                          |
+| `imageExportFormat` / `...Size` | `png \| jpeg \| webp` / `small \| medium \| large \| xlarge`               |
 
 ```typescript
 interface Color {
-  r: number // Rot (0-255)
-  g: number // Grün (0-255)
-  b: number // Blau (0-255)
-  hex: string // HEX-Wert (#RRGGBB)
-  hsl: {
-    h: number // Farbton (0-360)
-    s: number // Sättigung (0-100)
-    l: number // Helligkeit (0-100)
-  }
-  position: {
-    x: number // X-Koordinate im Originalbild
-    y: number // Y-Koordinate im Originalbild
-  }
+  r: number
+  g: number
+  b: number // 0–255
+  hex: string // #RRGGBB
+  hsl: { h: number; s: number; l: number }
+  position: { x: number; y: number } // Pixel im Originalbild
 }
 ```
 
-#### ImageSize
+Die Extraktion läuft im Web Worker. Eine laufende Extraktion wird verworfen, sobald ein neueres Bild sie überholt
+(`extractionId`).
 
-```typescript
-interface ImageSize {
-  width: number // Breite in Pixeln
-  height: number // Höhe in Pixeln
-}
-```
+### Generator (`composables/useColorGenerator.js`)
 
-#### ImageAdjustments
+Jeder Eintrag der Palette hat die Form `{ base: {r,g,b}, adj: {brightness, contrast, saturation, hue}, locked }`.
+Angezeigt und exportiert wird `displayHex(color)`, also die Grundfarbe mit den Anpassungen. Gesperrte Farben
+überstehen das Neugenerieren und Anpassungen. Undo/Redo speichert Snapshots der ganzen Palette.
 
-```typescript
-interface ImageAdjustments {
-  zoom: number // 100-300+ (Prozent)
-  brightness: number // 0-200 (Prozent)
-  contrast: number // 0-200 (Prozent)
-  saturation: number // 0-200 (Prozent)
-  hue: number // 0-360 (Grad)
-}
-```
+### Exportformate (`lib/core/paletteExport.js`)
 
-#### Position
+HEX, RGB, RGBA, HSL, HSLA, CSS-Variablen, SCSS, Tailwind und Design-Tokens (JSON). Der Extraktor exportiert
+außerdem ein Palettenbild als PNG, JPG oder WebP.
 
-```typescript
-interface Position {
-  x: number // X-Offset in Pixeln
-  y: number // Y-Offset in Pixeln
-}
-```
+### Persistenz im Browser
 
-#### Enums / Konstanten
-
-```typescript
-type DownloadFormat = 'hex' | 'rgb' | 'rgba' | 'hsl' | 'hsla' | 'css'
-type ImageFormat = 'png' | 'jpeg' | 'webp'
-type ExportSize = 'small' | 'medium' | 'large' | 'xlarge'
-
-const exportSizes = {
-  small: { label: 'Small (400px)', width: 400 },
-  medium: { label: 'Medium (800px)', width: 800 },
-  large: { label: 'Large (1200px)', width: 1200 },
-  xlarge: { label: 'XL (1600px)', width: 1600 },
-}
-```
-
-### Toast-System (composables/useToast.js)
-
-```typescript
-interface Toast {
-  id: number
-  message: string
-  type: 'success' | 'error' | 'info'
-}
-```
-
-### Theme-Persistierung
-
-```javascript
-// Gespeichert in localStorage
-{
-  key: 'kodini-color-theme',
-  value: 'light' | 'dark'
-}
-```
-
-### I18n-Struktur (composables/useI18n.js)
-
-```javascript
-{
-  en: { [key: string]: string },  // ~60 englische Übersetzungen
-  de: { [key: string]: string }   // ~60 deutsche Übersetzungen
-}
-```
+| Schlüssel             | Wo                      | Inhalt                                         |
+| --------------------- | ----------------------- | ---------------------------------------------- |
+| `localStorage.locale` | useI18n, globale Nav    | `de` oder `en`                                 |
+| `localStorage.theme`  | index.html, globale Nav | `light` oder `dark` (`html[data-theme]`)       |
+| Handoff-Schlüssel     | lib/core/handoff.js     | Bilder aus anderen Kodini-Tools                |
+| URL-Hash `#p=…`       | Generator               | geteilte Palette, wird nach dem Laden entfernt |
 
 ---
 
-## Architektur-Patterns
+## Architektur-Regeln
 
-### State Management
-
-- Zentraler Pinia Store (`usePaletteStore`)
-- Reactive Refs und Computed Properties
-- Klare Trennung von State, Getters und Actions
-
-### Komponenten-Architektur
-
-- **App.vue** - Root-Komponente mit Layout
-- **Spezialisierte Komponenten** - Eine Komponente pro Feature
-- Props für Konfiguration, Emits für Kind-zu-Eltern-Kommunikation
-
-### Composables Pattern
-
-| Composable      | Funktion                                     |
-| --------------- | -------------------------------------------- |
-| `useI18n()`     | Zweisprachigkeit mit Fallback auf Englisch   |
-| `useKeyboard()` | Tastaturkürzel (Ctrl+C, Ctrl+V, Pfeiltasten) |
-| `useToast()`    | Globales Benachrichtigungssystem             |
-| `useTheme()`    | System-Präferenz-Erkennung + localStorage    |
+- **Tokens statt Farben:** UI-Farben kommen aus `--ds-*` (`src/design-system/`). Feste Farben für Elemente über Fotos
+  oder Palettenfarben (Ringe, Kanten, Abdunklung, Farbkreis) stehen nur als `--app-*` Tokens im ersten `:root`-Block
+  von `main.css`. `src/__tests__/designTokens.test.ts` prüft das.
+- **Teleports nach `#app-layer`**, nie nach `<body>`, weil die SSI-Partials von kodinitools.com dort eigene Regeln
+  haben (siehe `src/design-system/README.md`).
+- **Keine Spenden-Elemente** (`src/__tests__/noDonation.test.ts`).
+- **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
 
 ---
 
-## Wichtige Funktionen (stores/palette.js)
+## Tastaturkürzel
 
-| Funktion                    | Beschreibung                                    |
-| --------------------------- | ----------------------------------------------- |
-| `extractColors()`           | Analysiert Bild und extrahiert dominante Farben |
-| `updateColorFromPosition()` | Holt Pixelfarbe an gezogener Position           |
-| `applyFiltersToCanvas()`    | Wendet Bildanpassungen an                       |
-| `getPixelZoomData()`        | Liefert Pixel-Daten für Zoom-Lupe               |
-| `downloadTxt()`             | Exportiert Palette als Textdatei                |
-| `downloadImage()`           | Exportiert Palette als Bild                     |
-| `copyPalette()`             | Kopiert formatierte Palette in Zwischenablage   |
-| `rgbToHsl()`                | RGB zu HSL Farbraum-Konvertierung               |
-
----
-
-## Features
-
-- Drag & Drop Farbindikatoren auf dem Bild
-- Pixel-Zoom (12x12 Pixel Lupe)
-- Echtzeit-Bildanpassungen (Canvas API)
-- Vorher/Nachher-Vergleich
-- 6 Farbformat-Optionen + 3 Bildformate für Export
-- Zweisprachige UI (DE/EN)
-- Tastaturkürzel
-- 8 Beispielbilder
-- Dark Mode mit persistenter Präferenz
+| Taste                                     | Extraktor                            | Generator    |
+| ----------------------------------------- | ------------------------------------ | ------------ |
+| Strg/Cmd + V                              | Bild aus der Zwischenablage einfügen |              |
+| Strg/Cmd + C                              | ausgewählte Farbe kopieren           |              |
+| Enter                                     | ausgewählte Farbe kopieren           |              |
+| ↑ / ↓                                     | vorherige / nächste Farbe wählen     |              |
+| Leertaste                                 |                                      | neue Palette |
+| Strg/Cmd + Z                              |                                      | Rückgängig   |
+| Strg/Cmd + Y oder Umschalt + Strg/Cmd + Z |                                      | Wiederholen  |
 
 ---
 
-## Hinweise
+## Befehle
 
-- **Keine Server-Kommunikation**: Alle Verarbeitung erfolgt lokal
-- **Ephemerer State**: Daten gehen bei Seitenaktualisierung verloren
-- **DSGVO-konform**: Keine Nutzerdaten verlassen das Gerät
-- **Gesamtumfang**: ~2.884 Zeilen Code
+```bash
+npm install
+npm run dev            # Dev-Server
+npm run format:check
+npm run lint
+npm run build:check    # vue-tsc
+npm test               # Vitest
+npm run test:e2e       # Playwright
+npm run build
+```
+
+Ausführliche Hintergründe zu Algorithmus und Aufbau stehen in `BLOG_TECHNICAL_DEEP_DIVE.md`.
