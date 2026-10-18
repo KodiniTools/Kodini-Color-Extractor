@@ -53,6 +53,7 @@ src/
 │   ├── ImageUploader.vue, SampleImages.vue, MainContent.vue, PixelMagnifier.vue,
 │   │   ColorList.vue, ImageEditPanel.vue, ImagePreviewModal.vue        # Extraktor
 │   ├── ContrastDialog.vue       # WCAG-Kontrastcheck (Extraktor und Generator)
+│   ├── PaletteLibraryDialog.vue # „Meine Paletten“: Verlauf und Favoriten (beide Werkzeuge)
 │   ├── LandingNav.vue, ToolCrossLink.vue, ToastContainer.vue
 │   ├── features/generator/      # PaletteStrip.vue, AdjustmentsPanel.vue
 │   ├── features/HandoffReceiver.vue
@@ -61,6 +62,7 @@ src/
 │   ├── useColorGenerator.js     # gesamter Generator-State inkl. Undo/Redo, Export, Teilen-Link
 │   ├── useCanvasDrag.js, useCanvasPan.js, useFileDrop.js   # Interaktion auf dem Bild
 │   ├── useKeyboard.js           # Tastaturkürzel des Extraktors
+│   ├── usePaletteLibrary.js     # gemeinsame Liste gespeicherter Paletten (IndexedDB)
 │   ├── useI18n.js               # DE/EN, Standard de
 │   ├── useSeo.js, useToast.js
 ├── lib/core/                    # framework-freie Logik
@@ -69,6 +71,7 @@ src/
 │   ├── paletteExport.js         # alle Exportformate, geteilt von Extraktor und Generator
 │   ├── paletteLink.js           # Paletten im URL-Hash (#p=rrggbb-…)
 │   ├── contrast.js              # WCAG-Kontrast, Stufen, Paarvorschläge
+│   ├── paletteLibrary.js        # Listenlogik und Speicher-Adapter für gespeicherte Paletten
 │   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage)
 │   └── seo.js
 ├── stores/
@@ -133,12 +136,17 @@ außerdem ein Palettenbild als PNG, JPG oder WebP.
 
 ### Persistenz im Browser
 
-| Schlüssel             | Wo                      | Inhalt                                         |
-| --------------------- | ----------------------- | ---------------------------------------------- |
-| `localStorage.locale` | useI18n, globale Nav    | `de` oder `en`                                 |
-| `localStorage.theme`  | index.html, globale Nav | `light` oder `dark` (`html[data-theme]`)       |
-| Handoff-Schlüssel     | lib/core/handoff.js     | Bilder aus anderen Kodini-Tools                |
-| URL-Hash `#p=…`       | Generator               | geteilte Palette, wird nach dem Laden entfernt |
+| Schlüssel                          | Wo                      | Inhalt                                         |
+| ---------------------------------- | ----------------------- | ---------------------------------------------- |
+| `localStorage.locale`              | useI18n, globale Nav    | `de` oder `en`                                 |
+| `localStorage.theme`               | index.html, globale Nav | `light` oder `dark` (`html[data-theme]`)       |
+| Handoff-Schlüssel                  | lib/core/handoff.js     | Bilder aus anderen Kodini-Tools                |
+| URL-Hash `#p=…`                    | Generator               | geteilte Palette, wird nach dem Laden entfernt |
+| IndexedDB `kodini-color-extractor` | usePaletteLibrary       | gespeicherte Paletten (Verlauf und Favoriten)  |
+
+Gespeicherte Paletten: Kopieren, Herunterladen, Teilen und „Im Generator bearbeiten“ legen die Palette unter
+„Zuletzt verwendet“ ab (höchstens 30, gleiche Farben in gleicher Reihenfolge sind ein Eintrag). Favoriten fallen
+nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zum Neuladen.
 
 ---
 

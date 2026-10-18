@@ -16,12 +16,15 @@ import ToastContainer from '../components/ToastContainer.vue'
 import ToolCrossLink from '../components/ToolCrossLink.vue'
 import ContrastDialog from '../components/ContrastDialog.vue'
 import ColorVisionDialog from '../components/ColorVisionDialog.vue'
+import PaletteLibraryDialog from '../components/PaletteLibraryDialog.vue'
+import { usePaletteLibrary } from '../composables/usePaletteLibrary'
 import { encodePaletteHash } from '../lib/core/paletteLink'
 
 const store = usePaletteStore()
 const router = useRouter()
 const { t } = useI18n()
 const toast = useToast()
+const library = usePaletteLibrary()
 
 // Initialize keyboard shortcuts
 useKeyboard()
@@ -30,6 +33,7 @@ useKeyboard()
 const showPreviewModal = ref(false)
 const showContrast = ref(false)
 const showVision = ref(false)
+const showLibrary = ref(false)
 const paletteHexes = computed(() => store.colors.map((c) => c.hex))
 
 const count = computed({
@@ -59,6 +63,7 @@ async function handleCopy() {
   const success = await store.copyPalette()
   if (success) {
     toast.show(t('paletteCopied'), 'success')
+    recordUse()
   } else {
     toast.show(t('clipboardError'), 'error')
   }
@@ -67,17 +72,31 @@ async function handleCopy() {
 function handleDownloadTxt() {
   store.downloadPalette()
   toast.show(t('downloadStarted'), 'success')
+  recordUse()
+}
+
+// Copying, downloading and handing over count as using a palette: it goes
+// into the recently used list.
+function recordUse() {
+  library.record(paletteHexes.value, 'extractor')
+}
+
+function openSaved(hexes) {
+  showLibrary.value = false
+  router.push({ name: 'generator', hash: `#${encodePaletteHash(hexes)}` })
 }
 
 // Hands the extracted colors to the generator, which opens them locked.
 function openInGenerator() {
   const hash = encodePaletteHash(paletteHexes.value)
+  recordUse()
   router.push({ name: 'generator', hash: `#${hash}` })
 }
 
 function handleDownloadImage() {
   store.downloadImage()
   toast.show(t('downloadStarted'), 'success')
+  recordUse()
 }
 </script>
 
@@ -230,6 +249,22 @@ function handleDownloadImage() {
               </svg>
               <span>{{ t('visionOpen') }}</span>
             </button>
+            <button class="export-btn" @click="showLibrary = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linejoin="round"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
+              <span>{{ t('libraryOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -250,6 +285,13 @@ function handleDownloadImage() {
       <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
       <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
       <ColorVisionDialog :show="showVision" :colors="paletteHexes" @close="showVision = false" />
+      <PaletteLibraryDialog
+        :show="showLibrary"
+        :colors="paletteHexes"
+        source="extractor"
+        @close="showLibrary = false"
+        @open="openSaved"
+      />
       <ToastContainer />
     </div>
   </div>

@@ -1,6 +1,7 @@
 import { ref, reactive, computed, onMounted, onUnmounted } from 'vue'
 import { useI18n } from './useI18n'
 import { useToast } from './useToast'
+import { usePaletteLibrary } from './usePaletteLibrary'
 import {
   ADJUST_FIELDS,
   clampAdjust,
@@ -34,6 +35,13 @@ const MAX_COUNT = COUNT_OPTIONS[COUNT_OPTIONS.length - 1]
 export function useColorGenerator() {
   const { t } = useI18n()
   const toast = useToast()
+  const library = usePaletteLibrary()
+
+  // Copying, downloading and sharing count as using a palette: it goes into
+  // the recently used list.
+  function recordUse() {
+    library.record(palette.value.map(displayHex), 'generator')
+  }
 
   const mode = ref('random')
   const count = ref(5)
@@ -344,6 +352,7 @@ export function useColorGenerator() {
     try {
       await navigator.clipboard.writeText(text)
       toast.success(t('genCopiedAll'))
+      recordUse()
     } catch {
       toast.error(t('clipboardError'))
     }
@@ -385,6 +394,7 @@ export function useColorGenerator() {
     const file = buildPaletteExport(exportFormatKey.value, exportEntries())
     if (!downloadPaletteFile(file)) return
     toast.success(t('genDownloaded').replace('{file}', file.filename))
+    recordUse()
   }
 
   function setCount(n) {
@@ -434,9 +444,6 @@ export function useColorGenerator() {
   function loadFromLink() {
     const hexes = decodePaletteHash(window.location.hash)
     if (!hexes.length) return false
-    const kept = hexes.slice(0, MAX_COUNT)
-    count.value = Math.max(MIN_COUNT, kept.length)
-    palette.value = kept.map((hex) => ({ base: hexToRgb(hex), adj: neutralAdjust(), locked: true }))
     // The hash only seeds the palette; drop it so a reload starts fresh and the
     // address bar does not show colors the user has since changed.
     window.history.replaceState(
@@ -444,15 +451,28 @@ export function useColorGenerator() {
       '',
       window.location.pathname + window.location.search
     )
+    loadPalette(hexes, t('genLinkLoaded'))
+    return true
+  }
+
+  /**
+   * Replaces the palette with these colors, locked, as one undo step.
+   * @param {string[]} hexes #RRGGBB
+   * @param {string} message toast shown when all colors fit
+   */
+  function loadPalette(hexes, message) {
+    const kept = hexes.filter((hex) => hexToRgb(hex)).slice(0, MAX_COUNT)
+    if (!kept.length) return
+    count.value = Math.max(MIN_COUNT, kept.length)
+    palette.value = kept.map((hex) => ({ base: hexToRgb(hex), adj: neutralAdjust(), locked: true }))
+    if (scope.value !== 'all') scope.value = 'all'
+    endCoalesce()
     // Fills any missing slots (fewer than MIN_COUNT colors) and records the
-    // first history step; locked colors stay as they are.
+    // history step; locked colors stay as they are.
     generate()
     toast.success(
-      hexes.length > MAX_COUNT
-        ? t('genLinkTruncated').replace('{n}', MAX_COUNT)
-        : t('genLinkLoaded')
+      hexes.length > MAX_COUNT ? t('genLinkTruncated').replace('{n}', MAX_COUNT) : message
     )
-    return true
   }
 
   // Copy a link that reopens the generator with the displayed colors.
@@ -462,6 +482,7 @@ export function useColorGenerator() {
     try {
       await navigator.clipboard.writeText(url)
       toast.success(t('genLinkCopied'))
+      recordUse()
     } catch {
       toast.error(t('clipboardError'))
     }
@@ -517,6 +538,7 @@ export function useColorGenerator() {
     exportFormat: exportFormatKey,
     setExportFormat,
     downloadPalette,
+    loadPalette,
     undo,
     redo,
   }
