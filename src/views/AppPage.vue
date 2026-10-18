@@ -14,6 +14,7 @@ import ImageEditPanel from '../components/ImageEditPanel.vue'
 import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 import ToolCrossLink from '../components/ToolCrossLink.vue'
+import ContrastDialog from '../components/ContrastDialog.vue'
 import { encodePaletteHash } from '../lib/core/paletteLink'
 
 const store = usePaletteStore()
@@ -26,6 +27,8 @@ useKeyboard()
 
 // Preview modal state
 const showPreviewModal = ref(false)
+const showContrast = ref(false)
+const paletteHexes = computed(() => store.colors.map((c) => c.hex))
 
 const count = computed({
   get: () => store.colorCount,
@@ -66,7 +69,7 @@ function handleDownloadTxt() {
 
 // Hands the extracted colors to the generator, which opens them locked.
 function openInGenerator() {
-  const hash = encodePaletteHash(store.colors.map((c) => c.hex))
+  const hash = encodePaletteHash(paletteHexes.value)
   router.push({ name: 'generator', hash: `#${hash}` })
 }
 
@@ -195,6 +198,20 @@ function handleDownloadImage() {
               </svg>
               <span>{{ t('openInGenerator') }}</span>
             </button>
+            <button class="export-btn" @click="showContrast = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+              >
+                <circle cx="12" cy="12" r="9" />
+                <path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor" />
+              </svg>
+              <span>{{ t('contrastOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -213,6 +230,7 @@ function handleDownloadImage() {
       <MainContent />
       <ImageEditPanel @open-preview="showPreviewModal = true" />
       <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
+      <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
       <ToastContainer />
     </div>
   </div>
