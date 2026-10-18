@@ -10,108 +10,119 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
   const panStart = ref({ x: 0, y: 0 })
   const panStartPosition = ref({ x: 0, y: 0 })
 
+  // Active pointers on the image (mouse, pen or fingers) by pointerId, so one
+  // code path handles a mouse pan, a one-finger pan and a two-finger pinch.
+  const pointers = new Map()
+  let panPointerId = null
+
   // Pinch-to-zoom state
   let pinchStartDistance = 0
   let pinchStartZoom = 100
 
-  // Extract client coordinates from a mouse or (single-finger) touch event
-  function getEventCoords(e) {
-    if (e.touches && e.touches.length > 0) {
-      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }
-    }
-    if (e.changedTouches && e.changedTouches.length > 0) {
-      return { clientX: e.changedTouches[0].clientX, clientY: e.changedTouches[0].clientY }
-    }
-    return { clientX: e.clientX, clientY: e.clientY }
+  // Distance between the first two active pointers (for pinch)
+  function pointerDistance() {
+    const [a, b] = [...pointers.values()]
+    return Math.hypot(a.x - b.x, a.y - b.y)
   }
 
-  // Distance between the first two active touch points (for pinch)
-  function getTouchDistance(touches) {
-    const dx = touches[0].clientX - touches[1].clientX
-    const dy = touches[0].clientY - touches[1].clientY
-    return Math.hypot(dx, dy)
+  function startPinch() {
+    isPinching.value = true
+    isPanning.value = false
+    panPointerId = null
+    pinchStartDistance = pointerDistance()
+    pinchStartZoom = store.imageAdjustments.zoom
   }
 
-  function isTouchEvent(e) {
-    return typeof TouchEvent !== 'undefined' && e instanceof TouchEvent
+  function beginPanWith(id) {
+    const p = pointers.get(id)
+    isPanning.value = true
+    panPointerId = id
+    panStart.value = { x: p.x, y: p.y }
+    panStartPosition.value = { ...store.panPosition }
   }
 
   function startPan(e) {
     // Never start a pan/pinch while dragging a color indicator
     if (isDragging.value) return
+    // Mouse: only the main button pans
+    if (e.pointerType === 'mouse' && e.button !== 0) return
 
-    // Two-finger pinch-to-zoom takes priority and works at any zoom level
-    if (e.touches && e.touches.length >= 2) {
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
+    addListeners()
+
+    // Second finger down: pinch-to-zoom takes priority and works at any zoom level
+    if (pointers.size >= 2) {
       e.preventDefault()
-      isPinching.value = true
-      isPanning.value = false
-      pinchStartDistance = getTouchDistance(e.touches)
-      pinchStartZoom = store.imageAdjustments.zoom
-      addTouchListeners()
+      startPinch()
       return
     }
 
-    // Single-finger / mouse pan: only meaningful when zoomed in
-    if (!isZoomed.value) return
+    // Single pointer pan: only meaningful when zoomed in. A finger stays
+    // tracked anyway, since a second one may still turn it into a pinch.
+    if (!isZoomed.value) {
+      if (e.pointerType !== 'touch') releasePointer(e.pointerId)
+      return
+    }
 
     e.preventDefault()
-    const { clientX, clientY } = getEventCoords(e)
-    isPanning.value = true
-    panStart.value = { x: clientX, y: clientY }
-    panStartPosition.value = { ...store.panPosition }
-
-    if (isTouchEvent(e)) {
-      addTouchListeners()
-    } else {
-      document.addEventListener('mousemove', handlePan)
-      document.addEventListener('mouseup', stopPan)
-      document.body.style.cursor = 'grabbing'
-    }
+    beginPanWith(e.pointerId)
+    if (e.pointerType === 'mouse') document.body.style.cursor = 'grabbing'
   }
 
-  function addTouchListeners() {
-    document.addEventListener('touchmove', handleTouchMove, { passive: false })
-    document.addEventListener('touchend', handleTouchEnd)
-    document.addEventListener('touchcancel', handleTouchEnd)
+  function addListeners() {
+    document.addEventListener('pointermove', handlePointerMove)
+    document.addEventListener('pointerup', handlePointerUp)
+    document.addEventListener('pointercancel', handlePointerUp)
   }
 
-  function handleTouchMove(e) {
+  function removeListeners() {
+    document.removeEventListener('pointermove', handlePointerMove)
+    document.removeEventListener('pointerup', handlePointerUp)
+    document.removeEventListener('pointercancel', handlePointerUp)
+  }
+
+  function releasePointer(id) {
+    pointers.delete(id)
+    if (!pointers.size) removeListeners()
+  }
+
+  function handlePointerMove(e) {
+    if (!pointers.has(e.pointerId)) return
+    pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (isPinching.value) {
       handlePinch(e)
-    } else if (isPanning.value) {
+    } else if (isPanning.value && e.pointerId === panPointerId) {
       handlePan(e)
     }
   }
 
-  // A finger lifted or the gesture ended
-  function handleTouchEnd(e) {
-    // Still two or more fingers down: keep pinching
-    if (e.touches && e.touches.length >= 2) {
-      pinchStartDistance = getTouchDistance(e.touches)
-      pinchStartZoom = store.imageAdjustments.zoom
+  // A pointer lifted or the gesture was cancelled
+  function handlePointerUp(e) {
+    if (!pointers.has(e.pointerId)) return
+    pointers.delete(e.pointerId)
+
+    // Still two or more pointers down: keep pinching from the new distance
+    if (pointers.size >= 2) {
+      startPinch()
       return
     }
 
     // Dropped from pinch (2 -> 1 finger): continue as a single-finger pan
-    if (isPinching.value && e.touches && e.touches.length === 1) {
+    if (isPinching.value && pointers.size === 1) {
       isPinching.value = false
-      if (isZoomed.value) {
-        isPanning.value = true
-        panStart.value = { x: e.touches[0].clientX, y: e.touches[0].clientY }
-        panStartPosition.value = { ...store.panPosition }
-      }
+      if (isZoomed.value) beginPanWith([...pointers.keys()][0])
       return
     }
 
-    // No fingers left: end everything
-    stopPan()
+    // The panning pointer lifted, or nothing is left: end everything
+    if (!pointers.size || e.pointerId === panPointerId) stopPan()
   }
 
   function handlePinch(e) {
-    if (!e.touches || e.touches.length < 2) return
+    if (pointers.size < 2) return
     if (e.cancelable) e.preventDefault()
 
-    const currentDistance = getTouchDistance(e.touches)
+    const currentDistance = pointerDistance()
     if (pinchStartDistance <= 0) {
       pinchStartDistance = currentDistance
       return
@@ -126,10 +137,9 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     if (!isPanning.value) return
     if (e.cancelable) e.preventDefault()
 
-    const { clientX, clientY } = getEventCoords(e)
     const zoom = store.imageAdjustments.zoom / 100
-    const deltaX = (clientX - panStart.value.x) / zoom
-    const deltaY = (clientY - panStart.value.y) / zoom
+    const deltaX = (e.clientX - panStart.value.x) / zoom
+    const deltaY = (e.clientY - panStart.value.y) / zoom
 
     // Calculate pan limits based on zoom level and image size
     const maxPan = calculateMaxPan()
@@ -161,21 +171,15 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     isPanning.value = false
     isPinching.value = false
     pinchStartDistance = 0
-
-    document.removeEventListener('mousemove', handlePan)
-    document.removeEventListener('mouseup', stopPan)
-    document.removeEventListener('touchmove', handleTouchMove)
-    document.removeEventListener('touchend', handleTouchEnd)
-    document.removeEventListener('touchcancel', handleTouchEnd)
+    panPointerId = null
+    pointers.clear()
+    removeListeners()
     document.body.style.cursor = ''
   }
 
   function cleanup() {
-    document.removeEventListener('mousemove', handlePan)
-    document.removeEventListener('mouseup', stopPan)
-    document.removeEventListener('touchmove', handleTouchMove)
-    document.removeEventListener('touchend', handleTouchEnd)
-    document.removeEventListener('touchcancel', handleTouchEnd)
+    pointers.clear()
+    removeListeners()
   }
 
   return { isPanning, isPinching, startPan, stopPan, cleanup }

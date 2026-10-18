@@ -7,6 +7,8 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
   const zoomPosition = ref({ x: 0, y: 0 })
 
   let animationFrameId = null
+  // The pointer (mouse, pen or finger) that grabbed the point; others are ignored.
+  let activePointerId = null
 
   function getIndicatorStyle(color) {
     if (!imageRect.value || !containerRect.value || !store.originalImageSize.width) {
@@ -42,38 +44,30 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     }
   }
 
-  // Get client coordinates from mouse or touch event
-  function getEventCoords(e) {
-    if (e.touches && e.touches.length > 0) {
-      return { clientX: e.touches[0].clientX, clientY: e.touches[0].clientY }
-    }
-    return { clientX: e.clientX, clientY: e.clientY }
-  }
-
   function startDrag(e, index) {
+    // Mouse: only the main button drags; a second pointer cannot take over.
+    if (e.pointerType === 'mouse' && e.button !== 0) return
+    if (isDragging.value) return
     e.preventDefault()
     e.stopPropagation()
 
+    activePointerId = e.pointerId
     isDragging.value = true
     dragIndex.value = index
     store.setSelectedColor(index)
     showZoom.value = true
 
-    // Mouse events
-    document.addEventListener('mousemove', handleDrag)
-    document.addEventListener('mouseup', stopDrag)
-    // Touch events
-    document.addEventListener('touchmove', handleDrag, { passive: false })
-    document.addEventListener('touchend', stopDrag)
-    document.addEventListener('touchcancel', stopDrag)
+    document.addEventListener('pointermove', handleDrag)
+    document.addEventListener('pointerup', handlePointerEnd)
+    document.addEventListener('pointercancel', handlePointerEnd)
     document.body.style.userSelect = 'none'
   }
 
   function handleDrag(e) {
+    if (e.pointerId !== activePointerId) return
     if (!isDragging.value || dragIndex.value < 0) return
     if (!imageRect.value || !containerRect.value) return
 
-    // Prevent scrolling on touch devices
     if (e.cancelable) e.preventDefault()
 
     // Use requestAnimationFrame for smooth updates
@@ -81,10 +75,12 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
       cancelAnimationFrame(animationFrameId)
     }
 
-    animationFrameId = requestAnimationFrame(() => {
-      const coords = getEventCoords(e)
-      processDrag(coords.clientX, coords.clientY)
-    })
+    const { clientX, clientY } = e
+    animationFrameId = requestAnimationFrame(() => processDrag(clientX, clientY))
+  }
+
+  function handlePointerEnd(e) {
+    if (e.pointerId === activePointerId) stopDrag()
   }
 
   function processDrag(clientX, clientY) {
@@ -145,26 +141,23 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     isDragging.value = false
     dragIndex.value = -1
     showZoom.value = false
+    activePointerId = null
 
-    // Remove mouse events
-    document.removeEventListener('mousemove', handleDrag)
-    document.removeEventListener('mouseup', stopDrag)
-    // Remove touch events
-    document.removeEventListener('touchmove', handleDrag)
-    document.removeEventListener('touchend', stopDrag)
-    document.removeEventListener('touchcancel', stopDrag)
+    removeListeners()
     document.body.style.userSelect = ''
+  }
+
+  function removeListeners() {
+    document.removeEventListener('pointermove', handleDrag)
+    document.removeEventListener('pointerup', handlePointerEnd)
+    document.removeEventListener('pointercancel', handlePointerEnd)
   }
 
   function cleanup() {
     if (animationFrameId) {
       cancelAnimationFrame(animationFrameId)
     }
-    document.removeEventListener('mousemove', handleDrag)
-    document.removeEventListener('mouseup', stopDrag)
-    document.removeEventListener('touchmove', handleDrag)
-    document.removeEventListener('touchend', stopDrag)
-    document.removeEventListener('touchcancel', stopDrag)
+    removeListeners()
   }
 
   return {
