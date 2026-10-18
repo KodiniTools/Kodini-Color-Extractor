@@ -15,6 +15,7 @@ const { t } = useI18n()
 const {
   harmonyGroups,
   ADJUST_FIELDS,
+  COUNT_OPTIONS,
   mode,
   count,
   palette,
@@ -41,6 +42,7 @@ const {
   copyColor,
   copyAll,
   copySelected,
+  copyLink,
   setCount,
   EXPORT_FORMATS,
   exportFormat,
@@ -95,7 +97,7 @@ function onModeChange(event) {
               class="field-select"
               @change="setCount(Number($event.target.value))"
             >
-              <option v-for="n in [3, 4, 5, 6, 7, 8]" :key="n" :value="n">{{ n }}</option>
+              <option v-for="n in COUNT_OPTIONS" :key="n" :value="n">{{ n }}</option>
             </select>
           </div>
         </PanelSection>
@@ -146,6 +148,22 @@ function onModeChange(event) {
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
               <span>{{ t('genCopyAll') }}</span>
+            </button>
+            <button class="export-btn" @click="copyLink">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+              </svg>
+              <span>{{ t('genCopyLink') }}</span>
             </button>
           </div>
         </PanelSection>
