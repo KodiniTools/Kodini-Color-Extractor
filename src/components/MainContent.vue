@@ -146,8 +146,7 @@ onUnmounted(() => {
           'has-image': store.currentImage,
         }"
         :style="containerAspectStyle"
-        @mousedown="startPan"
-        @touchstart="startPan"
+        @pointerdown="startPan"
       >
         <template v-if="store.currentImage">
           <img
@@ -170,8 +169,7 @@ onUnmounted(() => {
               dragging: isDragging && dragIndex === index,
             }"
             :style="getIndicatorStyle(color)"
-            @mousedown="startDragWithRects($event, index)"
-            @touchstart.prevent="startDragWithRects($event, index)"
+            @pointerdown="startDragWithRects($event, index)"
             @click.stop="selectColor(index)"
           ></div>
 

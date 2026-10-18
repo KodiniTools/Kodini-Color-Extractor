@@ -41,17 +41,27 @@ function handleKeydown(e) {
   }
 }
 
+// One pointer (mouse, pen or finger) moves the before/after divider. Capturing
+// it keeps the moves coming when it leaves the image.
+let activePointerId = null
+
 function startDrag(e) {
+  if (e.pointerType === 'mouse' && e.button !== 0) return
+  if (activePointerId !== null) return
+  activePointerId = e.pointerId
+  e.currentTarget.setPointerCapture?.(e.pointerId)
   isDragging.value = true
   updateSliderPosition(e)
 }
 
 function onDrag(e) {
-  if (!isDragging.value) return
+  if (!isDragging.value || e.pointerId !== activePointerId) return
   updateSliderPosition(e)
 }
 
-function stopDrag() {
+function stopDrag(e) {
+  if (e.pointerId !== activePointerId) return
+  activePointerId = null
   isDragging.value = false
 }
 
@@ -59,26 +69,17 @@ function updateSliderPosition(e) {
   if (!containerRef.value) return
 
   const rect = containerRef.value.getBoundingClientRect()
-  const clientX = e.touches ? e.touches[0].clientX : e.clientX
-  const x = clientX - rect.left
+  const x = e.clientX - rect.left
   const percentage = Math.max(0, Math.min(100, (x / rect.width) * 100))
   sliderPosition.value = percentage
 }
 
 onMounted(() => {
   document.addEventListener('keydown', handleKeydown)
-  document.addEventListener('mousemove', onDrag)
-  document.addEventListener('mouseup', stopDrag)
-  document.addEventListener('touchmove', onDrag)
-  document.addEventListener('touchend', stopDrag)
 })
 
 onUnmounted(() => {
   document.removeEventListener('keydown', handleKeydown)
-  document.removeEventListener('mousemove', onDrag)
-  document.removeEventListener('mouseup', stopDrag)
-  document.removeEventListener('touchmove', onDrag)
-  document.removeEventListener('touchend', stopDrag)
 })
 </script>
 
@@ -108,8 +109,10 @@ onUnmounted(() => {
             <div
               ref="containerRef"
               class="comparison-container"
-              @mousedown="startDrag"
-              @touchstart="startDrag"
+              @pointerdown="startDrag"
+              @pointermove="onDrag"
+              @pointerup="stopDrag"
+              @pointercancel="stopDrag"
             >
               <!-- After image (with filters) - full width background -->
               <div class="image-wrapper after-image">
@@ -254,6 +257,8 @@ onUnmounted(() => {
   position: relative;
   cursor: ew-resize;
   user-select: none;
+  /* Horizontal drags move the divider; vertical ones still scroll. */
+  touch-action: pan-y;
   border-radius: var(--ds-radius-md);
   overflow: hidden;
   background: var(--ds-surface-2);
