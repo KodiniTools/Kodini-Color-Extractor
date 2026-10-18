@@ -1,6 +1,7 @@
 <script setup>
-import { computed, nextTick, onUnmounted, ref, watch } from 'vue'
+import { computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import ModalDialog from './ui/ModalDialog.vue'
 import { bestPairs, contrastMatrix, formatRatio, textSuggestions } from '../lib/core/contrast'
 
 const props = defineProps({
@@ -12,7 +13,6 @@ const props = defineProps({
 const emit = defineEmits(['close'])
 
 const { t } = useI18n()
-const closeRef = ref(null)
 
 const matrix = computed(() => contrastMatrix(props.colors))
 const pairs = computed(() => bestPairs(props.colors))
@@ -32,278 +32,137 @@ function levelLabel(level) {
 function cellLabel(cell) {
   return `${cell.text} / ${cell.background}: ${formatRatio(cell.ratio)}:1, ${levelLabel(cell.level)}`
 }
-
-function onKeydown(e) {
-  if (e.key === 'Escape') emit('close')
-}
-
-// Listen for Escape only while open, and move focus into the dialog so
-// keyboard users land on it.
-watch(
-  () => props.show,
-  async (open) => {
-    if (open) {
-      document.addEventListener('keydown', onKeydown)
-      await nextTick()
-      closeRef.value?.focus()
-    } else {
-      document.removeEventListener('keydown', onKeydown)
-    }
-  },
-  { immediate: true }
-)
-
-onUnmounted(() => document.removeEventListener('keydown', onKeydown))
 </script>
 
 <template>
-  <Teleport to="#app-layer">
-    <Transition name="modal">
-      <div v-if="show" class="modal-overlay" @click.self="emit('close')">
-        <div
-          class="modal-content contrast-dialog"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="contrast-title"
-        >
-          <div class="modal-header">
-            <h2 id="contrast-title" class="modal-title">{{ t('contrastTitle') }}</h2>
-            <button
-              ref="closeRef"
-              class="close-btn"
-              :title="t('contrastClose')"
-              :aria-label="t('contrastClose')"
-              @click="emit('close')"
+  <ModalDialog
+    :show="show"
+    :title="t('contrastTitle')"
+    :close-label="t('contrastClose')"
+    @close="emit('close')"
+  >
+    <p class="contrast-intro">{{ t('contrastIntro') }}</p>
+    <ul class="contrast-legend">
+      <li v-for="level in ['AAA', 'AA', 'AA18', 'fail']" :key="level">
+        <span class="level-badge" :class="`level-badge--${level}`">
+          {{ levelLabel(level) }}
+        </span>
+        <span>{{ t(`contrastLegend${level}`) }}</span>
+      </li>
+    </ul>
+
+    <p v-if="matrix.colors.length < 2" class="contrast-empty">
+      {{ t('contrastNeedTwo') }}
+    </p>
+
+    <template v-else>
+      <section class="contrast-section">
+        <h3 class="contrast-heading">{{ t('contrastBestPairs') }}</h3>
+        <p v-if="pairs.length === 0" class="contrast-empty">
+          {{ t('contrastNoPairs') }}
+        </p>
+        <ul v-else class="pair-list">
+          <li
+            v-for="p in pairs"
+            :key="`${p.text}-${p.background}`"
+            class="pair-card"
+            data-testid="contrast-pair"
+          >
+            <div class="pair-preview" :style="{ background: p.background, color: p.text }">
+              <span class="pair-sample">{{ t('contrastSample') }}</span>
+            </div>
+            <div class="pair-meta">
+              <span class="pair-hex">{{ p.text }} / {{ p.background }}</span>
+              <span class="pair-ratio">{{ formatRatio(p.ratio) }}:1</span>
+              <span class="level-badge" :class="`level-badge--${p.level}`">
+                {{ levelLabel(p.level) }}
+              </span>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <section class="contrast-section">
+        <h3 class="contrast-heading">{{ t('contrastPerColor') }}</h3>
+        <ul class="suggest-list">
+          <li
+            v-for="s in suggestions"
+            :key="s.background"
+            class="suggest-row"
+            data-testid="contrast-suggestion"
+          >
+            <span
+              class="suggest-swatch"
+              :style="{ background: s.background, color: s.text }"
+              aria-hidden="true"
+              >Aa</span
             >
-              <svg
-                width="20"
-                height="20"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.75"
-              >
-                <line x1="18" y1="6" x2="6" y2="18"></line>
-                <line x1="6" y1="6" x2="18" y2="18"></line>
-              </svg>
-            </button>
-          </div>
+            <span class="suggest-hex">{{ s.background }}</span>
+            <span class="suggest-text">
+              {{ t('contrastTextLabel') }} {{ s.text }}
+              <span v-if="!s.fromPalette" class="suggest-note"> ({{ t('contrastNeutral') }}) </span>
+            </span>
+            <span class="pair-ratio">{{ formatRatio(s.ratio) }}:1</span>
+            <span class="level-badge" :class="`level-badge--${s.level}`">
+              {{ levelLabel(s.level) }}
+            </span>
+          </li>
+        </ul>
+      </section>
 
-          <div class="modal-body">
-            <p class="contrast-intro">{{ t('contrastIntro') }}</p>
-            <ul class="contrast-legend">
-              <li v-for="level in ['AAA', 'AA', 'AA18', 'fail']" :key="level">
-                <span class="level-badge" :class="`level-badge--${level}`">
-                  {{ levelLabel(level) }}
-                </span>
-                <span>{{ t(`contrastLegend${level}`) }}</span>
-              </li>
-            </ul>
-
-            <p v-if="matrix.colors.length < 2" class="contrast-empty">
-              {{ t('contrastNeedTwo') }}
-            </p>
-
-            <template v-else>
-              <section class="contrast-section">
-                <h3 class="contrast-heading">{{ t('contrastBestPairs') }}</h3>
-                <p v-if="pairs.length === 0" class="contrast-empty">
-                  {{ t('contrastNoPairs') }}
-                </p>
-                <ul v-else class="pair-list">
-                  <li
-                    v-for="p in pairs"
-                    :key="`${p.text}-${p.background}`"
-                    class="pair-card"
-                    data-testid="contrast-pair"
+      <section class="contrast-section">
+        <h3 class="contrast-heading">{{ t('contrastMatrix') }}</h3>
+        <p class="contrast-hint">{{ t('contrastMatrixHint') }}</p>
+        <div class="matrix-scroll">
+          <table class="matrix">
+            <thead>
+              <tr>
+                <th scope="col" class="matrix-corner">
+                  <span class="visually-hidden">{{ t('contrastMatrixCorner') }}</span>
+                </th>
+                <th v-for="bg in matrix.colors" :key="bg" scope="col" class="matrix-head">
+                  <span class="head-swatch" :style="{ background: bg }"></span>
+                  <span class="head-hex">{{ bg }}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="(row, i) in matrix.rows" :key="matrix.colors[i]">
+                <th scope="row" class="matrix-head matrix-head--row">
+                  <span class="head-swatch" :style="{ background: matrix.colors[i] }"></span>
+                  <span class="head-hex">{{ matrix.colors[i] }}</span>
+                </th>
+                <template v-for="(cell, j) in row" :key="j">
+                  <td v-if="cell === null" class="matrix-cell matrix-cell--self"></td>
+                  <td
+                    v-else
+                    class="matrix-cell"
+                    :style="{ background: cell.background, color: cell.text }"
+                    :aria-label="cellLabel(cell)"
+                    :title="cellLabel(cell)"
+                    data-testid="contrast-cell"
                   >
-                    <div class="pair-preview" :style="{ background: p.background, color: p.text }">
-                      <span class="pair-sample">{{ t('contrastSample') }}</span>
-                    </div>
-                    <div class="pair-meta">
-                      <span class="pair-hex">{{ p.text }} / {{ p.background }}</span>
-                      <span class="pair-ratio">{{ formatRatio(p.ratio) }}:1</span>
-                      <span class="level-badge" :class="`level-badge--${p.level}`">
-                        {{ levelLabel(p.level) }}
-                      </span>
-                    </div>
-                  </li>
-                </ul>
-              </section>
-
-              <section class="contrast-section">
-                <h3 class="contrast-heading">{{ t('contrastPerColor') }}</h3>
-                <ul class="suggest-list">
-                  <li
-                    v-for="s in suggestions"
-                    :key="s.background"
-                    class="suggest-row"
-                    data-testid="contrast-suggestion"
-                  >
+                    <span class="cell-sample" aria-hidden="true">Aa</span>
+                    <span class="cell-ratio" aria-hidden="true">{{ formatRatio(cell.ratio) }}</span>
                     <span
-                      class="suggest-swatch"
-                      :style="{ background: s.background, color: s.text }"
+                      class="level-badge level-badge--sm"
+                      :class="`level-badge--${cell.level}`"
                       aria-hidden="true"
-                      >Aa</span
                     >
-                    <span class="suggest-hex">{{ s.background }}</span>
-                    <span class="suggest-text">
-                      {{ t('contrastTextLabel') }} {{ s.text }}
-                      <span v-if="!s.fromPalette" class="suggest-note">
-                        ({{ t('contrastNeutral') }})
-                      </span>
+                      {{ cell.level === 'fail' ? '✕' : levelLabel(cell.level) }}
                     </span>
-                    <span class="pair-ratio">{{ formatRatio(s.ratio) }}:1</span>
-                    <span class="level-badge" :class="`level-badge--${s.level}`">
-                      {{ levelLabel(s.level) }}
-                    </span>
-                  </li>
-                </ul>
-              </section>
-
-              <section class="contrast-section">
-                <h3 class="contrast-heading">{{ t('contrastMatrix') }}</h3>
-                <p class="contrast-hint">{{ t('contrastMatrixHint') }}</p>
-                <div class="matrix-scroll">
-                  <table class="matrix">
-                    <thead>
-                      <tr>
-                        <th scope="col" class="matrix-corner">
-                          <span class="visually-hidden">{{ t('contrastMatrixCorner') }}</span>
-                        </th>
-                        <th v-for="bg in matrix.colors" :key="bg" scope="col" class="matrix-head">
-                          <span class="head-swatch" :style="{ background: bg }"></span>
-                          <span class="head-hex">{{ bg }}</span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="(row, i) in matrix.rows" :key="matrix.colors[i]">
-                        <th scope="row" class="matrix-head matrix-head--row">
-                          <span
-                            class="head-swatch"
-                            :style="{ background: matrix.colors[i] }"
-                          ></span>
-                          <span class="head-hex">{{ matrix.colors[i] }}</span>
-                        </th>
-                        <template v-for="(cell, j) in row" :key="j">
-                          <td v-if="cell === null" class="matrix-cell matrix-cell--self"></td>
-                          <td
-                            v-else
-                            class="matrix-cell"
-                            :style="{ background: cell.background, color: cell.text }"
-                            :aria-label="cellLabel(cell)"
-                            :title="cellLabel(cell)"
-                            data-testid="contrast-cell"
-                          >
-                            <span class="cell-sample" aria-hidden="true">Aa</span>
-                            <span class="cell-ratio" aria-hidden="true">{{
-                              formatRatio(cell.ratio)
-                            }}</span>
-                            <span
-                              class="level-badge level-badge--sm"
-                              :class="`level-badge--${cell.level}`"
-                              aria-hidden="true"
-                            >
-                              {{ cell.level === 'fail' ? '✕' : levelLabel(cell.level) }}
-                            </span>
-                          </td>
-                        </template>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </section>
-            </template>
-          </div>
+                  </td>
+                </template>
+              </tr>
+            </tbody>
+          </table>
         </div>
-      </div>
-    </Transition>
-  </Teleport>
+      </section>
+    </template>
+  </ModalDialog>
 </template>
 
 <style scoped>
-/* Same modal shell as the image preview: scrim, flat panel, overlay shadow. */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: var(--app-scrim);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: var(--ds-z-backdrop);
-  padding: var(--ds-space-5);
-}
-
-.modal-content {
-  background: var(--ds-surface-1);
-  border: var(--ds-border-width) solid var(--ds-border);
-  border-radius: var(--ds-radius-lg);
-  width: min(960px, 100%);
-  max-height: 90vh;
-  display: flex;
-  flex-direction: column;
-  box-shadow: var(--ds-shadow-overlay);
-  overflow: hidden;
-}
-
-.modal-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--ds-space-2);
-  padding: var(--ds-space-3) var(--ds-space-5);
-  border-bottom: var(--ds-border-width) solid var(--ds-border);
-}
-
-.modal-title {
-  font-size: var(--ds-text-lg);
-  font-weight: var(--ds-weight-semibold);
-  line-height: var(--ds-leading);
-  color: var(--ds-text);
-  margin: 0;
-}
-
-.close-btn {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: var(--ds-control-md);
-  height: var(--ds-control-md);
-  padding: 0;
-  background: transparent;
-  border: var(--ds-border-width) solid transparent;
-  border-radius: var(--ds-radius-md);
-  color: var(--ds-text-2);
-  cursor: pointer;
-  transition: var(--app-transition-colors);
-}
-
-.close-btn svg {
-  width: var(--ds-icon-md);
-  height: var(--ds-icon-md);
-}
-
-.close-btn:hover {
-  background: var(--ds-surface-2);
-  color: var(--ds-text);
-}
-
-.close-btn:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
-}
-
-.modal-body {
-  padding: var(--ds-space-5);
-  overflow: auto;
-  display: flex;
-  flex-direction: column;
-  gap: var(--ds-space-5);
-  color: var(--ds-text);
-  font-size: var(--ds-text-sm);
-}
-
 .contrast-intro,
 .contrast-hint,
 .contrast-empty {
@@ -561,39 +420,7 @@ onUnmounted(() => document.removeEventListener('keydown', onKeydown))
   border: 0;
 }
 
-.modal-enter-active,
-.modal-leave-active {
-  transition: opacity var(--ds-duration-slow) var(--ds-ease);
-}
-
-.modal-enter-active .modal-content,
-.modal-leave-active .modal-content {
-  transition: transform var(--ds-duration-slow) var(--ds-ease);
-}
-
-.modal-enter-from,
-.modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-  transform: translateY(8px);
-}
-
 @media (max-width: 768px) {
-  .modal-overlay {
-    padding: var(--ds-space-2);
-  }
-
-  .modal-header {
-    padding: var(--ds-space-3) var(--ds-space-4);
-  }
-
-  .modal-body {
-    padding: var(--ds-space-3);
-  }
-
   .matrix-cell {
     min-width: 60px;
     height: 60px;

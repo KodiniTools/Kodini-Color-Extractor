@@ -15,6 +15,7 @@ import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 import ToolCrossLink from '../components/ToolCrossLink.vue'
 import ContrastDialog from '../components/ContrastDialog.vue'
+import ColorVisionDialog from '../components/ColorVisionDialog.vue'
 import { encodePaletteHash } from '../lib/core/paletteLink'
 
 const store = usePaletteStore()
@@ -28,6 +29,7 @@ useKeyboard()
 // Preview modal state
 const showPreviewModal = ref(false)
 const showContrast = ref(false)
+const showVision = ref(false)
 const paletteHexes = computed(() => store.colors.map((c) => c.hex))
 
 const count = computed({
@@ -212,6 +214,22 @@ function handleDownloadImage() {
               </svg>
               <span>{{ t('contrastOpen') }}</span>
             </button>
+            <button class="export-btn" @click="showVision = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span>{{ t('visionOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -231,6 +249,7 @@ function handleDownloadImage() {
       <ImageEditPanel @open-preview="showPreviewModal = true" />
       <ImagePreviewModal :show="showPreviewModal" @close="showPreviewModal = false" />
       <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
+      <ColorVisionDialog :show="showVision" :colors="paletteHexes" @close="showVision = false" />
       <ToastContainer />
     </div>
   </div>
