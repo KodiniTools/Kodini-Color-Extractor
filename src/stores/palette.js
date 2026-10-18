@@ -18,6 +18,11 @@ const READ_OPTIONS = { willReadFrequently: true }
 // Bumped on every extractColors call, so only the latest request writes colors.
 let extractionId = 0
 
+const MAX_HISTORY = 60
+// Steps of the same kind closer together than this merge into one undo step,
+// so dragging a slider is undone as a whole and not tick by tick.
+const COALESCE_MS = 700
+
 export const usePaletteStore = defineStore('palette', () => {
   const colors = ref([])
   const currentImage = ref(null)
@@ -58,6 +63,100 @@ export const usePaletteStore = defineStore('palette', () => {
 
   const hasColors = computed(() => colors.value.length > 0)
 
+  // Undo/redo over what the user changed on the image: color point positions
+  // and the image adjustments. Zoom and pan are view state and stay out.
+  const history = ref([])
+  const historyIndex = ref(-1)
+  let coalesceKey = null
+  let coalesceTime = 0
+
+  const canUndo = computed(() => historyIndex.value > 0)
+  const canRedo = computed(() => historyIndex.value < history.value.length - 1)
+
+  function snapshot() {
+    // eslint-disable-next-line no-unused-vars
+    const { zoom, ...adjustments } = imageAdjustments.value
+    return {
+      colors: colors.value.map((c) => ({ ...c, hsl: { ...c.hsl }, position: { ...c.position } })),
+      adjustments,
+    }
+  }
+
+  // Equal when every point sits in the same place under the same adjustments;
+  // the sampled colors follow from those two.
+  function sameSnapshot(a, b) {
+    if (!a || !b || a.colors.length !== b.colors.length) return false
+    const samePoints = a.colors.every(
+      (c, i) =>
+        c.position?.x === b.colors[i].position?.x && c.position?.y === b.colors[i].position?.y
+    )
+    return (
+      samePoints && Object.keys(a.adjustments).every((k) => a.adjustments[k] === b.adjustments[k])
+    )
+  }
+
+  /** Starts a fresh history with the current state as its only entry. */
+  function resetHistory() {
+    history.value = [snapshot()]
+    historyIndex.value = 0
+    coalesceKey = null
+  }
+
+  /**
+   * Records the current state as an undo step. Calls with the same `key`
+   * in quick succession replace the last step instead of adding one.
+   * @param {string|null} [key]
+   */
+  function commitHistory(key = null) {
+    if (historyIndex.value < 0) return
+    const snap = snapshot()
+    const now = Date.now()
+    const continuation =
+      key !== null &&
+      key === coalesceKey &&
+      now - coalesceTime < COALESCE_MS &&
+      historyIndex.value === history.value.length - 1 &&
+      historyIndex.value > 0
+    coalesceKey = key
+    coalesceTime = now
+    if (continuation) {
+      history.value[historyIndex.value] = snap
+      return
+    }
+    if (sameSnapshot(snap, history.value[historyIndex.value])) return
+    const next = history.value.slice(0, historyIndex.value + 1)
+    next.push(snap)
+    if (next.length > MAX_HISTORY) next.shift()
+    history.value = next
+    historyIndex.value = next.length - 1
+  }
+
+  function restore(snap) {
+    clearTimeout(filterDebounceTimer)
+    coalesceKey = null
+    colors.value = snap.colors.map((c) => ({
+      ...c,
+      hsl: { ...c.hsl },
+      position: { ...c.position },
+    }))
+    imageAdjustments.value = { ...snap.adjustments, zoom: imageAdjustments.value.zoom }
+    if (selectedColorIndex.value >= colors.value.length) selectedColorIndex.value = -1
+    // Re-sample the restored points under the restored adjustments.
+    applyFiltersToCanvas()
+  }
+
+  function undo() {
+    if (!canUndo.value) return
+    historyIndex.value--
+    restore(history.value[historyIndex.value])
+  }
+
+  function redo() {
+    if (!canRedo.value) return
+    historyIndex.value++
+    restore(history.value[historyIndex.value])
+  }
+
   function setImage(imgSrc) {
     currentImage.value = imgSrc
   }
@@ -71,6 +170,9 @@ export const usePaletteStore = defineStore('palette', () => {
     selectedColorIndex.value = -1
     originalImageSize.value = { width: 0, height: 0 }
     resetImageAdjustments()
+    history.value = []
+    historyIndex.value = -1
+    coalesceKey = null
   }
 
   function setColorCount(count) {
@@ -98,6 +200,7 @@ export const usePaletteStore = defineStore('palette', () => {
     if (prop === 'zoom' && value === 100) {
       panPosition.value = { x: 0, y: 0 }
     }
+    if (prop !== 'zoom') commitHistory(`adjust:${prop}`)
     // Debounce canvas re-render to avoid blocking on every slider tick
     clearTimeout(filterDebounceTimer)
     filterDebounceTimer = setTimeout(applyFiltersToCanvas, 50)
@@ -123,6 +226,7 @@ export const usePaletteStore = defineStore('palette', () => {
     }
     panPosition.value = { x: 0, y: 0 }
     applyFiltersToCanvas()
+    commitHistory()
   }
 
   function applyFiltersToCanvas() {
@@ -231,6 +335,8 @@ export const usePaletteStore = defineStore('palette', () => {
             position,
           }))
           updateAllColorsFromFilteredCanvas()
+          // New image or color count: a new starting point for undo.
+          resetHistory()
           resolve(colors.value)
         }
         worker.onerror = () => {
@@ -482,5 +588,11 @@ export const usePaletteStore = defineStore('palette', () => {
     getFormatted,
     downloadImage,
     copyPalette,
+    canUndo,
+    canRedo,
+    commitHistory,
+    resetHistory,
+    undo,
+    redo,
   }
 })

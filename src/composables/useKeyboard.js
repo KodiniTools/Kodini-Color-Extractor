@@ -34,6 +34,18 @@ export function useKeyboard() {
       await pasteImageFromClipboard()
     }
 
+    // Ctrl/Cmd + Z - Undo; Ctrl/Cmd + Shift + Z or Ctrl/Cmd + Y - Redo
+    const key = e.key.toLowerCase()
+    if (modKey && key === 'z' && store.currentImage) {
+      e.preventDefault()
+      if (e.shiftKey) store.redo()
+      else store.undo()
+    }
+    if (modKey && key === 'y' && !e.shiftKey && store.currentImage) {
+      e.preventDefault()
+      store.redo()
+    }
+
     // Arrow Up - Select previous color
     if (e.key === 'ArrowUp' && store.hasColors) {
       e.preventDefault()

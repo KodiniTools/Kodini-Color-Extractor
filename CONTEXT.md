@@ -6,8 +6,8 @@ Der Kodini Color Extractor ist eine clientseitige Vue-3-Single-Page-Application 
 kodinitools.com (Basis-Pfad `/kodini-color-extractor/`). Sie besteht aus zwei Werkzeugen:
 
 - **Extraktor** (`/app`): Er liest die dominanten Farben eines Bildes aus, das hochgeladen, eingefügt oder aus den
-  Beispielbildern gewählt wird. Die Farbpunkte lassen sich auf dem Bild verschieben, das Bild lässt sich anpassen,
-  und die Palette kann als Text oder Bild exportiert werden.
+  Beispielbildern gewählt wird. Die Farbpunkte lassen sich auf dem Bild verschieben, das Bild lässt sich anpassen
+  (beides mit Undo/Redo), und die Palette kann als Text oder Bild exportiert werden.
 - **Generator** (`/generator`): Er erzeugt Paletten aus Farbharmonien und Stil-Presets. Farben lassen sich sperren
   und anpassen, mit Undo/Redo, und die Palette kann exportiert und per Link geteilt werden.
 
@@ -115,6 +115,11 @@ interface Color {
 Die Extraktion läuft im Web Worker. Eine laufende Extraktion wird verworfen, sobald ein neueres Bild sie überholt
 (`extractionId`).
 
+Undo/Redo (`undo`, `redo`, `commitHistory`) speichert bis zu 60 Snapshots aus Farbpunkt-Positionen und
+Bildanpassungen ohne Zoom; Zoom und Pan sind Ansicht und bleiben außen vor. Schnelle Schritte am selben Regler
+werden zu einem Schritt zusammengefasst, ein beendetes Ziehen ist ein Schritt. Jede neue Extraktion setzt den
+Verlauf zurück.
+
 ### Generator (`composables/useColorGenerator.js`)
 
 Jeder Eintrag der Palette hat die Form `{ base: {r,g,b}, adj: {brightness, contrast, saturation, hue}, locked }`.
@@ -158,8 +163,8 @@ außerdem ein Palettenbild als PNG, JPG oder WebP.
 | Enter                                     | ausgewählte Farbe kopieren           |              |
 | ↑ / ↓                                     | vorherige / nächste Farbe wählen     |              |
 | Leertaste                                 |                                      | neue Palette |
-| Strg/Cmd + Z                              |                                      | Rückgängig   |
-| Strg/Cmd + Y oder Umschalt + Strg/Cmd + Z |                                      | Wiederholen  |
+| Strg/Cmd + Z                              | Rückgängig                           | Rückgängig   |
+| Strg/Cmd + Y oder Umschalt + Strg/Cmd + Z | Wiederholen                          | Wiederholen  |
 
 ---
 

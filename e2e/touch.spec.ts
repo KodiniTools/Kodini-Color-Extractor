@@ -54,6 +54,8 @@ test.describe('Touch gestures on the image canvas', () => {
     await page.goto('/kodini-color-extractor/app')
     // Load the first available sample image
     const firstSample = page.locator('.sample-thumbnail').first()
+    // A click before the thumbnail has loaded is ignored by the app.
+    await expect(firstSample).toHaveClass(/\bloaded\b/)
     await firstSample.click()
     await expect(page.locator('.preview-image')).toBeVisible({ timeout: 10000 })
   })

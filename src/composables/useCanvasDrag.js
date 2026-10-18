@@ -139,6 +139,9 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
       animationFrameId = null
     }
 
+    // A finished drag is one undo step (a click without moving adds none).
+    if (dragIndex.value >= 0) store.commitHistory()
+
     isDragging.value = false
     dragIndex.value = -1
     showZoom.value = false

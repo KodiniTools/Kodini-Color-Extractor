@@ -18,7 +18,10 @@ test.describe('Contrast check', () => {
 
   test('the extractor checks the extracted colors', async ({ page }) => {
     await page.goto('/kodini-color-extractor/app')
-    await page.locator('.sample-thumbnail').first().click()
+    // A click before the thumbnail has loaded is ignored by the app.
+    const sample = page.locator('.sample-thumbnail').first()
+    await expect(sample).toHaveClass(/\bloaded\b/)
+    await sample.click()
     await expect(page.locator('.color-primary').first()).toHaveText(/#[0-9a-fA-F]{6}/, {
       timeout: 10000,
     })
