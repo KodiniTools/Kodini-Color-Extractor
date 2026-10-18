@@ -21,6 +21,12 @@ import {
   formatColor,
   paletteEntry,
 } from '../lib/core/paletteExport'
+import { decodePaletteHash, encodePaletteHash } from '../lib/core/paletteLink'
+
+// Palette sizes the generator offers (the count select renders these).
+const COUNT_OPTIONS = [3, 4, 5, 6, 7, 8]
+const MIN_COUNT = COUNT_OPTIONS[0]
+const MAX_COUNT = COUNT_OPTIONS[COUNT_OPTIONS.length - 1]
 
 // Reactive state and behaviour for the palette generator. Keeps the view
 // components thin: they render props and emit intent, this owns the logic.
@@ -429,8 +435,48 @@ export function useColorGenerator() {
     }
   }
 
-  onMounted(() => {
+  // ─── Shareable links ───
+  // A link (/generator#p=...) or the extractor's "Edit in generator" button
+  // opens the generator with those colors locked, so regenerating builds on
+  // them instead of replacing them. Up to MAX_COUNT colors are taken over.
+  function loadFromLink() {
+    const hexes = decodePaletteHash(window.location.hash)
+    if (!hexes.length) return false
+    const kept = hexes.slice(0, MAX_COUNT)
+    count.value = Math.max(MIN_COUNT, kept.length)
+    palette.value = kept.map((hex) => ({ base: hexToRgb(hex), adj: neutralAdjust(), locked: true }))
+    // The hash only seeds the palette; drop it so a reload starts fresh and the
+    // address bar does not show colors the user has since changed.
+    window.history.replaceState(
+      window.history.state,
+      '',
+      window.location.pathname + window.location.search
+    )
+    // Fills any missing slots (fewer than MIN_COUNT colors) and records the
+    // first history step; locked colors stay as they are.
     generate()
+    toast.success(
+      hexes.length > MAX_COUNT
+        ? t('genLinkTruncated').replace('{n}', MAX_COUNT)
+        : t('genLinkLoaded')
+    )
+    return true
+  }
+
+  // Copy a link that reopens the generator with the displayed colors.
+  async function copyLink() {
+    const hash = encodePaletteHash(palette.value.map((c) => displayHex(c)))
+    const url = `${window.location.origin}${import.meta.env.BASE_URL}generator#${hash}`
+    try {
+      await navigator.clipboard.writeText(url)
+      toast.success(t('genLinkCopied'))
+    } catch {
+      toast.error(t('clipboardError'))
+    }
+  }
+
+  onMounted(() => {
+    if (!loadFromLink()) generate()
     window.addEventListener('keydown', onKeydown)
   })
 
@@ -443,6 +489,7 @@ export function useColorGenerator() {
     harmonyModes,
     harmonyGroups,
     ADJUST_FIELDS,
+    COUNT_OPTIONS,
     // state
     mode,
     count,
@@ -472,6 +519,7 @@ export function useColorGenerator() {
     copyColor,
     copyAll,
     copySelected,
+    copyLink,
     setCount,
     EXPORT_FORMATS,
     exportFormat: exportFormatKey,

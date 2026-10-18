@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useKeyboard } from '../composables/useKeyboard'
@@ -13,8 +14,10 @@ import ImageEditPanel from '../components/ImageEditPanel.vue'
 import ImagePreviewModal from '../components/ImagePreviewModal.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 import ToolCrossLink from '../components/ToolCrossLink.vue'
+import { encodePaletteHash } from '../lib/core/paletteLink'
 
 const store = usePaletteStore()
+const router = useRouter()
 const { t } = useI18n()
 const toast = useToast()
 
@@ -59,6 +62,12 @@ async function handleCopy() {
 function handleDownloadTxt() {
   store.downloadPalette()
   toast.show(t('downloadStarted'), 'success')
+}
+
+// Hands the extracted colors to the generator, which opens them locked.
+function openInGenerator() {
+  const hash = encodePaletteHash(store.colors.map((c) => c.hex))
+  router.push({ name: 'generator', hash: `#${hash}` })
 }
 
 function handleDownloadImage() {
@@ -169,6 +178,22 @@ function handleDownloadImage() {
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
               </svg>
               <span>{{ t('copyPalette') }}</span>
+            </button>
+            <button class="export-btn" @click="openInGenerator">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <line x1="5" y1="12" x2="19" y2="12" />
+                <polyline points="12 5 19 12 12 19" />
+              </svg>
+              <span>{{ t('openInGenerator') }}</span>
             </button>
           </div>
         </PanelSection>
