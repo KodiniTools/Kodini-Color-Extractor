@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
  *
  * 1. tokens-v2.json and tokens-v2.css stay in lockstep for both themes.
  * 2. Components use only the tokens: no legacy palette variables, no fixed
- *    colours except white and neutral black transparencies, no gradients,
+ *    colours outside main.css's --app-* overlay tokens, no gradients,
  *    no hover transforms, no literal durations, no card shadows, only the
  *    three radii and the seven type sizes.
  * 3. main.css loads Supreme in the three real weights and index.html's
@@ -138,11 +138,29 @@ describe('Komponenten nutzen nur die Tokens', () => {
     ).toEqual([])
   })
 
-  it('setzen keine festen Farben außer Weiß und neutralen Schwarz-Transparenzen', () => {
-    const hex = findInStyles(/#(?!fff\b|ffffff\b)[0-9a-f]{3,8}\b/i, ['design-system/tokens-v2.css'])
-    expect(hex).toEqual([])
-    const tinted = findInStyles(/rgba\(\s*(\d+)\s*,\s*(?!\1\s*,\s*\1\s*,)\d+\s*,\s*\d+\s*,/)
-    expect(tinted).toEqual([])
+  it('setzen keine festen Farben; die stehen nur als --app-* Tokens in main.css', () => {
+    // Literal colours: hex, rgb()/hsl() in any notation, or a named white/black.
+    const literal = /#[0-9a-f]{3,8}\b|\b(?:rgba?|hsla?)\(|(?<![\w-])(?:white|black)(?![\w-])/i
+    const hits: string[] = []
+    for (const [file, css] of Object.entries(styleSources())) {
+      let source = css.replace(/\/\*[\s\S]*?\*\//g, '')
+      // main.css's first :root block holds the app's own fixed colours for
+      // overlays on photos and palette colours; everything else uses them.
+      if (file === 'assets/main.css') source = source.replace(/:root \{[^}]*\}/, '')
+      source.split('\n').forEach((line, index) => {
+        if (literal.test(line)) hits.push(`${file}:${index + 1}: ${line.trim()}`)
+      })
+    }
+    expect(hits).toEqual([])
+  })
+
+  it('definiert jedes verwendete --app-* Token', () => {
+    const defined = Object.keys(customProperties(mainCss, ':root'))
+    const used = new Set<string>()
+    for (const css of Object.values(styleSources())) {
+      for (const match of css.matchAll(/var\((--app-[\w-]+)\)/g)) used.add(match[1])
+    }
+    expect([...used].filter((name) => !defined.includes(name))).toEqual([])
   })
 
   it('zeichnen keine Verläufe mit Farbwerten (nur der Farbton-Regler zeigt den Farbkreis)', () => {
@@ -153,7 +171,7 @@ describe('Komponenten nutzen nur die Tokens', () => {
       }
     }
     expect(hits).toEqual([])
-    expect(mainCss).toMatch(/\.slider-field__range--hue \{\s*background: linear-gradient\(/)
+    expect(mainCss).toMatch(/\.slider-field__range--hue \{\s*background: var\(--app-hue-spectrum\)/)
   })
 
   it('verändern bei Hover nur Farbe, nie Größe oder Position', () => {

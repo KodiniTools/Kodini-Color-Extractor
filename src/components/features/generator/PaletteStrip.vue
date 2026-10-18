@@ -112,7 +112,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
   justify-content: flex-end;
   min-width: 0;
   padding: var(--ds-space-5) var(--ds-space-2) var(--ds-space-6);
-  color: #ffffff;
+  color: var(--app-overlay-light);
   cursor: pointer;
   transition: background-color var(--ds-duration-slow) var(--ds-ease);
 }
@@ -128,7 +128,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 .swatch--selected {
   z-index: 1;
   box-shadow:
-    inset 0 0 0 3px #ffffff,
+    inset 0 0 0 3px var(--app-overlay-light),
     inset 0 0 0 6px var(--ds-on-accent);
 }
 
@@ -173,7 +173,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 
 .swatch-action:hover,
 .swatch-action.is-active {
-  background: rgba(127, 127, 127, 0.22);
+  background: var(--app-swatch-active);
 }
 
 .swatch-action:focus-visible {
@@ -206,7 +206,7 @@ const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 }
 
 .swatch-hex:hover {
-  background: rgba(127, 127, 127, 0.18);
+  background: var(--app-swatch-hover);
 }
 
 .swatch-hex:focus-visible {

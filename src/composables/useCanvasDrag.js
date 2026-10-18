@@ -8,7 +8,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
 
   let animationFrameId = null
 
-  function getIndicatorStyle(color, index) {
+  function getIndicatorStyle(color) {
     if (!imageRect.value || !containerRect.value || !store.originalImageSize.width) {
       return { display: 'none' }
     }
@@ -38,7 +38,6 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
       left: `${x}px`,
       top: `${y}px`,
       backgroundColor: color.hex,
-      borderColor: store.selectedColorIndex === index ? 'var(--selection-color)' : 'white',
       transform: `scale(${Math.min(zoom, 1.5)})`,
     }
   }
