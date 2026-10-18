@@ -10,6 +10,7 @@ import AdjustmentsPanel from '../components/features/generator/AdjustmentsPanel.
 import PaletteStrip from '../components/features/generator/PaletteStrip.vue'
 import ContrastDialog from '../components/ContrastDialog.vue'
 import ColorVisionDialog from '../components/ColorVisionDialog.vue'
+import PaletteLibraryDialog from '../components/PaletteLibraryDialog.vue'
 import { displayHex } from '../lib/core/colorGenerator'
 
 const { t } = useI18n()
@@ -52,6 +53,7 @@ const {
   exportFormat,
   setExportFormat,
   downloadPalette,
+  loadPalette,
   undo,
   redo,
 } = useColorGenerator()
@@ -60,7 +62,13 @@ const {
 // adjustments included.
 const showContrast = ref(false)
 const showVision = ref(false)
+const showLibrary = ref(false)
 const paletteHexes = computed(() => palette.value.map(displayHex))
+
+function openSaved(hexes) {
+  showLibrary.value = false
+  loadPalette(hexes, t('libraryOpened'))
+}
 
 // Changing the harmony updates the mode and regenerates in one go.
 function onModeChange(event) {
@@ -205,6 +213,22 @@ function onModeChange(event) {
               </svg>
               <span>{{ t('visionOpen') }}</span>
             </button>
+            <button class="export-btn" @click="showLibrary = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linejoin="round"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
+              <span>{{ t('libraryOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -258,6 +282,13 @@ function onModeChange(event) {
 
       <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
       <ColorVisionDialog :show="showVision" :colors="paletteHexes" @close="showVision = false" />
+      <PaletteLibraryDialog
+        :show="showLibrary"
+        :colors="paletteHexes"
+        source="generator"
+        @close="showLibrary = false"
+        @open="openSaved"
+      />
       <ToastContainer />
     </div>
   </div>
