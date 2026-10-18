@@ -9,6 +9,7 @@ import PanelSection from '../components/ui/PanelSection.vue'
 import AdjustmentsPanel from '../components/features/generator/AdjustmentsPanel.vue'
 import PaletteStrip from '../components/features/generator/PaletteStrip.vue'
 import ContrastDialog from '../components/ContrastDialog.vue'
+import ColorVisionDialog from '../components/ColorVisionDialog.vue'
 import { displayHex } from '../lib/core/colorGenerator'
 
 const { t } = useI18n()
@@ -55,8 +56,10 @@ const {
   redo,
 } = useColorGenerator()
 
-// The contrast check works on the colors as shown, adjustments included.
+// The contrast and color vision checks work on the colors as shown,
+// adjustments included.
 const showContrast = ref(false)
+const showVision = ref(false)
 const paletteHexes = computed(() => palette.value.map(displayHex))
 
 // Changing the harmony updates the mode and regenerates in one go.
@@ -186,6 +189,22 @@ function onModeChange(event) {
               </svg>
               <span>{{ t('contrastOpen') }}</span>
             </button>
+            <button class="export-btn" @click="showVision = true">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z" />
+                <circle cx="12" cy="12" r="3" />
+              </svg>
+              <span>{{ t('visionOpen') }}</span>
+            </button>
           </div>
         </PanelSection>
 
@@ -238,6 +257,7 @@ function onModeChange(event) {
       />
 
       <ContrastDialog :show="showContrast" :colors="paletteHexes" @close="showContrast = false" />
+      <ColorVisionDialog :show="showVision" :colors="paletteHexes" @close="showVision = false" />
       <ToastContainer />
     </div>
   </div>
