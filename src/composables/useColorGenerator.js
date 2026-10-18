@@ -18,6 +18,7 @@ import {
   DEFAULT_EXPORT_FORMAT,
   EXPORT_FORMATS,
   buildPaletteExport,
+  downloadPaletteFile,
   formatColor,
   paletteEntry,
 } from '../lib/core/paletteExport'
@@ -382,16 +383,7 @@ export function useColorGenerator() {
 
   function downloadPalette() {
     const file = buildPaletteExport(exportFormatKey.value, exportEntries())
-    if (!file) return
-    const blob = new Blob([file.content], { type: `${file.mime};charset=utf-8` })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = file.filename
-    document.body.appendChild(link)
-    link.click()
-    link.remove()
-    URL.revokeObjectURL(url)
+    if (!downloadPaletteFile(file)) return
     toast.success(t('genDownloaded').replace('{file}', file.filename))
   }
 

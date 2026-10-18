@@ -311,7 +311,12 @@ export const usePaletteStore = defineStore('palette', () => {
     })
   }
 
+  // Binary formats (Adobe ASE) cannot go to the clipboard; copying then
+  // falls back to the plain HEX list.
   function getPaletteText() {
+    if (findExportFormat(downloadFormat.value)?.binary) {
+      return buildPaletteExport('hex', paletteEntries())?.content ?? ''
+    }
     return buildExport()?.content ?? ''
   }
 
@@ -348,6 +353,7 @@ export const usePaletteStore = defineStore('palette', () => {
       hsla: 145,
       css: 150,
       scss: 150,
+      tailwind4: 175,
       tailwind: 165,
     }
     const baseSwatchSize = formatWidths[f] || 80
@@ -385,6 +391,7 @@ export const usePaletteStore = defineStore('palette', () => {
       hsla: 9,
       css: 9,
       scss: 9,
+      tailwind4: 8,
       tailwind: 9,
     }
     const mainFontSize = Math.round((baseFontSizes[f] || 11) * scale)
