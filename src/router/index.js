@@ -1,10 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { STORAGE_KEY } from '../lib/core/handoff'
-import LandingPage from '../views/LandingPage.vue'
-import AppPage from '../views/AppPage.vue'
-import GeneratorPage from '../views/GeneratorPage.vue'
-import GalleryView from '../views/GalleryView.vue'
-import FaqPage from '../views/FaqPage.vue'
+
+// Each page is its own chunk, so visitors only download the page they open.
+const LandingPage = () => import('../views/LandingPage.vue')
+const AppPage = () => import('../views/AppPage.vue')
+const GeneratorPage = () => import('../views/GeneratorPage.vue')
+const GalleryView = () => import('../views/GalleryView.vue')
+const FaqPage = () => import('../views/FaqPage.vue')
 
 const routes = [
   {

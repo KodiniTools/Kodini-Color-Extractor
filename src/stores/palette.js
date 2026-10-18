@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { rgbToHslRounded as rgbToHsl } from '../lib/core/colorGenerator'
+import { rgbToHex, rgbToHslRounded as rgbToHsl } from '../lib/core/colorGenerator'
 import { ref, computed } from 'vue'
 import {
   EXPORT_FORMATS,
@@ -12,13 +12,15 @@ import {
 } from '../lib/core/paletteExport'
 
 let filterDebounceTimer = null
+// The source and filtered canvases are read pixel by pixel while dragging the
+// color pickers, so keep them in CPU memory instead of reading back from the GPU.
+const READ_OPTIONS = { willReadFrequently: true }
 // Bumped on every extractColors call, so only the latest request writes colors.
 let extractionId = 0
 
 export const usePaletteStore = defineStore('palette', () => {
   const colors = ref([])
   const currentImage = ref(null)
-  const imageData = ref(null)
   const colorCount = ref(5)
   const downloadFormat = ref('hex')
   const selectedColorIndex = ref(-1)
@@ -64,7 +66,6 @@ export const usePaletteStore = defineStore('palette', () => {
     extractionId++ // drop any extraction still running for the old image
     currentImage.value = null
     colors.value = []
-    imageData.value = null
     canvasRef.value = null
     filteredCanvasRef.value = null
     selectedColorIndex.value = -1
@@ -140,7 +141,7 @@ export const usePaletteStore = defineStore('palette', () => {
     filteredCanvas.width = originalCanvas.width
     filteredCanvas.height = originalCanvas.height
 
-    const ctx = filteredCanvas.getContext('2d')
+    const ctx = filteredCanvas.getContext('2d', READ_OPTIONS)
 
     // Apply CSS-like filters using canvas
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) blur(${blur}px) grayscale(${grayscale}%)`
@@ -156,7 +157,7 @@ export const usePaletteStore = defineStore('palette', () => {
   function updateAllColorsFromFilteredCanvas() {
     if (!filteredCanvasRef.value || colors.value.length === 0) return
 
-    const ctx = filteredCanvasRef.value.getContext('2d')
+    const ctx = filteredCanvasRef.value.getContext('2d', READ_OPTIONS)
 
     colors.value = colors.value.map((color) => {
       if (!color.position) return color
@@ -174,7 +175,7 @@ export const usePaletteStore = defineStore('palette', () => {
       const r = pixel[0]
       const g = pixel[1]
       const b = pixel[2]
-      const hex = '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
+      const hex = rgbToHex({ r, g, b })
       const hsl = rgbToHsl(r, g, b)
 
       return { r, g, b, hex, hsl, position: color.position }
@@ -189,7 +190,7 @@ export const usePaletteStore = defineStore('palette', () => {
       img.onload = () => {
         if (requestId !== extractionId) return resolve(colors.value)
         const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d')
+        const ctx = canvas.getContext('2d', READ_OPTIONS)
 
         canvas.width = img.width
         canvas.height = img.height
@@ -202,11 +203,10 @@ export const usePaletteStore = defineStore('palette', () => {
         filteredCanvasRef.value = document.createElement('canvas')
         filteredCanvasRef.value.width = canvas.width
         filteredCanvasRef.value.height = canvas.height
-        const filteredCtx = filteredCanvasRef.value.getContext('2d')
+        const filteredCtx = filteredCanvasRef.value.getContext('2d', READ_OPTIONS)
         filteredCtx.drawImage(canvas, 0, 0)
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
-        imageData.value = imgData
 
         // Transfer pixel buffer to worker for off-thread quantization
         const pixelBuffer = imgData.data.buffer.slice(0)
@@ -248,7 +248,7 @@ export const usePaletteStore = defineStore('palette', () => {
     const canvas = filteredCanvasRef.value || canvasRef.value
     if (!canvas || index < 0 || index >= colors.value.length) return
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', READ_OPTIONS)
     const imgX = Math.max(0, Math.min(originalImageSize.value.width - 1, Math.round(x)))
     const imgY = Math.max(0, Math.min(originalImageSize.value.height - 1, Math.round(y)))
 
@@ -256,7 +256,7 @@ export const usePaletteStore = defineStore('palette', () => {
     const r = pixel[0]
     const g = pixel[1]
     const b = pixel[2]
-    const hex = '#' + [r, g, b].map((x) => x.toString(16).padStart(2, '0')).join('')
+    const hex = rgbToHex({ r, g, b })
     const hsl = rgbToHsl(r, g, b)
 
     colors.value[index] = {
@@ -274,7 +274,7 @@ export const usePaletteStore = defineStore('palette', () => {
     const canvas = filteredCanvasRef.value || canvasRef.value
     if (!canvas) return null
 
-    const ctx = canvas.getContext('2d')
+    const ctx = canvas.getContext('2d', READ_OPTIONS)
     const imgX = Math.max(
       0,
       Math.min(originalImageSize.value.width - size, Math.round(x - size / 2))
@@ -447,7 +447,6 @@ export const usePaletteStore = defineStore('palette', () => {
   return {
     colors,
     currentImage,
-    imageData,
     colorCount,
     downloadFormat,
     EXPORT_FORMATS,
@@ -457,10 +456,8 @@ export const usePaletteStore = defineStore('palette', () => {
     originalImageSize,
     imageAdjustments,
     panPosition,
-    filteredCanvasRef,
     imageExportFormat,
     imageExportSize,
-    exportSizes,
     setImage,
     clearImage,
     setColorCount,
@@ -472,13 +469,11 @@ export const usePaletteStore = defineStore('palette', () => {
     setPanPosition,
     resetPanPosition,
     resetImageAdjustments,
-    applyFiltersToCanvas,
     extractColors,
     updateColorFromPosition,
     getPixelZoomData,
     getFormatted,
     downloadImage,
     copyPalette,
-    rgbToHsl,
   }
 })

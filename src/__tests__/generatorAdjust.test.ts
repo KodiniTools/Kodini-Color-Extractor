@@ -1,5 +1,3 @@
-/* Test harnesses below define throwaway host components, not real SFCs. */
-/* eslint-disable vue/one-component-per-file */
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 import { mount } from '@vue/test-utils'
