@@ -94,6 +94,32 @@ function clearImage() {
     </div>
 
     <div class="history-actions">
+      <button
+        class="btn-history"
+        :disabled="!store.canUndo"
+        :title="t('undoTitle')"
+        data-testid="extractor-undo"
+        @click="store.undo()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M3 7v6h6" />
+          <path d="M3 13C5.33 7.5 10 4 16 4a9 9 0 0 1 0 18H8" />
+        </svg>
+        {{ t('undo') }}
+      </button>
+      <button
+        class="btn-history"
+        :disabled="!store.canRedo"
+        :title="t('redoTitle')"
+        data-testid="extractor-redo"
+        @click="store.redo()"
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
+          <path d="M21 7v6h-6" />
+          <path d="M21 13C18.67 7.5 14 4 8 4a9 9 0 0 0 0 18h8" />
+        </svg>
+        {{ t('redo') }}
+      </button>
       <button class="btn-history btn-reset reset-all-btn" :title="t('resetAll')" @click="resetAll">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75">
           <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />

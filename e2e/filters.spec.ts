@@ -22,7 +22,10 @@ async function firstColorRgb(page: Page): Promise<[number, number, number]> {
 test.describe('Image effect filters', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/kodini-color-extractor/app')
-    await page.locator('.sample-thumbnail').first().click()
+    // A click before the thumbnail has loaded is ignored by the app.
+    const sample = page.locator('.sample-thumbnail').first()
+    await expect(sample).toHaveClass(/\bloaded\b/)
+    await sample.click()
     await expect(page.locator('.preview-image')).toBeVisible({ timeout: 10000 })
     // Colors are extracted in a worker; wait until the first HEX value is populated
     await expect(page.locator('.color-primary').first()).toHaveText(/#[0-9a-fA-F]{6}/, {
