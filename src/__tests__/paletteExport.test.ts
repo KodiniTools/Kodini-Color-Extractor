@@ -54,8 +54,9 @@ describe('paletteExport - formats', () => {
       expect(file!.filename).toBe(`kodini-palette.${f.ext}`)
       expect(file!.mime).toBe(f.mime)
       expect(file!.content.length).toBeGreaterThan(0)
-      // Every format has to carry every color of the palette, in whatever
-      // notation it uses.
+      // Every text format has to carry every color of the palette, in
+      // whatever notation it uses (the binary ASE has its own test below).
+      if (f.binary) continue
       for (let i = 0; i < colors.length; i++) {
         expect(file!.content, `format ${f.key}`).toContain(await formatColor(colors[i], f.key, i))
       }
@@ -72,8 +73,11 @@ describe('paletteExport - formats', () => {
       'hsla',
       'css',
       'scss',
+      'tailwind4',
       'tailwind',
       'tokens',
+      'gpl',
+      'ase',
     ])
   })
 
@@ -108,7 +112,7 @@ describe('paletteExport - formats', () => {
 
   it('css export declares custom properties on :root', async () => {
     const { buildPaletteExport } = await mod()
-    const content = buildPaletteExport('css', await entries())!.content
+    const content = buildPaletteExport('css', await entries())!.content as string
     expect(content).toContain(':root {')
     expect(content).toContain('  --color-1: #49313E;')
     expect(content).toContain('  --color-3: #A17389;')
@@ -139,7 +143,7 @@ describe('paletteExport - formats', () => {
 
   it('tokens export is valid DTCG json', async () => {
     const { buildPaletteExport } = await mod()
-    const content = buildPaletteExport('tokens', await entries())!.content
+    const content = buildPaletteExport('tokens', await entries())!.content as string
     const parsed = JSON.parse(content)
     expect(Object.keys(parsed.color)).toEqual(['color-1', 'color-2', 'color-3'])
     expect(parsed.color['color-1']).toEqual({ $type: 'color', $value: '#49313E' })
@@ -268,5 +272,107 @@ describe('paletteExport - showsHexInline', () => {
     expect(showsHexInline('hsla')).toBe(false)
     expect(showsHexInline('css')).toBe(true)
     expect(showsHexInline('hex')).toBe(true)
+  })
+})
+
+/** Minimal Adobe Swatch Exchange reader, enough to check what buildAse writes. */
+function readAse(bytes: Uint8Array) {
+  const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength)
+  const ascii = (at: number, n: number) =>
+    String.fromCharCode(...Array.from(bytes.subarray(at, at + n)))
+  const swatches: Array<{ name: string; model: string; rgb: number[]; type: number }> = []
+  let offset = 12
+  for (let b = 0; b < view.getUint32(8); b++) {
+    const blockType = view.getUint16(offset)
+    const length = view.getUint32(offset + 2)
+    const body = offset + 6
+    expect(blockType).toBe(0x0001)
+    const units = view.getUint16(body)
+    const name = Array.from({ length: units - 1 }, (_, i) =>
+      String.fromCharCode(view.getUint16(body + 2 + i * 2))
+    ).join('')
+    let p = body + 2 + units * 2
+    const model = ascii(p, 4)
+    p += 4
+    const rgb = [0, 1, 2].map((i) => Math.round(view.getFloat32(p + i * 4) * 255))
+    p += 12
+    swatches.push({ name, model, rgb, type: view.getUint16(p) })
+    expect(p + 2).toBe(body + length)
+    offset = body + length
+  }
+  expect(offset).toBe(bytes.byteLength)
+  return {
+    signature: ascii(0, 4),
+    version: [view.getUint16(4), view.getUint16(6)],
+    swatches,
+  }
+}
+
+describe('paletteExport - design app formats', () => {
+  beforeEach(() => vi.resetModules())
+
+  it('tailwind4 export is an @theme block of --color-* variables', async () => {
+    const { buildPaletteExport, formatColor } = await mod()
+    const [first] = await entries()
+    expect(formatColor(first, 'tailwind4', 0)).toBe('--color-palette-1: #49313E;')
+    const file = buildPaletteExport('tailwind4', await entries())!
+    expect(file.filename).toBe('kodini-palette.css')
+    expect(file.content).toContain('@theme {')
+    expect(file.content).toContain('  --color-palette-3: #A17389;')
+    expect((file.content as string).trimEnd().endsWith('}')).toBe(true)
+  })
+
+  it('gpl export follows the GIMP palette layout', async () => {
+    const { buildPaletteExport } = await mod()
+    const file = buildPaletteExport('gpl', await entries(['#49313E', '#0A0B0C']))!
+    expect(file.filename).toBe('kodini-palette.gpl')
+    expect((file.content as string).split('\n')).toEqual([
+      'GIMP Palette',
+      'Name: Kodini palette',
+      'Columns: 0',
+      '#',
+      ' 73  49  62\tcolor-1 #49313E',
+      ' 10  11  12\tcolor-2 #0A0B0C',
+      '',
+    ])
+  })
+
+  it('ase export is a valid Adobe Swatch Exchange file', async () => {
+    const { buildPaletteExport, exportFormat } = await mod()
+    const file = buildPaletteExport('ase', await entries())!
+    expect(exportFormat('ase')!.binary).toBe(true)
+    expect(file.filename).toBe('kodini-palette.ase')
+    expect(file.content).toBeInstanceOf(Uint8Array)
+    const ase = readAse(file.content as Uint8Array)
+    expect(ase.signature).toBe('ASEF')
+    expect(ase.version).toEqual([1, 0])
+    expect(ase.swatches).toEqual([
+      { name: 'color-1 #49313E', model: 'RGB ', rgb: [73, 49, 62], type: 2 },
+      { name: 'color-2 #77506A', model: 'RGB ', rgb: [119, 80, 106], type: 2 },
+      { name: 'color-3 #A17389', model: 'RGB ', rgb: [161, 115, 137], type: 2 },
+    ])
+  })
+
+  it('downloads binary files without a text charset', async () => {
+    const { buildPaletteExport, downloadPaletteFile } = await mod()
+    let type = ''
+    vi.stubGlobal('URL', {
+      ...URL,
+      createObjectURL: vi.fn((blob: Blob) => {
+        type = blob.type
+        return 'blob:stub'
+      }),
+      revokeObjectURL: vi.fn(),
+    })
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {})
+    try {
+      expect(downloadPaletteFile(buildPaletteExport('ase', await entries()))).toBe(true)
+      expect(type).toBe('application/octet-stream')
+      downloadPaletteFile(buildPaletteExport('gpl', await entries()))
+      expect(type).toBe('text/plain;charset=utf-8')
+    } finally {
+      click.mockRestore()
+      vi.unstubAllGlobals()
+    }
   })
 })

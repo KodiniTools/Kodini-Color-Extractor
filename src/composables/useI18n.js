@@ -162,8 +162,11 @@ const translations = {
     exportHsla: 'HSLA list (.txt)',
     exportCss: 'CSS variables (.css)',
     exportScss: 'SCSS variables (.scss)',
-    exportTailwind: 'Tailwind config (.js)',
+    exportTailwind4: 'Tailwind v4 theme (.css)',
+    exportTailwind: 'Tailwind v3 config (.js)',
     exportTokens: 'Design tokens (.json)',
+    exportGpl: 'GIMP/Inkscape palette (.gpl)',
+    exportAse: 'Adobe swatches (.ase)',
     genMode_random: 'Random',
     genMode_monochromatic: 'Monochromatic',
     genMode_analogous: 'Analogous',
@@ -245,7 +248,7 @@ const translations = {
 
     faq5Question: 'What export formats are available?',
     faq5Answer:
-      'You can export your color palette in multiple formats: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA, and CSS custom properties. Export as a text file or as a beautiful palette image in PNG, JPG, or WebP format.',
+      'You can export your color palette in multiple formats: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA, CSS and SCSS variables, Tailwind CSS (v4 theme or v3 config), design tokens (JSON), GIMP/Inkscape palettes (.gpl) and Adobe swatches (.ase). You can also save the palette as an image in PNG, JPG, or WebP format.',
 
     faq6Question: 'Can I adjust the image before extracting colors?',
     faq6Answer:
@@ -445,8 +448,11 @@ const translations = {
     exportHsla: 'HSLA-Liste (.txt)',
     exportCss: 'CSS-Variablen (.css)',
     exportScss: 'SCSS-Variablen (.scss)',
-    exportTailwind: 'Tailwind-Config (.js)',
+    exportTailwind4: 'Tailwind-v4-Theme (.css)',
+    exportTailwind: 'Tailwind-v3-Config (.js)',
     exportTokens: 'Design Tokens (.json)',
+    exportGpl: 'GIMP/Inkscape-Palette (.gpl)',
+    exportAse: 'Adobe-Farbfelder (.ase)',
     genMode_random: 'Zufällig',
     genMode_monochromatic: 'Monochrom',
     genMode_analogous: 'Analog',
@@ -529,7 +535,7 @@ const translations = {
 
     faq5Question: 'Welche Exportformate sind verfügbar?',
     faq5Answer:
-      'Du kannst deine Farbpalette in mehreren Formaten exportieren: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA und CSS Custom Properties. Export als Textdatei oder als ansprechendes Palettenbild im PNG-, JPG- oder WebP-Format.',
+      'Du kannst deine Farbpalette in mehreren Formaten exportieren: HEX (#RRGGBB), RGB (rgb(r,g,b)), RGBA, HSL, HSLA, CSS- und SCSS-Variablen, Tailwind CSS (v4-Theme oder v3-Config), Design Tokens (JSON), GIMP/Inkscape-Paletten (.gpl) und Adobe-Farbfelder (.ase). Außerdem kannst du die Palette als Bild im PNG-, JPG- oder WebP-Format speichern.',
 
     faq6Question: 'Kann ich das Bild vor der Farbextraktion anpassen?',
     faq6Answer:

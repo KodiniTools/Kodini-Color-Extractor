@@ -169,3 +169,35 @@ describe('palette store - getPaletteText (via getFormatted)', () => {
     expect(cssBlock.endsWith('}')).toBe(true)
   })
 })
+
+describe('palette store - copyPalette', () => {
+  const red = { r: 255, g: 0, b: 0, hex: '#FF0000', hsl: { h: 0, s: 100, l: 50 } }
+  const blue = { r: 0, g: 0, b: 255, hex: '#0000FF', hsl: { h: 240, s: 100, l: 50 } }
+
+  async function copied(format: string) {
+    setActivePinia(createPinia())
+    const { usePaletteStore } = await import('../stores/palette')
+    const store = usePaletteStore()
+    store.colors = [
+      { ...red, position: { x: 0, y: 0 } },
+      { ...blue, position: { x: 1, y: 0 } },
+    ]
+    store.setDownloadFormat(format)
+    const writeText = vi.fn().mockResolvedValue(undefined)
+    vi.stubGlobal('navigator', { clipboard: { writeText } })
+    try {
+      expect(await store.copyPalette()).toBe(true)
+      return writeText.mock.calls[0][0]
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  }
+
+  it('copies the file content of a text format', async () => {
+    expect(await copied('gpl')).toContain('GIMP Palette')
+  })
+
+  it('falls back to the HEX list for the binary ASE format', async () => {
+    expect(await copied('ase')).toBe('#FF0000\n#0000FF')
+  })
+})

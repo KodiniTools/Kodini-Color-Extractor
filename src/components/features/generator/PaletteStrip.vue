@@ -20,7 +20,7 @@ function swatchLabel(color, index) {
 }
 
 // Code-shaped formats produce a much longer label than a bare HEX value.
-const longLabel = computed(() => ['css', 'scss', 'tailwind'].includes(props.format))
+const longLabel = computed(() => ['css', 'scss', 'tailwind4', 'tailwind'].includes(props.format))
 
 const emit = defineEmits(['select', 'toggle-lock', 'copy'])
 </script>
