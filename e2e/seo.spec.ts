@@ -31,7 +31,10 @@ test.describe('SEO head management', () => {
     await page.goto('/kodini-color-extractor/faq')
 
     await expect(page).toHaveTitle(/FAQ/)
-    expect(await attr(page, 'link[rel="canonical"]', 'href')).toBe(
+    // The router sets the title before the lazily loaded page applies its SEO
+    // tags, so wait for the canonical instead of reading it once.
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute(
+      'href',
       'https://kodinitools.com/kodini-color-extractor/faq'
     )
   })
