@@ -659,3 +659,5 @@ export const usePaletteStore = defineStore('palette', () => {
     redo,
   }
 })
+
+export type PaletteStore = ReturnType<typeof usePaletteStore>

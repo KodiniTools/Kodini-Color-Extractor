@@ -8,12 +8,13 @@ export function useKeyboard() {
   const toast = useToast()
   const { t } = useI18n()
 
-  async function handleKeydown(e) {
+  async function handleKeydown(e: KeyboardEvent) {
     const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
     const modKey = isMac ? e.metaKey : e.ctrlKey
 
     // Ignore if typing in an input
-    if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') {
+    const target = e.target as HTMLElement | null
+    if (target?.tagName === 'INPUT' || target?.tagName === 'TEXTAREA') {
       return
     }
 
@@ -72,7 +73,7 @@ export function useKeyboard() {
     }
   }
 
-  async function copyToClipboard(text) {
+  async function copyToClipboard(text: string) {
     try {
       await navigator.clipboard.writeText(text)
     } catch {
@@ -95,8 +96,9 @@ export function useKeyboard() {
           if (type.startsWith('image/')) {
             const blob = await item.getType(type)
             const reader = new FileReader()
-            reader.onload = async (e) => {
-              const imgSrc = e.target.result
+            reader.onload = async () => {
+              // readAsDataURL always yields a string.
+              const imgSrc = reader.result as string
               store.setImage(imgSrc)
               await store.extractColors(imgSrc)
               toast.success(t('imagePasted'))

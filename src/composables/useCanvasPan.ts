@@ -1,10 +1,33 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
+import type { Point } from '../stores/palette'
+
+/** The part of the palette store a pan or pinch reads and writes. */
+export interface PanStore {
+  imageAdjustments: { zoom: number }
+  panPosition: Point
+  setImageAdjustment(prop: 'zoom', value: number): void
+  setPanPosition(x: number, y: number): void
+}
+
+export interface CanvasPanOptions {
+  imageRect: Readonly<Ref<DOMRect | null>>
+  containerRect: Readonly<Ref<DOMRect | null>>
+  store: PanStore
+  isDragging: Readonly<Ref<boolean>>
+  isZoomed: Readonly<Ref<boolean>>
+}
 
 // Zoom limits must match the zoom slider in ImageEditPanel.vue (min="25" max="400")
 const ZOOM_MIN = 25
 const ZOOM_MAX = 400
 
-export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZoomed }) {
+export function useCanvasPan({
+  imageRect,
+  containerRect,
+  store,
+  isDragging,
+  isZoomed,
+}: CanvasPanOptions) {
   const isPanning = ref(false)
   const isPinching = ref(false)
   const panStart = ref({ x: 0, y: 0 })
@@ -12,8 +35,8 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
 
   // Active pointers on the image (mouse, pen or fingers) by pointerId, so one
   // code path handles a mouse pan, a one-finger pan and a two-finger pinch.
-  const pointers = new Map()
-  let panPointerId = null
+  const pointers = new Map<number, Point>()
+  let panPointerId: number | null = null
 
   // Pinch-to-zoom state
   let pinchStartDistance = 0
@@ -33,15 +56,15 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     pinchStartZoom = store.imageAdjustments.zoom
   }
 
-  function beginPanWith(id) {
-    const p = pointers.get(id)
+  function beginPanWith(id: number) {
+    const p = pointers.get(id)!
     isPanning.value = true
     panPointerId = id
     panStart.value = { x: p.x, y: p.y }
     panStartPosition.value = { ...store.panPosition }
   }
 
-  function startPan(e) {
+  function startPan(e: PointerEvent) {
     // Never start a pan/pinch while dragging a color indicator
     if (isDragging.value) return
     // Mouse: only the main button pans
@@ -81,12 +104,12 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     document.removeEventListener('pointercancel', handlePointerUp)
   }
 
-  function releasePointer(id) {
+  function releasePointer(id: number) {
     pointers.delete(id)
     if (!pointers.size) removeListeners()
   }
 
-  function handlePointerMove(e) {
+  function handlePointerMove(e: PointerEvent) {
     if (!pointers.has(e.pointerId)) return
     pointers.set(e.pointerId, { x: e.clientX, y: e.clientY })
     if (isPinching.value) {
@@ -97,7 +120,7 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
   }
 
   // A pointer lifted or the gesture was cancelled
-  function handlePointerUp(e) {
+  function handlePointerUp(e: PointerEvent) {
     if (!pointers.has(e.pointerId)) return
     pointers.delete(e.pointerId)
 
@@ -118,7 +141,7 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     if (!pointers.size || e.pointerId === panPointerId) stopPan()
   }
 
-  function handlePinch(e) {
+  function handlePinch(e: PointerEvent) {
     if (pointers.size < 2) return
     if (e.cancelable) e.preventDefault()
 
@@ -133,7 +156,7 @@ export function useCanvasPan({ imageRect, containerRect, store, isDragging, isZo
     store.setImageAdjustment('zoom', newZoom)
   }
 
-  function handlePan(e) {
+  function handlePan(e: PointerEvent) {
     if (!isPanning.value) return
     if (e.cancelable) e.preventDefault()
 

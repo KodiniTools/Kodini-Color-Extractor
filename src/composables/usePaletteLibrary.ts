@@ -1,5 +1,8 @@
 import { ref, computed } from 'vue'
 import {
+  type LibraryEntry,
+  type LibrarySource,
+  type LibraryStorage,
   addEntry,
   createIndexedDbStorage,
   createMemoryStorage,
@@ -10,12 +13,12 @@ import {
 } from '../lib/core/paletteLibrary'
 
 // One list shared by the extractor and the generator, loaded once per page.
-const entries = ref([])
+const entries = ref<LibraryEntry[]>([])
 const persistent = ref(true)
-let storage = null
-let ready = null
+let storage: LibraryStorage | null = null
+let ready: Promise<void> | null = null
 
-function init() {
+function init(): Promise<void> {
   if (!ready) {
     ready = (async () => {
       if (!storage) {
@@ -36,11 +39,12 @@ function init() {
   return ready
 }
 
-async function update(change) {
+async function update(change: (list: LibraryEntry[]) => LibraryEntry[]) {
   await init()
   entries.value = change(entries.value)
   try {
-    await storage.save(entries.value)
+    // init() always leaves a storage in place.
+    await storage!.save(entries.value)
   } catch {
     // Quota or a blocked database: the list still works for this visit.
     persistent.value = false
@@ -64,21 +68,21 @@ export function usePaletteLibrary() {
     persistent,
     ready: () => init(),
     /** Records a palette as used (copied, downloaded, shared, handed over). */
-    record: (hexes, source) => update((list) => addEntry(list, hexes, { source })),
+    record: (hexes: readonly string[], source: LibrarySource) =>
+      update((list) => addEntry(list, hexes, { source })),
     /** Records a palette and marks it as a favorite. */
-    saveFavorite: (hexes, source) =>
+    saveFavorite: (hexes: readonly string[], source: LibrarySource) =>
       update((list) => addEntry(list, hexes, { source, favorite: true })),
-    toggleFavorite: (id) => update((list) => toggleFavorite(list, id)),
-    remove: (id) => update((list) => removeEntry(list, id)),
-    isFavorite: (hexes) => findEntry(entries.value, hexes)?.favorite === true,
+    toggleFavorite: (id: string) => update((list) => toggleFavorite(list, id)),
+    remove: (id: string) => update((list) => removeEntry(list, id)),
+    isFavorite: (hexes: readonly string[]) => findEntry(entries.value, hexes)?.favorite === true,
   }
 }
 
 /**
  * Test hook: swap the storage and reset the shared state.
- * @param {{load: Function, save: Function, persistent: boolean}|null} adapter
  */
-export function resetPaletteLibrary(adapter = null) {
+export function resetPaletteLibrary(adapter: LibraryStorage | null = null) {
   storage = adapter
   ready = null
   entries.value = []

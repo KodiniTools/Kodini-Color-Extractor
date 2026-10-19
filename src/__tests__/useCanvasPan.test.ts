@@ -37,7 +37,13 @@ function pointer(
   { pointerId, pointerType = 'touch', button = 0, x, y }: PointerInit
 ) {
   const e = new Event(type, { cancelable: true, bubbles: true })
-  return Object.assign(e, { pointerId, pointerType, button, clientX: x, clientY: y })
+  return Object.assign(e, {
+    pointerId,
+    pointerType,
+    button,
+    clientX: x,
+    clientY: y,
+  }) as unknown as PointerEvent
 }
 
 function setup(zoom = 100) {
