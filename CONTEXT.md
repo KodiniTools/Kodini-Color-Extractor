@@ -161,10 +161,9 @@ nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zu
   haben (siehe `src/design-system/README.md`).
 - **Keine Spenden-Elemente** (`src/__tests__/noDonation.test.ts`).
 - **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
-- **TypeScript (Umstellung läuft):** `lib/core/`, der Worker, die Stores und die Composables sind TypeScript und
-  schreiben ihre Typen selbst aus (`Rgb`, `PaletteEntry`, `ExtractedColor`, `GenColor` …); `tsconfig` steht auf
-  `strict: true`. `main.ts`, der Router, Views, Generator- und UI-Komponenten nutzen `<script setup lang="ts">`;
-  die Extractor-Komponenten folgen. Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
+- **TypeScript:** Der ganze Code ist TypeScript; Komponenten nutzen `<script setup lang="ts">` mit typbasierten
+  `defineProps`/`defineEmits`. Typen werden ausgeschrieben (`Rgb`, `PaletteEntry`, `ExtractedColor`, `GenColor` …),
+  `tsconfig` steht auf `strict: true`. Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
   anderen Kodini-Tools geteilt wird. Neue Dateien werden `.ts`.
 
 ---

@@ -1,20 +1,20 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 
-defineProps({
-  show: Boolean,
-})
+defineProps<{
+  show?: boolean
+}>()
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{ close: [] }>()
 
 const store = usePaletteStore()
 const { t } = useI18n()
 
 const sliderPosition = ref(50)
 const isDragging = ref(false)
-const containerRef = ref(null)
+const containerRef = ref<HTMLElement | null>(null)
 
 const imageFilterStyle = computed(() => {
   const { brightness, contrast, saturation, hue, blur, grayscale } = store.imageAdjustments
@@ -35,7 +35,7 @@ const hasAdjustments = computed(() => {
   )
 })
 
-function handleKeydown(e) {
+function handleKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     emit('close')
   }
@@ -43,29 +43,30 @@ function handleKeydown(e) {
 
 // One pointer (mouse, pen or finger) moves the before/after divider. Capturing
 // it keeps the moves coming when it leaves the image.
-let activePointerId = null
+let activePointerId: number | null = null
 
-function startDrag(e) {
+function startDrag(e: PointerEvent) {
   if (e.pointerType === 'mouse' && e.button !== 0) return
   if (activePointerId !== null) return
   activePointerId = e.pointerId
-  e.currentTarget.setPointerCapture?.(e.pointerId)
+  const target = e.currentTarget as HTMLElement
+  target.setPointerCapture?.(e.pointerId)
   isDragging.value = true
   updateSliderPosition(e)
 }
 
-function onDrag(e) {
+function onDrag(e: PointerEvent) {
   if (!isDragging.value || e.pointerId !== activePointerId) return
   updateSliderPosition(e)
 }
 
-function stopDrag(e) {
+function stopDrag(e: PointerEvent) {
   if (e.pointerId !== activePointerId) return
   activePointerId = null
   isDragging.value = false
 }
 
-function updateSliderPosition(e) {
+function updateSliderPosition(e: PointerEvent) {
   if (!containerRef.value) return
 
   const rect = containerRef.value.getBoundingClientRect()
@@ -117,7 +118,7 @@ onUnmounted(() => {
               <!-- After image (with filters) - full width background -->
               <div class="image-wrapper after-image">
                 <img
-                  :src="store.currentImage"
+                  :src="store.currentImage ?? undefined"
                   :style="imageFilterStyle"
                   alt="After"
                   draggable="false"
@@ -130,7 +131,7 @@ onUnmounted(() => {
                 class="image-wrapper before-image"
                 :style="{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }"
               >
-                <img :src="store.currentImage" alt="Before" draggable="false" />
+                <img :src="store.currentImage ?? undefined" alt="Before" draggable="false" />
                 <span class="image-label before-label">{{ t('before') }}</span>
               </div>
 

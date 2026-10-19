@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { usePaletteStore } from '../stores/palette'
+import { usePaletteStore, type ImageExportFormat, type ImageExportSize } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useKeyboard } from '../composables/useKeyboard'
 import { useToast } from '../composables/useToast'
@@ -39,7 +39,7 @@ const paletteHexes = computed(() => store.colors.map((c) => c.hex))
 
 const count = computed({
   get: () => store.colorCount,
-  set: (val) => {
+  set: (val: number) => {
     store.setColorCount(val)
     if (store.currentImage) store.extractColors(store.currentImage)
   },
@@ -47,17 +47,17 @@ const count = computed({
 
 const format = computed({
   get: () => store.downloadFormat,
-  set: (val) => store.setDownloadFormat(val),
+  set: (val: string) => store.setDownloadFormat(val),
 })
 
 const imageFormat = computed({
   get: () => store.imageExportFormat,
-  set: (val) => store.setImageExportFormat(val),
+  set: (val: ImageExportFormat) => store.setImageExportFormat(val),
 })
 
 const imageSize = computed({
   get: () => store.imageExportSize,
-  set: (val) => store.setImageExportSize(val),
+  set: (val: ImageExportSize) => store.setImageExportSize(val),
 })
 
 async function handleCopy() {
@@ -82,7 +82,7 @@ function recordUse() {
   library.record(paletteHexes.value, 'extractor')
 }
 
-function openSaved(hexes) {
+function openSaved(hexes: string[]) {
   showLibrary.value = false
   router.push({ name: 'generator', hash: `#${encodePaletteHash(hexes)}` })
 }

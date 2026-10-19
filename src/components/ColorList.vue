@@ -1,7 +1,7 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { showsHexInline } from '../lib/core/paletteExport'
-import { usePaletteStore } from '../stores/palette'
+import { usePaletteStore, type SampledColor } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
 
@@ -9,10 +9,10 @@ const store = usePaletteStore()
 const { t } = useI18n()
 const toast = useToast()
 
-const hoveredIndex = ref(null)
+const hoveredIndex = ref<number | null>(null)
 const tooltipPosition = ref({ x: 0, y: 0 })
 
-async function copyColor(color, index) {
+async function copyColor(color: SampledColor, index: number) {
   const text = store.getFormatted(color, index)
   try {
     await navigator.clipboard.writeText(text)
@@ -29,7 +29,7 @@ async function copyColor(color, index) {
   toast.success(t('copiedToClipboard'))
 }
 
-function selectColor(index) {
+function selectColor(index: number) {
   store.setSelectedColor(index)
 }
 
@@ -38,17 +38,17 @@ function selectColor(index) {
  * out (rgb/hsl). Under HEX itself, or a CSS/SCSS/Tailwind line that already
  * contains it, it would just repeat what is above.
  */
-function getSecondaryText(color) {
+function getSecondaryText(color: SampledColor) {
   return color.hex.toUpperCase()
 }
 
-function showTooltip(event, index) {
+function showTooltip(event: MouseEvent, index: number) {
   hoveredIndex.value = index
   updateTooltipPosition(event)
 }
 
-function updateTooltipPosition(event) {
-  const rect = event.currentTarget.getBoundingClientRect()
+function updateTooltipPosition(event: MouseEvent) {
+  const rect = (event.currentTarget as HTMLElement).getBoundingClientRect()
   tooltipPosition.value = {
     x: rect.left + rect.width / 2,
     y: rect.top - 8,

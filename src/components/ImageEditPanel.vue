@@ -1,28 +1,29 @@
-<script setup>
-import { usePaletteStore } from '../stores/palette'
+<script setup lang="ts">
+import { usePaletteStore, type ImageAdjustmentKey } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
 import SliderField from './ui/SliderField.vue'
 import PanelSection from './ui/PanelSection.vue'
 
 // Range, step and unit per slider — shared by the range input and the number
 // spinner so the two can never disagree about what a value may be.
-const RANGES = {
-  zoom: { min: 25, max: 400, step: 5, unit: '%' },
-  brightness: { min: 0, max: 200, step: 1, unit: '%' },
-  contrast: { min: 0, max: 200, step: 1, unit: '%' },
-  saturation: { min: 0, max: 200, step: 1, unit: '%' },
-  hue: { min: -180, max: 180, step: 1, unit: '°' },
-  blur: { min: 0, max: 8, step: 0.5, unit: 'px' },
-  grayscale: { min: 0, max: 100, step: 1, unit: '%' },
-}
+const RANGES: Record<ImageAdjustmentKey, { min: number; max: number; step: number; unit: string }> =
+  {
+    zoom: { min: 25, max: 400, step: 5, unit: '%' },
+    brightness: { min: 0, max: 200, step: 1, unit: '%' },
+    contrast: { min: 0, max: 200, step: 1, unit: '%' },
+    saturation: { min: 0, max: 200, step: 1, unit: '%' },
+    hue: { min: -180, max: 180, step: 1, unit: '°' },
+    blur: { min: 0, max: 8, step: 0.5, unit: 'px' },
+    grayscale: { min: 0, max: 100, step: 1, unit: '%' },
+  }
 
 const store = usePaletteStore()
 const { t } = useI18n()
 
-const emit = defineEmits(['open-preview'])
+const emit = defineEmits<{ 'open-preview': [] }>()
 
 // Neutral value per slider — what its reset button returns to.
-const DEFAULTS = {
+const DEFAULTS: Record<ImageAdjustmentKey, number> = {
   zoom: 100,
   brightness: 100,
   contrast: 100,
@@ -33,16 +34,16 @@ const DEFAULTS = {
 }
 
 // Panel layout: which sliders go into which section, in display order.
-const SECTIONS = [
+const SECTIONS: { titleKey: string; keys: ImageAdjustmentKey[] }[] = [
   { titleKey: 'adjustmentsTitle', keys: ['zoom', 'brightness', 'contrast', 'saturation', 'hue'] },
   { titleKey: 'effectsTitle', keys: ['blur', 'grayscale'] },
 ]
 
-function value(key) {
+function value(key: ImageAdjustmentKey) {
   return store.imageAdjustments[key]
 }
 
-function setValue(key, val) {
+function setValue(key: ImageAdjustmentKey, val: number) {
   store.setImageAdjustment(key, val)
 }
 
