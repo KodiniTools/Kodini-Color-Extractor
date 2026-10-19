@@ -59,12 +59,12 @@ src/
 │   ├── features/HandoffReceiver.vue
 │   └── ui/                      # PanelSection, SliderField, NumberSpinner
 ├── composables/
-│   ├── useColorGenerator.js     # gesamter Generator-State inkl. Undo/Redo, Export, Teilen-Link
-│   ├── useCanvasDrag.js, useCanvasPan.js, useFileDrop.js   # Interaktion auf dem Bild
-│   ├── useKeyboard.js           # Tastaturkürzel des Extraktors
-│   ├── usePaletteLibrary.js     # gemeinsame Liste gespeicherter Paletten (IndexedDB)
-│   ├── useI18n.js               # DE/EN, Standard de
-│   ├── useSeo.js, useToast.js
+│   ├── useColorGenerator.ts     # gesamter Generator-State inkl. Undo/Redo, Export, Teilen-Link
+│   ├── useCanvasDrag.ts, useCanvasPan.ts, useFileDrop.ts   # Interaktion auf dem Bild
+│   ├── useKeyboard.ts           # Tastaturkürzel des Extraktors
+│   ├── usePaletteLibrary.ts     # gemeinsame Liste gespeicherter Paletten (IndexedDB)
+│   ├── useI18n.ts               # DE/EN, Standard de
+│   ├── useSeo.ts, useToast.ts
 ├── lib/core/                    # framework-freie Logik
 │   ├── dominantColors.ts        # Histogramm-Extraktion (läuft im Worker)
 │   ├── colorGenerator.ts        # Farbkonvertierung, Harmonien, Anpassungen
@@ -125,7 +125,7 @@ Bildanpassungen ohne Zoom; Zoom und Pan sind Ansicht und bleiben außen vor. Sch
 werden zu einem Schritt zusammengefasst, ein beendetes Ziehen ist ein Schritt. Jede neue Extraktion setzt den
 Verlauf zurück.
 
-### Generator (`composables/useColorGenerator.js`)
+### Generator (`composables/useColorGenerator.ts`)
 
 Jeder Eintrag der Palette hat die Form `{ base: {r,g,b}, adj: {brightness, contrast, saturation, hue}, locked }`.
 Angezeigt und exportiert wird `displayHex(color)`, also die Grundfarbe mit den Anpassungen. Gesperrte Farben
@@ -161,9 +161,10 @@ nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zu
   haben (siehe `src/design-system/README.md`).
 - **Keine Spenden-Elemente** (`src/__tests__/noDonation.test.ts`).
 - **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
-- **TypeScript (Umstellung läuft):** `lib/core/`, der Worker und die Stores sind TypeScript und schreiben ihre Typen selbst aus
-  (`Rgb`, `PaletteEntry`, `LibraryEntry` …). Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
-  anderen Kodini-Tools geteilt wird. Neue Dateien in `lib/core/` werden `.ts`.
+- **TypeScript (Umstellung läuft):** `lib/core/`, der Worker, die Stores und die Composables sind TypeScript und
+  schreiben ihre Typen selbst aus (`Rgb`, `PaletteEntry`, `ExtractedColor`, `GenColor` …); `tsconfig` steht auf
+  `strict: true`. Die Komponenten folgen. Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
+  anderen Kodini-Tools geteilt wird. Neue Dateien werden `.ts`.
 
 ---
 

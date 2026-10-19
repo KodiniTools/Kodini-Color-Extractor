@@ -14,6 +14,9 @@ import {
   rgbToHex,
   displayHex,
   displayRgb,
+  type Adjust,
+  type AdjustKey,
+  type GenColor,
 } from '../lib/core/colorGenerator'
 import {
   DEFAULT_EXPORT_FORMAT,
@@ -30,6 +33,15 @@ const COUNT_OPTIONS = [3, 4, 5, 6, 7, 8]
 const MIN_COUNT = COUNT_OPTIONS[0]
 const MAX_COUNT = COUNT_OPTIONS[COUNT_OPTIONS.length - 1]
 
+/** What the sliders edit: every color, or the selected indices (never empty). */
+export type GeneratorScope = 'all' | number[]
+
+interface GeneratorSnapshot {
+  palette: GenColor[]
+  scope: GeneratorScope
+  master: Adjust
+}
+
 // Reactive state and behaviour for the palette generator. Keeps the view
 // components thin: they render props and emit intent, this owns the logic.
 export function useColorGenerator() {
@@ -45,16 +57,16 @@ export function useColorGenerator() {
 
   const mode = ref('random')
   const count = ref(5)
-  const palette = ref([])
+  const palette = ref<GenColor[]>([])
 
   // Which color(s) the adjustment sliders control: the string 'all', or a
   // non-empty array of selected color indices (multi-select). An empty
   // selection is never stored — it collapses back to 'all'.
-  const scope = ref('all')
+  const scope = ref<GeneratorScope>('all')
 
   // Normalize a set of indices to a sorted, unique, in-range array — or 'all'
   // when nothing valid remains.
-  function normalizeScope(indices) {
+  function normalizeScope(indices: readonly number[]): GeneratorScope {
     const next = [...new Set(indices)]
       .filter((i) => i >= 0 && i < palette.value.length)
       .sort((a, b) => a - b)
@@ -62,25 +74,25 @@ export function useColorGenerator() {
   }
 
   // True when the given color index is part of the current selection.
-  function isSelected(index) {
+  function isSelected(index: number) {
     return scope.value !== 'all' && scope.value.includes(index)
   }
   // Slider values shown when editing all colors at once.
-  const masterAdjust = reactive(neutralAdjust())
+  const masterAdjust = reactive<Adjust>(neutralAdjust())
 
   // ─── Undo / redo history ───
   // Each snapshot captures the palette (base color, per-color adjustments and
   // lock state), the current selection and the master sliders, so stepping
   // back or forward restores a fully coherent editing state.
-  const history = ref([])
+  const history = ref<GeneratorSnapshot[]>([])
   const historyIndex = ref(-1)
   const MAX_HISTORY = 60
 
   // Consecutive drags of the same slider collapse into a single history step.
-  let coalesceKey = null
+  let coalesceKey: string | null = null
   let coalesceTime = 0
 
-  function snapshot() {
+  function snapshot(): GeneratorSnapshot {
     return {
       palette: palette.value.map((c) => ({
         base: { ...c.base },
@@ -112,7 +124,7 @@ export function useColorGenerator() {
     coalesceKey = null
   }
 
-  function restore(snap) {
+  function restore(snap: GeneratorSnapshot) {
     palette.value = snap.palette.map((c) => ({
       base: { ...c.base },
       adj: { ...c.adj },
@@ -154,7 +166,7 @@ export function useColorGenerator() {
     commit()
   }
 
-  function toggleLock(index) {
+  function toggleLock(index: number) {
     const c = palette.value[index]
     if (!c) return
     if (c.locked) {
@@ -173,7 +185,7 @@ export function useColorGenerator() {
 
   // Unlock a color and let it adopt the current "all colors" slider state, so
   // it rejoins the rest of the palette instead of keeping its frozen values.
-  function unlockColor(c) {
+  function unlockColor(c: GenColor) {
     c.locked = false
     Object.assign(c.adj, { ...masterAdjust })
   }
@@ -191,9 +203,9 @@ export function useColorGenerator() {
   // Toggle a color in or out of the selection. Clicking an unselected color
   // adds it; clicking a selected one removes it — so several colors can be
   // edited together. Locked colors are protected and can't be selected.
-  function selectScope(index) {
+  function selectScope(index: number) {
     if (palette.value[index]?.locked) return
-    const current = scope.value === 'all' ? [] : scope.value
+    const current: number[] = scope.value === 'all' ? [] : scope.value
     const next = current.includes(index) ? current.filter((i) => i !== index) : [...current, index]
     scope.value = normalizeScope(next)
   }
@@ -237,7 +249,7 @@ export function useColorGenerator() {
 
   // Apply a picked colour: it becomes the swatch's new base with neutral
   // adjustments, so the swatch, the hex and the sliders all resync to it.
-  function setColorFromHex(hex) {
+  function setColorFromHex(hex: string) {
     const c = selectedColor.value
     if (!c || c.locked) return
     const rgb = hexToRgb(hex)
@@ -273,17 +285,19 @@ export function useColorGenerator() {
 
   // Move a slider: the value is applied to every targeted, unlocked color.
   // In "all" or multi-select mode the master sliders track the shared value.
-  function setAdjust(key, value) {
+  function setAdjust(key: string, value: unknown) {
     // The value can come from the slider or the number spinner, so it is
     // normalized here: out-of-range or non-numeric input never reaches the
     // palette.
     const v = clampAdjust(key, value)
     if (v === null) return
+    // clampAdjust accepts known fields only.
+    const field = key as AdjustKey
     const single = scope.value !== 'all' && scope.value.length === 1
-    if (!single) masterAdjust[key] = v
+    if (!single) masterAdjust[field] = v
     scopeIndices.value.forEach((i) => {
       const c = palette.value[i]
-      if (c && !c.locked) c.adj[key] = v
+      if (c && !c.locked) c.adj[field] = v
     })
     // Collapse a continuous drag of the same slider into one undo step: the
     // first move pushes a new entry, later moves replace it until the user
@@ -311,15 +325,16 @@ export function useColorGenerator() {
 
   // Reset a single adjustment (one slider/spinner row) back to its neutral
   // value for the current scope. Locked colors keep their state.
-  function resetAdjustField(key) {
+  function resetAdjustField(key: string) {
     const neutral = neutralAdjust()
     if (!(key in neutral)) return
-    const def = neutral[key]
+    const field = key as AdjustKey
+    const def = neutral[field]
     const single = scope.value !== 'all' && scope.value.length === 1
-    if (!single) masterAdjust[key] = def
+    if (!single) masterAdjust[field] = def
     scopeIndices.value.forEach((i) => {
       const c = palette.value[i]
-      if (c && !c.locked) c.adj[key] = def
+      if (c && !c.locked) c.adj[field] = def
     })
     endCoalesce()
     commit()
@@ -332,7 +347,7 @@ export function useColorGenerator() {
   })
 
   // Copies exactly what the swatch shows: the color in the selected format.
-  async function copyColor(color) {
+  async function copyColor(color: GenColor) {
     const index = palette.value.indexOf(color)
     const value = formatColor(
       paletteEntry(displayHex(color), displayRgb(color)),
@@ -379,7 +394,7 @@ export function useColorGenerator() {
   // (displayed) colors, never the untouched base values.
   const exportFormatKey = ref(DEFAULT_EXPORT_FORMAT)
 
-  function setExportFormat(key) {
+  function setExportFormat(key: string) {
     if (EXPORT_FORMATS.some((f) => f.key === key)) exportFormatKey.value = key
   }
 
@@ -392,12 +407,12 @@ export function useColorGenerator() {
 
   function downloadPalette() {
     const file = buildPaletteExport(exportFormatKey.value, exportEntries())
-    if (!downloadPaletteFile(file)) return
+    if (!file || !downloadPaletteFile(file)) return
     toast.success(t('genDownloaded', { file: file.filename }))
     recordUse()
   }
 
-  function setCount(n) {
+  function setCount(n: number) {
     count.value = n
     // Trim or extend while keeping existing (and locked) colors.
     if (palette.value.length > n) {
@@ -414,8 +429,8 @@ export function useColorGenerator() {
   // Keyboard shortcuts: spacebar generates a fresh palette, Ctrl/Cmd+Z undoes
   // and Ctrl/Cmd+Shift+Z (or Ctrl/Cmd+Y) redoes — all ignored while typing in
   // a form control.
-  function onKeydown(e) {
-    const tag = (e.target && e.target.tagName) || ''
+  function onKeydown(e: KeyboardEvent) {
+    const tag = (e.target as HTMLElement | null)?.tagName || ''
     const typing = tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA'
     if (typing) return
 
@@ -456,15 +471,14 @@ export function useColorGenerator() {
   }
 
   /**
-   * Replaces the palette with these colors, locked, as one undo step.
-   * @param {string[]} hexes #RRGGBB
-   * @param {string} message toast shown when all colors fit
+   * Replaces the palette with these colors (#RRGGBB), locked, as one undo
+   * step. `message` is the toast shown when all colors fit.
    */
-  function loadPalette(hexes, message) {
-    const kept = hexes.filter((hex) => hexToRgb(hex)).slice(0, MAX_COUNT)
+  function loadPalette(hexes: readonly string[], message: string) {
+    const kept = hexes.flatMap((hex) => hexToRgb(hex) ?? []).slice(0, MAX_COUNT)
     if (!kept.length) return
     count.value = Math.max(MIN_COUNT, kept.length)
-    palette.value = kept.map((hex) => ({ base: hexToRgb(hex), adj: neutralAdjust(), locked: true }))
+    palette.value = kept.map((base) => ({ base, adj: neutralAdjust(), locked: true }))
     if (scope.value !== 'all') scope.value = 'all'
     endCoalesce()
     // Fills any missing slots (fewer than MIN_COUNT colors) and records the

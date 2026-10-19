@@ -654,6 +654,18 @@ const translations = {
   },
 }
 
+export type Locale = keyof typeof translations
+
+/** Placeholder values for `{name}` in a translation. */
+export type TranslationParams = Record<string, string | number>
+
+/** Text lookup by key; keys can be built at runtime, so they stay strings. */
+const tables: Record<Locale, Record<string, string>> = translations
+
+function isLocale(lang: unknown): lang is Locale {
+  return typeof lang === 'string' && Object.hasOwn(translations, lang)
+}
+
 // ─── SSI Navigation Synchronisation ───
 // Die SSI-Nav (nav.html) steuert Sprachwechsel über:
 //   localStorage key: 'locale' (default: 'de')
@@ -666,19 +678,19 @@ const translations = {
 //   3. storage Event → Tab-übergreifende Synchronisation
 
 // Default 'de' - identisch mit SSI-Nav: localStorage.getItem('locale') || 'de'
-function getInitialLocale() {
+function getInitialLocale(): Locale {
   const stored = localStorage.getItem('locale')
-  if (stored && translations[stored]) return stored
+  if (isLocale(stored)) return stored
   return 'de'
 }
 
-const currentLocale = ref(getInitialLocale())
+const currentLocale = ref<Locale>(getInitialLocale())
 
 // Computed für aktuelle Übersetzungen – stärkt die reaktive Abhängigkeitskette
-const currentTranslations = computed(() => translations[currentLocale.value] || translations.de)
+const currentTranslations = computed(() => tables[currentLocale.value] || tables.de)
 
-function setLocale(lang) {
-  if (lang && translations[lang] && currentLocale.value !== lang) {
+function setLocale(lang: unknown) {
+  if (isLocale(lang) && currentLocale.value !== lang) {
     currentLocale.value = lang
     triggerRef(currentLocale)
   }
@@ -686,7 +698,7 @@ function setLocale(lang) {
 
 // Sync 1: CustomEvent von SSI-Nav
 window.addEventListener('language-changed', (e) => {
-  const lang = e.detail?.lang
+  const lang = (e as CustomEvent<{ lang?: string } | null>).detail?.lang
   setLocale(lang)
 })
 
@@ -725,11 +737,11 @@ window.addEventListener('storage', (e) => {
 // Initiale Synchronisation mit SSI-Nav (falls locale vor Vue-Mount gesetzt wurde)
 function syncInitialLocale() {
   const stored = localStorage.getItem('locale')
-  if (stored && translations[stored] && currentLocale.value !== stored) {
+  if (isLocale(stored) && currentLocale.value !== stored) {
     currentLocale.value = stored
   }
   const docLang = document.documentElement.lang
-  if (docLang && translations[docLang] && currentLocale.value !== docLang) {
+  if (isLocale(docLang) && currentLocale.value !== docLang) {
     currentLocale.value = docLang
   }
 }
@@ -743,11 +755,8 @@ if (document.readyState === 'loading') {
 /**
  * Fills `{name}` placeholders from `params`. Placeholders without a value
  * stay as they are, so a missing parameter shows up instead of vanishing.
- * @param {string} text
- * @param {Record<string, string|number>} [params]
- * @returns {string}
  */
-export function interpolate(text, params) {
+export function interpolate(text: string, params?: TranslationParams): string {
   if (!params) return text
   return text.replace(/\{(\w+)\}/g, (match, name) =>
     Object.hasOwn(params, name) ? String(params[name]) : match
@@ -755,8 +764,8 @@ export function interpolate(text, params) {
 }
 
 /** Placeholder names in each translation, for checks that both languages agree. */
-export function placeholders(locale) {
-  const table = translations[locale] || {}
+export function placeholders(locale: string): Record<string, string[]> {
+  const table = isLocale(locale) ? tables[locale] : {}
   return Object.fromEntries(
     Object.entries(table).map(([key, text]) => [
       key,
@@ -766,18 +775,15 @@ export function placeholders(locale) {
 }
 
 export function useI18n() {
-  /**
-   * @param {string} key
-   * @param {Record<string, string|number>} [params] values for `{name}` placeholders
-   */
-  const t = (key, params) => {
-    return interpolate(currentTranslations.value[key] || translations.de[key] || key, params)
+  /** The text for `key` in the current language, German as fallback. */
+  const t = (key: string, params?: TranslationParams): string => {
+    return interpolate(currentTranslations.value[key] || tables.de[key] || key, params)
   }
 
   const locale = computed({
     get: () => currentLocale.value,
-    set: (val) => {
-      if (translations[val]) {
+    set: (val: string) => {
+      if (isLocale(val)) {
         currentLocale.value = val
         localStorage.setItem('locale', val)
         document.documentElement.setAttribute('lang', val)
@@ -786,7 +792,7 @@ export function useI18n() {
     },
   })
 
-  const availableLocales = Object.keys(translations)
+  const availableLocales = Object.keys(translations) as Locale[]
 
   return { t, locale, availableLocales }
 }

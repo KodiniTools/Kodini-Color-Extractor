@@ -37,7 +37,7 @@ describe('Kein Spenden-Button', () => {
   })
 
   it('hat keine Spenden-Übersetzungen mehr', () => {
-    const i18n = readFileSync(join(SRC, 'composables/useI18n.js'), 'utf8')
+    const i18n = readFileSync(join(SRC, 'composables/useI18n.ts'), 'utf8')
     expect(i18n).not.toMatch(/\bdonate(?:Title)?\s*:/)
   })
 })

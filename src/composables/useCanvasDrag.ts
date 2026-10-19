@@ -1,16 +1,39 @@
-import { ref } from 'vue'
+import { ref, type Ref } from 'vue'
+import type { ExtractedColor, PaletteStore } from '../stores/palette'
 
-export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas }) {
+export interface CanvasDragOptions {
+  imageRect: Readonly<Ref<DOMRect | null>>
+  containerRect: Readonly<Ref<DOMRect | null>>
+  store: Pick<
+    PaletteStore,
+    | 'originalImageSize'
+    | 'imageAdjustments'
+    | 'panPosition'
+    | 'setSelectedColor'
+    | 'updateColorFromPosition'
+    | 'getPixelZoomData'
+    | 'commitHistory'
+  >
+  /** The magnifier's canvas, once it is mounted. */
+  pixelZoomCanvas: Readonly<Ref<HTMLCanvasElement | null | undefined>>
+}
+
+export function useCanvasDrag({
+  imageRect,
+  containerRect,
+  store,
+  pixelZoomCanvas,
+}: CanvasDragOptions) {
   const isDragging = ref(false)
   const dragIndex = ref(-1)
   const showZoom = ref(false)
   const zoomPosition = ref({ x: 0, y: 0 })
 
-  let animationFrameId = null
+  let animationFrameId: number | null = null
   // The pointer (mouse, pen or finger) that grabbed the point; others are ignored.
-  let activePointerId = null
+  let activePointerId: number | null = null
 
-  function getIndicatorStyle(color) {
+  function getIndicatorStyle(color: ExtractedColor): Record<string, string> {
     if (!imageRect.value || !containerRect.value || !store.originalImageSize.width) {
       return { display: 'none' }
     }
@@ -44,7 +67,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     }
   }
 
-  function startDrag(e, index) {
+  function startDrag(e: PointerEvent, index: number) {
     // Mouse: only the main button drags; a second pointer cannot take over.
     if (e.pointerType === 'mouse' && e.button !== 0) return
     if (isDragging.value) return
@@ -63,7 +86,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     document.body.style.userSelect = 'none'
   }
 
-  function handleDrag(e) {
+  function handleDrag(e: PointerEvent) {
     if (e.pointerId !== activePointerId) return
     if (!isDragging.value || dragIndex.value < 0) return
     if (!imageRect.value || !containerRect.value) return
@@ -79,11 +102,11 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     animationFrameId = requestAnimationFrame(() => processDrag(clientX, clientY))
   }
 
-  function handlePointerEnd(e) {
+  function handlePointerEnd(e: PointerEvent) {
     if (e.pointerId === activePointerId) stopDrag()
   }
 
-  function processDrag(clientX, clientY) {
+  function processDrag(clientX: number, clientY: number) {
     if (!isDragging.value || dragIndex.value < 0) return
     if (!imageRect.value || !containerRect.value) return
 
@@ -123,7 +146,7 @@ export function useCanvasDrag({ imageRect, containerRect, store, pixelZoomCanvas
     // Draw zoom canvas
     const zoomData = store.getPixelZoomData(imgX, imgY, 24)
     if (zoomData && pixelZoomCanvas.value) {
-      const ctx = pixelZoomCanvas.value.getContext('2d')
+      const ctx = pixelZoomCanvas.value.getContext('2d')!
       ctx.putImageData(zoomData, 0, 0)
     }
   }
