@@ -1,5 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import { STORAGE_KEY } from '../lib/core/handoff'
+import { checkIncomingHandoff } from '../lib/core/collageHandoff'
 
 // Each page is its own chunk, so visitors only download the page they open.
 const LandingPage = () => import('../views/LandingPage.vue')
@@ -57,7 +57,7 @@ router.beforeEach((to, from, next) => {
   // Handoff: redirect to gallery if handoff data is present
   if (to.name !== 'gallery') {
     const hasHandoffParam = to.query.handoff === 'kodinitools'
-    const hasHandoffData = !!localStorage.getItem(STORAGE_KEY)
+    const hasHandoffData = !!checkIncomingHandoff()
     if (hasHandoffParam || hasHandoffData) {
       return next({ name: 'gallery', query: { ...to.query, handoff: 'kodinitools' } })
     }

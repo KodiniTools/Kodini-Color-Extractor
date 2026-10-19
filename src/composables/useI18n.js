@@ -150,6 +150,8 @@ const translations = {
     visionAllDistinct: 'No new mix-ups',
     visionIssues: 'Hard to tell apart: {n}',
     libraryOpen: 'My palettes',
+    sendToCollage: 'Send to Collage Maker',
+    sendToCollageError: 'Could not send: the image is too large for browser storage.',
     libraryTitle: 'My palettes',
     libraryClose: 'Close my palettes',
     libraryIntro:
@@ -473,6 +475,8 @@ const translations = {
     visionAllDistinct: 'Keine neuen Verwechslungen',
     visionIssues: 'Schwer zu unterscheiden: {n}',
     libraryOpen: 'Meine Paletten',
+    sendToCollage: 'An Collage Maker senden',
+    sendToCollageError: 'Senden fehlgeschlagen: Das Bild ist zu groß für den Browser-Speicher.',
     libraryTitle: 'Meine Paletten',
     libraryClose: 'Meine Paletten schließen',
     libraryIntro:

@@ -19,6 +19,7 @@ import ColorVisionDialog from '../components/ColorVisionDialog.vue'
 import PaletteLibraryDialog from '../components/PaletteLibraryDialog.vue'
 import { usePaletteLibrary } from '../composables/usePaletteLibrary'
 import { encodePaletteHash } from '../lib/core/paletteLink'
+import { sendToCollageMaker } from '../lib/core/collageHandoff'
 
 const store = usePaletteStore()
 const router = useRouter()
@@ -91,6 +92,18 @@ function openInGenerator() {
   const hash = encodePaletteHash(paletteHexes.value)
   recordUse()
   router.push({ name: 'generator', hash: `#${hash}` })
+}
+
+// The Collage Maker is another app on the same site, so this is a full page
+// load; the image and the palette card travel through localStorage.
+function sendToCollage() {
+  const url = sendToCollageMaker(store.handoffCanvases())
+  if (!url) {
+    toast.show(t('sendToCollageError'), 'error')
+    return
+  }
+  recordUse()
+  window.location.assign(url)
 }
 
 function handleDownloadImage() {
@@ -218,6 +231,23 @@ function handleDownloadImage() {
                 <polyline points="12 5 19 12 12 19" />
               </svg>
               <span>{{ t('openInGenerator') }}</span>
+            </button>
+            <button class="export-btn" data-testid="send-to-collage" @click="sendToCollage">
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.75"
+                stroke-linejoin="round"
+              >
+                <rect x="3" y="3" width="8" height="10" rx="1" />
+                <rect x="13" y="3" width="8" height="6" rx="1" />
+                <rect x="13" y="11" width="8" height="10" rx="1" />
+                <rect x="3" y="15" width="8" height="6" rx="1" />
+              </svg>
+              <span>{{ t('sendToCollage') }}</span>
             </button>
             <button class="export-btn" @click="showContrast = true">
               <svg
