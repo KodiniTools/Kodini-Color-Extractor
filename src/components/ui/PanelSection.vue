@@ -1,10 +1,10 @@
-<script setup>
-defineProps({
+<script setup lang="ts">
+defineProps<{
   /** Section heading, rendered as a small caps label. */
-  title: { type: String, required: true },
+  title: string
   /** Drops the separator — use on the first section of a panel. */
-  first: { type: Boolean, default: false },
-})
+  first?: boolean
+}>()
 </script>
 
 <template>

@@ -1,10 +1,10 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useRouter } from 'vue-router'
 import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
 import { usePaletteStore } from '../stores/palette'
-import { useHandoffStore } from '../stores/handoff'
+import { useHandoffStore, type HandoffImage } from '../stores/handoff'
 import HandoffReceiver from '../components/features/HandoffReceiver.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 
@@ -17,7 +17,7 @@ const handoffStore = useHandoffStore()
 const images = computed(() => handoffStore.images)
 const hasImages = computed(() => handoffStore.images.length > 0)
 
-function handleHandoffAccept(handoffImages) {
+function handleHandoffAccept(handoffImages: HandoffImage[]) {
   handoffStore.setImages(handoffImages, '')
   toast.show(t('handoffAccepted'), 'success')
 }
@@ -26,7 +26,7 @@ function handleHandoffDismiss() {
   handoffStore.clear()
 }
 
-function selectImage(img) {
+function selectImage(img: HandoffImage) {
   paletteStore.setImage(img.dataUrl)
   paletteStore.extractColors(img.dataUrl)
   router.push({ name: 'app' })

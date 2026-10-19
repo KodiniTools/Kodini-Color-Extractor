@@ -1,17 +1,17 @@
-<script setup>
+<script setup lang="ts">
 /**
  * Subtle cross-promotion hint between the Color Extractor (/app) and the
  * Color Generator (/generator). Renders a short lead-in text followed by a
  * router link with an arrow icon. Purely presentational.
  */
-defineProps({
+defineProps<{
   /** Route target, e.g. "/generator" or "/app". */
-  to: { type: String, required: true },
+  to: string
   /** Lead-in sentence shown before the link. */
-  text: { type: String, required: true },
+  text: string
   /** Link label. */
-  linkText: { type: String, required: true },
-})
+  linkText: string
+}>()
 </script>
 
 <template>

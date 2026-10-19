@@ -46,6 +46,7 @@ export default [
   // Override Vue-specific rules
   {
     files: ['**/*.vue'],
+    plugins: { '@typescript-eslint': tsPlugin },
     languageOptions: {
       parserOptions: {
         parser: tsParser,
@@ -57,6 +58,10 @@ export default [
       'vue/multi-word-component-names': 'off',
       'vue/no-unused-vars': 'error',
       'vue/component-api-style': ['error', ['script-setup', 'composition']],
+      // The core rule reports parameter names inside type signatures such as
+      // `isSelected: (index: number) => boolean`; the TypeScript rule does not.
+      'no-unused-vars': 'off',
+      '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     },
   },
 

@@ -1,22 +1,25 @@
-<script setup>
+<script setup lang="ts">
 import { computed, onUnmounted, ref, watch } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  modelValue: { type: Number, required: true },
-  min: { type: Number, required: true },
-  max: { type: Number, required: true },
-  step: { type: Number, default: 1 },
-  /** Suffix shown inside the field ('%', '°', 'px', …). */
-  unit: { type: String, default: '' },
-  disabled: { type: Boolean, default: false },
-  /** Control name, used for the field's and the arrows' accessible labels. */
-  label: { type: String, required: true },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: number
+    min: number
+    max: number
+    step?: number
+    /** Suffix shown inside the field ('%', '°', 'px', …). */
+    unit?: string
+    disabled?: boolean
+    /** Control name, used for the field's and the arrows' accessible labels. */
+    label: string
+  }>(),
+  { step: 1, unit: '', disabled: false }
+)
 
-const emit = defineEmits(['update:modelValue'])
+const emit = defineEmits<{ 'update:modelValue': [value: number] }>()
 
 // Decimal places implied by the step size, so a 0.5 step never produces
 // 2.5000000000000004 and a whole-number step never grows a ".0".
@@ -27,13 +30,13 @@ const decimals = computed(() => {
 })
 
 /** Snap to the step grid and clamp into range. */
-function normalize(n) {
+function normalize(n: number): number {
   const snapped = Number((Math.round(n / props.step) * props.step).toFixed(decimals.value))
   return Math.min(props.max, Math.max(props.min, snapped))
 }
 
 /** Parse raw field input; null for an empty field or non-numeric text. */
-function readNumber(raw) {
+function readNumber(raw: string | null | undefined): number | null {
   if (raw === '' || raw === null || raw === undefined) return null
   const n = Number(raw)
   return Number.isFinite(n) ? n : null
@@ -42,7 +45,7 @@ function readNumber(raw) {
 // Text the user is currently typing. While it exists the field shows it
 // verbatim, so normalizing never rewrites the value under the caret — the
 // value behind it still follows every keystroke, clamped.
-const draft = ref(null)
+const draft = ref<string | null>(null)
 
 const displayValue = computed(() => draft.value ?? String(props.modelValue))
 
@@ -62,13 +65,14 @@ watch(
   }
 )
 
-function apply(value) {
+function apply(value: number) {
   if (value !== props.modelValue) emit('update:modelValue', value)
 }
 
-function onInput(event) {
-  draft.value = event.target.value
-  const typed = readNumber(event.target.value)
+function onInput(event: Event) {
+  const input = event.target as HTMLInputElement
+  draft.value = input.value
+  const typed = readNumber(input.value)
   if (typed === null) return
   apply(normalize(typed))
 }
@@ -78,16 +82,17 @@ function onInput(event) {
  * value actually held. The DOM is written directly because Vue does not
  * re-render the input when the bound value did not change.
  */
-function onCommit(event) {
-  const typed = readNumber(event.target.value)
+function onCommit(event: Event) {
+  const input = event.target as HTMLInputElement
+  const typed = readNumber(input.value)
   const next = typed === null ? props.modelValue : normalize(typed)
   clearDraft()
   apply(next)
-  if (event.target.value !== String(next)) event.target.value = String(next)
+  if (input.value !== String(next)) input.value = String(next)
 }
 
 /** Move by `factor` steps. Returns false when the value could not move. */
-function stepBy(direction, factor = 1) {
+function stepBy(direction: 1 | -1, factor = 1): boolean {
   if (props.disabled) return false
   clearDraft()
   const next = normalize(props.modelValue + direction * props.step * factor)
@@ -106,7 +111,7 @@ const HOLD_PHASES = [
   { until: Infinity, interval: 40, factor: 5 },
 ]
 
-let holdTimer = null
+let holdTimer: ReturnType<typeof setTimeout> | null = null
 let holdTicks = 0
 
 function stopHold() {
@@ -119,9 +124,10 @@ function stopHold() {
   window.removeEventListener('pointercancel', stopHold)
 }
 
-function repeatHold(direction) {
+function repeatHold(direction: 1 | -1) {
   holdTicks += 1
-  const phase = HOLD_PHASES.find((p) => holdTicks <= p.until)
+  // The last phase runs until Infinity, so one always matches.
+  const phase = HOLD_PHASES.find((p) => holdTicks <= p.until)!
   if (!stepBy(direction, phase.factor)) {
     stopHold()
     return
@@ -129,7 +135,7 @@ function repeatHold(direction) {
   holdTimer = setTimeout(() => repeatHold(direction), phase.interval)
 }
 
-function startHold(direction) {
+function startHold(direction: 1 | -1) {
   stopHold()
   if (!stepBy(direction)) return
   // Listen on the window: the pointer is often released off the button, and

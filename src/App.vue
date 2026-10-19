@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { useSeo } from './composables/useSeo'
 
 // Keep <head> SEO tags (title, description, canonical, OG/Twitter, JSON-LD)

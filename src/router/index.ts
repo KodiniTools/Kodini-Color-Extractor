@@ -1,5 +1,12 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
 import { checkIncomingHandoff } from '../lib/core/collageHandoff'
+
+declare module 'vue-router' {
+  interface RouteMeta {
+    /** Document title until useSeo sets the localized one. */
+    title?: string
+  }
+}
 
 // Each page is its own chunk, so visitors only download the page they open.
 const LandingPage = () => import('../views/LandingPage.vue')
@@ -8,7 +15,7 @@ const GeneratorPage = () => import('../views/GeneratorPage.vue')
 const GalleryView = () => import('../views/GalleryView.vue')
 const FaqPage = () => import('../views/FaqPage.vue')
 
-const routes = [
+const routes: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'landing',

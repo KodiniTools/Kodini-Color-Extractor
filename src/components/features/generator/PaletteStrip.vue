@@ -1,20 +1,28 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '../../../composables/useI18n'
-import { displayHex, displayLight, displayRgb } from '../../../lib/core/colorGenerator'
+import {
+  displayHex,
+  displayLight,
+  displayRgb,
+  type GenColor,
+} from '../../../lib/core/colorGenerator'
 import { formatColor, paletteEntry } from '../../../lib/core/paletteExport'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  palette: { type: Array, required: true },
-  isSelected: { type: Function, required: true },
-  /** Export format the labels are written in, so the strip shows what you get. */
-  format: { type: String, default: 'hex' },
-})
+const props = withDefaults(
+  defineProps<{
+    palette: GenColor[]
+    isSelected: (index: number) => boolean
+    /** Export format the labels are written in, so the strip shows what you get. */
+    format?: string
+  }>(),
+  { format: 'hex' }
+)
 
 /** The swatch label in the selected notation (HEX for formats without one). */
-function swatchLabel(color, index) {
+function swatchLabel(color: GenColor, index: number) {
   const rgb = displayRgb(color)
   return formatColor(paletteEntry(displayHex(color), rgb), props.format, index)
 }
@@ -22,7 +30,11 @@ function swatchLabel(color, index) {
 // Code-shaped formats produce a much longer label than a bare HEX value.
 const longLabel = computed(() => ['css', 'scss', 'tailwind4', 'tailwind'].includes(props.format))
 
-const emit = defineEmits(['select', 'toggle-lock', 'copy'])
+const emit = defineEmits<{
+  select: [index: number]
+  'toggle-lock': [index: number]
+  copy: [color: GenColor]
+}>()
 </script>
 
 <template>
