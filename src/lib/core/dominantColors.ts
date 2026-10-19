@@ -1,4 +1,38 @@
-import { rgbToHex, rgbToHslRounded } from './colorGenerator.js'
+import { rgbToHex, rgbToHslRounded, type Hsl } from './colorGenerator'
+
+/** A color found in the image, at the pixel that best represents it. */
+export interface DominantColor {
+  r: number
+  g: number
+  b: number
+  hex: string
+  hsl: Hsl
+  position: { x: number; y: number }
+  /** Pixels in the color's bucket. */
+  count: number
+}
+
+interface Bucket {
+  key: number
+  count: number
+  sumR: number
+  sumG: number
+  sumB: number
+  sumX: number
+  sumY: number
+}
+
+interface TopEntry {
+  count: number
+  meanR: number
+  meanG: number
+  meanB: number
+  centerX: number
+  centerY: number
+  minColorDist: number
+  bestIndex: number
+  bestSpatialDist: number
+}
 
 // Channel bucket width for the histogram: 256 / 16 = 16 buckets per channel.
 const BUCKET = 16
@@ -8,7 +42,7 @@ const MIN_ALPHA = 128
 // as matching its bucket's mean color when choosing where to place the dot.
 const MATCH_TOLERANCE = 48
 
-function bucketKey(r, g, b) {
+function bucketKey(r: number, g: number, b: number): number {
   return (Math.round(r / BUCKET) << 10) | (Math.round(g / BUCKET) << 5) | Math.round(b / BUCKET)
 }
 
@@ -22,18 +56,21 @@ function bucketKey(r, g, b) {
  * that exists in the image, inside the area it comes from rather than at its
  * first occurrence on the top edge.
  *
- * @param {Uint8ClampedArray} pixels RGBA data, as from ImageData.data
- * @param {number} width image width in pixels
- * @param {number} colorCount maximum number of colors to return
- * @returns {Array<{r:number,g:number,b:number,hex:string,hsl:{h:number,s:number,l:number},position:{x:number,y:number},count:number}>}
- *   sorted by frequency, most frequent first; fewer entries if the image has
+ * @param pixels RGBA data, as from ImageData.data
+ * @param width image width in pixels
+ * @param colorCount maximum number of colors to return
+ * @returns sorted by frequency, most frequent first; fewer entries if the image has
  *   fewer distinct buckets
  */
-export function extractDominantColors(pixels, width, colorCount) {
+export function extractDominantColors(
+  pixels: ArrayLike<number>,
+  width: number,
+  colorCount: number
+): DominantColor[] {
   if (!pixels || !width || !(colorCount > 0)) return []
 
   // Pass 1: histogram with per-bucket channel and coordinate sums.
-  const buckets = new Map()
+  const buckets = new Map<number, Bucket>()
   for (let i = 0; i < pixels.length; i += 4) {
     if (pixels[i + 3] < MIN_ALPHA) continue
     const r = pixels[i]
@@ -63,7 +100,7 @@ export function extractDominantColors(pixels, width, colorCount) {
   if (ranked.length === 0) return []
 
   const slotByKey = new Map(ranked.map((bucket, slot) => [bucket.key, slot]))
-  const top = ranked.map((bucket) => ({
+  const top: TopEntry[] = ranked.map((bucket) => ({
     count: bucket.count,
     meanR: bucket.sumR / bucket.count,
     meanG: bucket.sumG / bucket.count,
@@ -76,7 +113,7 @@ export function extractDominantColors(pixels, width, colorCount) {
   }))
 
   // Calls visit(entry, i, colorDist) for every opaque pixel in a top bucket.
-  function forEachTopPixel(visit) {
+  function forEachTopPixel(visit: (entry: TopEntry, i: number, colorDist: number) => void) {
     for (let i = 0; i < pixels.length; i += 4) {
       if (pixels[i + 3] < MIN_ALPHA) continue
       const r = pixels[i]

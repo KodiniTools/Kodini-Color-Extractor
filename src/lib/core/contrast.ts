@@ -1,6 +1,16 @@
 // WCAG 2.x contrast between palette colors: the ratio formula, the pass
 // levels, and the pairings the contrast dialog shows.
-import { hexToRgb } from './colorGenerator.js'
+import { hexToRgb, type Rgb } from './colorGenerator'
+
+/** WCAG level a ratio passes; 'AA18' is AA for large text only. */
+export type WcagLevel = 'AAA' | 'AA' | 'AA18' | 'fail'
+
+export interface ContrastPair {
+  text: string
+  background: string
+  ratio: number
+  level: WcagLevel
+}
 
 // Text colors offered next to the palette when nothing inside it is readable
 // enough on a background.
@@ -11,28 +21,23 @@ const AAA = 7
 const AA = 4.5
 const AA_LARGE = 3
 
-function channel(value) {
+function channel(value: number): number {
   const c = value / 255
   return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4
 }
 
 /**
  * WCAG relative luminance of an { r, g, b } color (0-255), from 0 to 1.
- * @param {{r:number,g:number,b:number}} rgb
- * @returns {number}
  */
-export function relativeLuminance({ r, g, b }) {
+export function relativeLuminance({ r, g, b }: Rgb): number {
   return 0.2126 * channel(r) + 0.7152 * channel(g) + 0.0722 * channel(b)
 }
 
 /**
  * Contrast ratio between two #RRGGBB colors, from 1 to 21. Order does not
  * matter. Returns null when either color is not a valid hex value.
- * @param {string} hexA
- * @param {string} hexB
- * @returns {number|null}
  */
-export function contrastRatio(hexA, hexB) {
+export function contrastRatio(hexA: string, hexB: string): number | null {
   const a = hexToRgb(hexA)
   const b = hexToRgb(hexB)
   if (!a || !b) return null
@@ -45,11 +50,9 @@ export function contrastRatio(hexA, hexB) {
  * The highest WCAG level a ratio passes: 'AAA', 'AA', 'AA18' (AA for large
  * text only, 18pt or 14pt bold) or 'fail'. Compares the unrounded ratio, as
  * WCAG requires, so 4.49 fails AA even though it displays as 4.5.
- * @param {number|null} ratio
- * @returns {'AAA'|'AA'|'AA18'|'fail'}
  */
-export function wcagLevel(ratio) {
-  if (!(ratio >= AA_LARGE)) return 'fail'
+export function wcagLevel(ratio: number | null): WcagLevel {
+  if (ratio === null || !(ratio >= AA_LARGE)) return 'fail'
   if (ratio >= AAA) return 'AAA'
   if (ratio >= AA) return 'AA'
   return 'AA18'
@@ -58,22 +61,21 @@ export function wcagLevel(ratio) {
 /**
  * Display form of a ratio: two decimals rounded down, so a value that fails a
  * threshold never shows as reaching it (4.499 reads 4.49, not 4.50).
- * @param {number} ratio
- * @returns {string}
  */
-export function formatRatio(ratio) {
+export function formatRatio(ratio: number): string {
   return (Math.floor(ratio * 100) / 100).toFixed(2)
 }
 
-function pair(text, background) {
-  const ratio = contrastRatio(text, background)
+// Both colors come from uniqueHexes or NEUTRAL_TEXT, so they are valid.
+function pair(text: string, background: string): ContrastPair {
+  const ratio = contrastRatio(text, background)!
   return { text, background, ratio, level: wcagLevel(ratio) }
 }
 
 // Uppercase, valid and without repeats, keeping the palette order.
-function uniqueHexes(hexes) {
-  const seen = new Set()
-  const out = []
+function uniqueHexes(hexes: readonly string[] | null | undefined): string[] {
+  const seen = new Set<string>()
+  const out: string[] = []
   for (const hex of hexes || []) {
     if (!hexToRgb(hex)) continue
     const norm = `#${String(hex).trim().replace(/^#/, '').toUpperCase()}`
@@ -88,10 +90,11 @@ function uniqueHexes(hexes) {
  * Every text/background combination of the palette, row by row: rows are the
  * text colors, columns the backgrounds. The diagonal (a color on itself) is
  * null.
- * @param {string[]} hexes
- * @returns {{colors:string[], rows:Array<Array<{text:string,background:string,ratio:number,level:string}|null>>}}
  */
-export function contrastMatrix(hexes) {
+export function contrastMatrix(hexes: readonly string[]): {
+  colors: string[]
+  rows: (ContrastPair | null)[][]
+} {
   const colors = uniqueHexes(hexes)
   const rows = colors.map((text, i) =>
     colors.map((background, j) => (i === j ? null : pair(text, background)))
@@ -103,16 +106,15 @@ export function contrastMatrix(hexes) {
  * The most readable pairings inside the palette, best first. Each pair of
  * colors appears once, with the lighter color as background. Only pairs that
  * pass at least AA for large text are returned.
- * @param {string[]} hexes
- * @param {number} [limit=5]
  */
-export function bestPairs(hexes, limit = 5) {
+export function bestPairs(hexes: readonly string[], limit = 5): ContrastPair[] {
   const colors = uniqueHexes(hexes)
-  const pairs = []
+  const pairs: ContrastPair[] = []
   for (let i = 0; i < colors.length; i++) {
     for (let j = i + 1; j < colors.length; j++) {
-      const li = relativeLuminance(hexToRgb(colors[i]))
-      const lj = relativeLuminance(hexToRgb(colors[j]))
+      // uniqueHexes keeps valid colors only.
+      const li = relativeLuminance(hexToRgb(colors[i])!)
+      const lj = relativeLuminance(hexToRgb(colors[j])!)
       const [text, background] = li <= lj ? [colors[i], colors[j]] : [colors[j], colors[i]]
       const p = pair(text, background)
       if (p.level !== 'fail') pairs.push(p)
@@ -125,12 +127,13 @@ export function bestPairs(hexes, limit = 5) {
  * For each palette color as background, the most readable text color: the
  * best one from the palette, or white/black when no palette color reaches AA.
  * `fromPalette` tells which of the two it is.
- * @param {string[]} hexes
  */
-export function textSuggestions(hexes) {
+export function textSuggestions(
+  hexes: readonly string[]
+): (ContrastPair & { fromPalette: boolean })[] {
   const colors = uniqueHexes(hexes)
   return colors.map((background) => {
-    let best = null
+    let best: ContrastPair | null = null
     for (const text of colors) {
       if (text === background) continue
       const p = pair(text, background)

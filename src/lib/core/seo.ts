@@ -15,12 +15,12 @@ export const OG_IMAGE = `${SITE_URL}/og-image.png`
 export const SITE_NAME = 'Kodini Color Extractor'
 
 // Map an OG/HTML locale from the app's short language code.
-export function ogLocale(lang) {
+export function ogLocale(lang: string): string {
   return lang === 'de' ? 'de_DE' : 'en_US'
 }
 
 // Build the absolute canonical URL for a router path ('/', '/app', '/faq', ...).
-export function canonicalUrl(path) {
+export function canonicalUrl(path: string | null | undefined): string {
   if (!path || path === '/') return `${SITE_URL}/`
   return SITE_URL + path
 }
@@ -28,7 +28,15 @@ export function canonicalUrl(path) {
 // Per-route SEO metadata. Titles/descriptions are i18n keys resolved via t().
 // `robots` follows the values indexable crawlers expect; internal, state-driven
 // views (gallery/handoff) are excluded from the index.
-const ROUTE_SEO = {
+type Translate = (key: string) => string
+
+interface RouteSeoConfig {
+  titleKey: string
+  descKey: string
+  robots: string
+}
+
+const ROUTE_SEO: Record<string, RouteSeoConfig> = {
   landing: { titleKey: 'metaTitleHome', descKey: 'metaDescHome', robots: 'index, follow' },
   app: { titleKey: 'metaTitleApp', descKey: 'metaDescApp', robots: 'index, follow' },
   generator: {
@@ -41,8 +49,15 @@ const ROUTE_SEO = {
 }
 
 // Resolve the localized SEO fields for a route name.
-export function routeSeo(routeName, t) {
-  const cfg = ROUTE_SEO[routeName] || ROUTE_SEO.landing
+export function routeSeo(
+  routeName: string | symbol | null | undefined,
+  t: Translate
+): { title: string; description: string; robots: string } {
+  const cfg =
+    (typeof routeName === 'string' &&
+      Object.hasOwn(ROUTE_SEO, routeName) &&
+      ROUTE_SEO[routeName]) ||
+    ROUTE_SEO.landing
   return {
     title: t(cfg.titleKey),
     description: t(cfg.descKey),
@@ -51,7 +66,7 @@ export function routeSeo(routeName, t) {
 }
 
 // Create or update a <meta> tag identified by its name/property attribute.
-export function upsertMeta(attr, key, content) {
+export function upsertMeta(attr: string, key: string, content: string): void {
   if (typeof document === 'undefined') return
   let el = document.head.querySelector(`meta[${attr}="${key}"]`)
   if (!el) {
@@ -64,7 +79,7 @@ export function upsertMeta(attr, key, content) {
 
 // Create or update a <link rel="..."> tag (canonical, alternate, ...).
 // `hreflang` lets multiple alternate links coexist under the same rel.
-export function upsertLink(rel, href, hreflang) {
+export function upsertLink(rel: string, href: string, hreflang?: string): void {
   if (typeof document === 'undefined') return
   const selector = hreflang
     ? `link[rel="${rel}"][hreflang="${hreflang}"]`
@@ -81,21 +96,22 @@ export function upsertLink(rel, href, hreflang) {
 
 // Inject or replace a JSON-LD <script> block, tagged so it can be updated
 // or removed on later navigations.
-export function setJsonLd(id, data) {
+export function setJsonLd(id: string, data: unknown): void {
   if (typeof document === 'undefined') return
   const domId = `jsonld-${id}`
   let el = document.getElementById(domId)
   if (!el) {
-    el = document.createElement('script')
-    el.type = 'application/ld+json'
-    el.id = domId
-    document.head.appendChild(el)
+    const script = document.createElement('script')
+    script.type = 'application/ld+json'
+    script.id = domId
+    document.head.appendChild(script)
+    el = script
   }
   el.textContent = JSON.stringify(data)
 }
 
 // Remove a previously injected JSON-LD block (e.g. when leaving the FAQ page).
-export function removeJsonLd(id) {
+export function removeJsonLd(id: string): void {
   if (typeof document === 'undefined') return
   const el = document.getElementById(`jsonld-${id}`)
   if (el) el.remove()
@@ -103,8 +119,8 @@ export function removeJsonLd(id) {
 
 // Build a schema.org FAQPage graph from the localized FAQ content so search
 // engines can surface rich results. Mirrors the items rendered in FaqPage.vue.
-export function buildFaqJsonLd(t, faqCount = 10) {
-  const mainEntity = []
+export function buildFaqJsonLd(t: Translate, faqCount = 10) {
+  const mainEntity: object[] = []
   for (let i = 1; i <= faqCount; i++) {
     mainEntity.push({
       '@type': 'Question',

@@ -314,7 +314,7 @@ export const usePaletteStore = defineStore('palette', () => {
 
         // Transfer pixel buffer to worker for off-thread quantization
         const pixelBuffer = imgData.data.buffer.slice(0)
-        const worker = new Worker(new URL('../workers/colorExtractor.worker.js', import.meta.url), {
+        const worker = new Worker(new URL('../workers/colorExtractor.worker.ts', import.meta.url), {
           type: 'module',
         })
         worker.postMessage({ pixelBuffer, width: canvas.width, colorCount: colorCount.value }, [

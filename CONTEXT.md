@@ -66,19 +66,19 @@ src/
 │   ├── useI18n.js               # DE/EN, Standard de
 │   ├── useSeo.js, useToast.js
 ├── lib/core/                    # framework-freie Logik
-│   ├── dominantColors.js        # Histogramm-Extraktion (läuft im Worker)
-│   ├── colorGenerator.js        # Farbkonvertierung, Harmonien, Anpassungen
-│   ├── paletteExport.js         # alle Exportformate, geteilt von Extraktor und Generator
-│   ├── paletteLink.js           # Paletten im URL-Hash (#p=rrggbb-…)
-│   ├── contrast.js              # WCAG-Kontrast, Stufen, Paarvorschläge
-│   ├── paletteLibrary.js        # Listenlogik und Speicher-Adapter für gespeicherte Paletten
+│   ├── dominantColors.ts        # Histogramm-Extraktion (läuft im Worker)
+│   ├── colorGenerator.ts        # Farbkonvertierung, Harmonien, Anpassungen
+│   ├── paletteExport.ts         # alle Exportformate, geteilt von Extraktor und Generator
+│   ├── paletteLink.ts           # Paletten im URL-Hash (#p=rrggbb-…)
+│   ├── contrast.ts              # WCAG-Kontrast, Stufen, Paarvorschläge
+│   ├── paletteLibrary.ts        # Listenlogik und Speicher-Adapter für gespeicherte Paletten
 │   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage, geteilt)
-│   ├── collageHandoff.js        # Bild + Palettenkarte an den Collage Maker; eigene Übergabe ignorieren
-│   └── seo.js
+│   ├── collageHandoff.ts        # Bild + Palettenkarte an den Collage Maker; eigene Übergabe ignorieren
+│   └── seo.ts
 ├── stores/
 │   ├── palette.js               # Extraktor
 │   └── handoff.js               # empfangene Galerie-Bilder
-├── workers/colorExtractor.worker.js
+├── workers/colorExtractor.worker.ts
 ├── design-system/               # geteilte --ds-* Tokens, siehe README dort
 └── assets/main.css              # globale Styles, --app-* Tokens
 e2e/                             # Playwright-Specs
@@ -102,7 +102,7 @@ Es gibt keine Datenbank. Der Extraktor hält seinen State im Pinia-Store, der Ge
 | `originalImageSize`             | `{ width, height }`                                                        |
 | `imageAdjustments`              | `zoom`, `brightness`, `contrast`, `saturation`, `hue`, `blur`, `grayscale` |
 | `panPosition`                   | `{ x, y }`                                                                 |
-| `downloadFormat`                | Schlüssel aus `EXPORT_FORMATS` (paletteExport.js)                          |
+| `downloadFormat`                | Schlüssel aus `EXPORT_FORMATS` (paletteExport.ts)                          |
 | `imageExportFormat` / `...Size` | `png \| jpeg \| webp` / `small \| medium \| large \| xlarge`               |
 
 ```typescript
@@ -130,7 +130,7 @@ Jeder Eintrag der Palette hat die Form `{ base: {r,g,b}, adj: {brightness, contr
 Angezeigt und exportiert wird `displayHex(color)`, also die Grundfarbe mit den Anpassungen. Gesperrte Farben
 überstehen das Neugenerieren und Anpassungen. Undo/Redo speichert Snapshots der ganzen Palette.
 
-### Exportformate (`lib/core/paletteExport.js`)
+### Exportformate (`lib/core/paletteExport.ts`)
 
 HEX, RGB, RGBA, HSL, HSLA, CSS-Variablen, SCSS, Tailwind und Design-Tokens (JSON). Der Extraktor exportiert
 außerdem ein Palettenbild als PNG, JPG oder WebP.
@@ -160,6 +160,9 @@ nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zu
   haben (siehe `src/design-system/README.md`).
 - **Keine Spenden-Elemente** (`src/__tests__/noDonation.test.ts`).
 - **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
+- **TypeScript (Umstellung läuft):** `lib/core/` und der Worker sind TypeScript und schreiben ihre Typen selbst aus
+  (`Rgb`, `PaletteEntry`, `LibraryEntry` …). Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
+  anderen Kodini-Tools geteilt wird. Neue Dateien in `lib/core/` werden `.ts`.
 
 ---
 

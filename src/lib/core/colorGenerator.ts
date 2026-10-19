@@ -2,17 +2,57 @@
 // The generator creates colours from scratch (via HSL harmonies) rather than
 // extracting them from an image, so nothing here depends on Vue or the DOM.
 
+/** A color channel triple, each 0-255. */
+export interface Rgb {
+  r: number
+  g: number
+  b: number
+}
+
+/** Hue 0-360, saturation and lightness 0-100. */
+export interface Hsl {
+  h: number
+  s: number
+  l: number
+}
+
+/** Per-color filter values: percentages (100 = identity) and a hue rotation. */
+export interface Adjust {
+  brightness: number
+  contrast: number
+  saturation: number
+  hue: number
+}
+
+export type AdjustKey = keyof Adjust
+
+/** A generator color: the generated base plus the filters applied on top. */
+export interface GenColor {
+  base: Rgb
+  adj: Adjust
+  locked: boolean
+}
+
+export interface AdjustField {
+  key: AdjustKey
+  min: number
+  max: number
+  step: number
+  unit: string
+  def: number
+}
+
 // ─── Colour conversions ───
 
 // Convert HSL (h: 0-360, s/l: 0-100) to an { r, g, b } object (0-255).
-export function hslToRgb(h, s, l) {
+export function hslToRgb(h: number, s: number, l: number): Rgb {
   h = ((h % 360) + 360) % 360
   s = Math.max(0, Math.min(100, s)) / 100
   l = Math.max(0, Math.min(100, l)) / 100
   const c = (1 - Math.abs(2 * l - 1)) * s
   const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
   const m = l - c / 2
-  let r, g, b
+  let r: number, g: number, b: number
   if (h < 60) [r, g, b] = [c, x, 0]
   else if (h < 120) [r, g, b] = [x, c, 0]
   else if (h < 180) [r, g, b] = [0, c, x]
@@ -27,7 +67,7 @@ export function hslToRgb(h, s, l) {
 }
 
 // Convert an { r, g, b } object (0-255) to HSL (h: 0-360, s/l: 0-100).
-export function rgbToHsl({ r, g, b }) {
+export function rgbToHsl({ r, g, b }: Rgb): Hsl {
   r /= 255
   g /= 255
   b /= 255
@@ -57,18 +97,18 @@ export function rgbToHsl({ r, g, b }) {
  * other side of a .5 hue boundary. Keep this one for anything user-facing
  * that must stay stable.
  */
-export function rgbToHslRounded(r, g, b) {
+export function rgbToHslRounded(r: number, g: number, b: number): Hsl {
   r /= 255
   g /= 255
   b /= 255
   const max = Math.max(r, g, b)
   const min = Math.min(r, g, b)
-  let h, s
+  // A gray (max === min) keeps hue and saturation at 0.
+  let h = 0
+  let s = 0
   const l = (max + min) / 2
 
-  if (max === min) {
-    h = s = 0
-  } else {
+  if (max !== min) {
     const d = max - min
     s = l > 0.5 ? d / (2 - max - min) : d / (max + min)
     switch (max) {
@@ -86,13 +126,13 @@ export function rgbToHslRounded(r, g, b) {
   return { h: Math.round(h * 360), s: Math.round(s * 100), l: Math.round(l * 100) }
 }
 
-export function rgbToHex({ r, g, b }) {
-  const toHex = (n) => n.toString(16).padStart(2, '0')
+export function rgbToHex({ r, g, b }: Rgb): string {
+  const toHex = (n: number) => n.toString(16).padStart(2, '0')
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`.toUpperCase()
 }
 
 // Parse a #RRGGBB string into an { r, g, b } object, or null if invalid.
-export function hexToRgb(hex) {
+export function hexToRgb(hex: unknown): Rgb | null {
   const m = /^#?([0-9a-fA-F]{6})$/.exec(String(hex).trim())
   if (!m) return null
   const n = parseInt(m[1], 16)
@@ -100,19 +140,19 @@ export function hexToRgb(hex) {
 }
 
 // Relative luminance → pick readable overlay text (dark vs light).
-export function isLightColor({ r, g, b }) {
+export function isLightColor({ r, g, b }: Rgb): boolean {
   const lum = (0.299 * r + 0.587 * g + 0.114 * b) / 255
   return lum > 0.6
 }
 
-export function randInt(min, max) {
+export function randInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
 }
 
 // ─── Filter adjustments (brightness / contrast / saturation / hue) ───
 // Mirrors the CSS-filter semantics used by the image editor: percentages
 // default to 100 (identity), hue is a rotation in degrees (0 = identity).
-export function neutralAdjust() {
+export function neutralAdjust(): Adjust {
   return { brightness: 100, contrast: 100, saturation: 100, hue: 0 }
 }
 
@@ -122,7 +162,7 @@ const NEUTRAL_ADJUST = neutralAdjust()
 
 // Field descriptors for the adjustment controls: range, step size, display
 // unit and the neutral default the per-field reset returns to.
-export const ADJUST_FIELDS = [
+export const ADJUST_FIELDS: AdjustField[] = [
   { key: 'brightness', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.brightness },
   { key: 'contrast', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.contrast },
   { key: 'saturation', min: 0, max: 200, step: 1, unit: '%', def: NEUTRAL_ADJUST.saturation },
@@ -130,7 +170,7 @@ export const ADJUST_FIELDS = [
 ]
 
 // Look up a field descriptor by key (null for unknown keys).
-export function adjustField(key) {
+export function adjustField(key: string): AdjustField | null {
   return ADJUST_FIELDS.find((f) => f.key === key) || null
 }
 
@@ -138,7 +178,7 @@ export function adjustField(key) {
 // and clamped to the field range. Returns null for unknown fields or values
 // that are not a finite number (an empty number input, for instance), so
 // callers can ignore the change instead of writing NaN into the palette.
-export function clampAdjust(key, value) {
+export function clampAdjust(key: string, value: unknown): number | null {
   const field = adjustField(key)
   if (!field) return null
   // Number('') and Number(null) are 0, so empty input is rejected up front
@@ -151,8 +191,8 @@ export function clampAdjust(key, value) {
 }
 
 // Apply an adjustment set to a base RGB color and return the resulting RGB.
-export function applyAdjust(rgb, adj) {
-  const clamp = (n) => Math.max(0, Math.min(255, n))
+export function applyAdjust(rgb: Rgb, adj: Adjust): Rgb {
+  const clamp = (n: number) => Math.max(0, Math.min(255, n))
   const bf = adj.brightness / 100
   let r = rgb.r * bf
   let g = rgb.g * bf
@@ -169,18 +209,18 @@ export function applyAdjust(rgb, adj) {
 
 // Build a single color descriptor from HSL values. `base` is the generated
 // color; `adj` holds the per-color filter values applied on top of it.
-export function makeColor(h, s, l, locked = false) {
+export function makeColor(h: number, s: number, l: number, locked = false): GenColor {
   return { base: hslToRgb(h, s, l), adj: neutralAdjust(), locked }
 }
 
 // ─── Displayed (adjusted) values used throughout the UI ───
-export function displayRgb(color) {
+export function displayRgb(color: GenColor): Rgb {
   return applyAdjust(color.base, color.adj)
 }
-export function displayHex(color) {
+export function displayHex(color: GenColor): string {
   return rgbToHex(displayRgb(color))
 }
-export function displayLight(color) {
+export function displayLight(color: GenColor): boolean {
   return isLightColor(displayRgb(color))
 }
 
@@ -203,7 +243,9 @@ export const harmonyModes = [
   'earthy',
   'sunset',
   'darkui',
-]
+] as const
+
+export type HarmonyMode = (typeof harmonyModes)[number]
 
 /** Dropdown grouping: colour theory first, then the style presets. */
 export const harmonyGroups = [
@@ -213,7 +255,10 @@ export const harmonyGroups = [
 
 // Each builder receives the random base hue, the wanted count and a `push`
 // that normalizes the hue and stores one colour.
-const HARMONY_BUILDERS = {
+type PushHsl = (h: number, s: number, l: number) => void
+type HarmonyBuilder = (base: number, count: number, push: PushHsl) => void
+
+const HARMONY_BUILDERS: Partial<Record<HarmonyMode, HarmonyBuilder>> = {
   monochromatic(base, count, push) {
     const s = randInt(45, 75)
     for (let i = 0; i < count; i++) {
@@ -304,18 +349,18 @@ const HARMONY_BUILDERS = {
   },
 }
 
-export function harmonyColors(mode, count) {
+export function harmonyColors(mode: string, count: number): Hsl[] {
   const base = randInt(0, 359)
-  const out = []
+  const out: Hsl[] = []
 
-  const push = (h, s, l) =>
+  const push: PushHsl = (h, s, l) =>
     out.push({
       h: ((h % 360) + 360) % 360,
       s: Math.max(0, Math.min(100, Math.round(s))),
       l: Math.max(0, Math.min(100, Math.round(l))),
     })
 
-  const build = HARMONY_BUILDERS[mode]
+  const build = HARMONY_BUILDERS[mode as HarmonyMode]
   if (build) {
     build(base, count, push)
   } else {

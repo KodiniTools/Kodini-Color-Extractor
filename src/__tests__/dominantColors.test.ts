@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { extractDominantColors } from '../lib/core/dominantColors.js'
+import { extractDominantColors } from '../lib/core/dominantColors'
 
 type RGBA = [number, number, number, number]
 
