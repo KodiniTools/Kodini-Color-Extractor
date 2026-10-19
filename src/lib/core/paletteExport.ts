@@ -6,7 +6,30 @@
 // A palette entry is the neutral shape { hex, rgb: {r,g,b}, hsl: {h,s,l} };
 // `paletteEntry()` builds one from whatever a caller already has.
 
-import { rgbToHsl } from './colorGenerator'
+import { rgbToHsl, type Hsl, type Rgb } from './colorGenerator'
+
+/** The neutral shape every format is built from. */
+export interface PaletteEntry {
+  hex: string
+  rgb: Rgb
+  hsl: Hsl
+}
+
+export interface ExportFormat {
+  key: string
+  labelKey: string
+  ext: string
+  mime: string
+  perColor?: boolean
+  binary?: boolean
+}
+
+export interface ExportFile {
+  filename: string
+  mime: string
+  /** A Uint8Array for `binary` formats, otherwise text. */
+  content: string | Uint8Array<ArrayBuffer>
+}
 
 /**
  * Every available format.
@@ -17,7 +40,7 @@ import { rgbToHsl } from './colorGenerator'
  * `binary` formats build a Uint8Array instead of text; they can be downloaded
  * but not copied as text.
  */
-export const EXPORT_FORMATS = [
+export const EXPORT_FORMATS: ExportFormat[] = [
   { key: 'hex', labelKey: 'exportHex', ext: 'txt', mime: 'text/plain', perColor: true },
   { key: 'rgb', labelKey: 'exportRgb', ext: 'txt', mime: 'text/plain', perColor: true },
   { key: 'rgba', labelKey: 'exportRgba', ext: 'txt', mime: 'text/plain', perColor: true },
@@ -56,12 +79,12 @@ export const EXPORT_FORMATS = [
 export const DEFAULT_EXPORT_FORMAT = 'css'
 
 /** Look up a format descriptor by key (null for unknown keys). */
-export function exportFormat(key) {
+export function exportFormat(key: string): ExportFormat | null {
   return EXPORT_FORMATS.find((f) => f.key === key) || null
 }
 
 /** Normalize a hex string to upper-case `#RRGGBB`. */
-function normalizeHex(hex) {
+function normalizeHex(hex: string | null | undefined): string {
   const value = String(hex || '').replace(/^#/, '')
   return `#${value.toUpperCase()}`
 }
@@ -71,7 +94,11 @@ function normalizeHex(hex) {
  * passing them keeps a caller's own values (the extractor stores its own HSL,
  * and rounding it a second time would shift what users see).
  */
-export function paletteEntry(hex, rgb = null, hsl = null) {
+export function paletteEntry(
+  hex: string,
+  rgb: Rgb | null = null,
+  hsl: Hsl | null = null
+): PaletteEntry {
   const normalized = normalizeHex(hex)
   const channels = rgb || {
     r: parseInt(normalized.slice(1, 3), 16),
@@ -83,12 +110,12 @@ export function paletteEntry(hex, rgb = null, hsl = null) {
   return { hex: normalized, rgb: channels, hsl: hsl || roundHsl(rgbToHsl(channels)) }
 }
 
-function roundHsl({ h, s, l }) {
+function roundHsl({ h, s, l }: Hsl): Hsl {
   return { h: Math.round(h), s: Math.round(s), l: Math.round(l) }
 }
 
 /** Token/variable name for the color at `index` (1-based, as shown in the UI). */
-function colorName(index) {
+function colorName(index: number): string {
   return `color-${index + 1}`
 }
 
@@ -96,12 +123,12 @@ function colorName(index) {
  * Tailwind v4 reads theme colors from `--color-*` variables; the name after
  * the prefix becomes the utility (`--color-palette-1` → `bg-palette-1`).
  */
-function tailwind4Name(index) {
+function tailwind4Name(index: number): string {
   return `palette-${index + 1}`
 }
 
 /** Swatch name in design-app palettes: position and value, e.g. `color-1 #49313E`. */
-function swatchName(entry, index) {
+function swatchName(entry: PaletteEntry, index: number): string {
   return `${colorName(index)} ${entry.hex}`
 }
 
@@ -110,7 +137,7 @@ function swatchName(entry, index) {
  * builders below and for the extractor's per-swatch labels. Unknown formats
  * and formats without a sensible one-liner fall back to HEX.
  */
-export function formatColor(entry, format, index = 0) {
+export function formatColor(entry: PaletteEntry, format: string, index = 0): string {
   const { hex, rgb } = entry
   // Last line of defence: a caller-supplied HSL is emitted as whole units too.
   const hsl = roundHsl(entry.hsl)
@@ -140,31 +167,33 @@ export function formatColor(entry, format, index = 0) {
  * True when a format's one-line rendering already spells out the HEX value,
  * so a UI showing that line does not need to repeat the HEX underneath.
  */
-export function showsHexInline(format) {
+export function showsHexInline(format: string): boolean {
   return !['rgb', 'rgba', 'hsl', 'hsla'].includes(format)
 }
 
-function header(colors) {
+type Colors = readonly PaletteEntry[]
+
+function header(colors: Colors): string {
   return `Kodini color palette — ${colors.length} colors`
 }
 
 /** Plain list: one color per line in the chosen notation. */
-function buildList(colors, format) {
+function buildList(colors: Colors, format: string): string {
   return colors.map((c, i) => formatColor(c, format, i)).join('\n')
 }
 
-function buildCss(colors) {
+function buildCss(colors: Colors): string {
   const lines = colors.map((c, i) => `  ${formatColor(c, 'css', i)}`)
   return [`/* ${header(colors)} */`, ':root {', ...lines, '}', ''].join('\n')
 }
 
-function buildScss(colors) {
+function buildScss(colors: Colors): string {
   const vars = colors.map((c, i) => formatColor(c, 'scss', i))
   const list = colors.map((_, i) => `$${colorName(i)}`).join(', ')
   return [`// ${header(colors)}`, ...vars, '', `$palette: (${list});`, ''].join('\n')
 }
 
-function buildTailwind(colors) {
+function buildTailwind(colors: Colors): string {
   const entries = colors.map((c, i) => `        ${formatColor(c, 'tailwind', i)}`)
   return [
     `// ${header(colors)}`,
@@ -188,8 +217,8 @@ function buildTailwind(colors) {
  * Style Dictionary, Tokens Studio and the Figma variables plugins. Values are
  * hex strings, which is what those tools consume in practice.
  */
-function buildTokens(colors) {
-  const color = {}
+function buildTokens(colors: Colors): string {
+  const color: Record<string, { $type: 'color'; $value: string }> = {}
   colors.forEach((c, i) => {
     color[colorName(i)] = { $type: 'color', $value: c.hex }
   })
@@ -200,7 +229,7 @@ function buildTokens(colors) {
  * Tailwind CSS v4: theme variables in an @theme block, placed in the CSS file
  * that imports Tailwind. Each color becomes utilities like `bg-palette-1`.
  */
-function buildTailwind4(colors) {
+function buildTailwind4(colors: Colors): string {
   const lines = colors.map((c, i) => `  ${formatColor(c, 'tailwind4', i)}`)
   return [
     `/* ${header(colors)} */`,
@@ -216,8 +245,8 @@ function buildTailwind4(colors) {
  * GIMP palette (.gpl), also read by Inkscape and Krita: a header, then one
  * swatch per line as right-aligned R G B followed by a tab and the name.
  */
-function buildGpl(colors) {
-  const pad = (n) => String(n).padStart(3, ' ')
+function buildGpl(colors: Colors): string {
+  const pad = (n: number) => String(n).padStart(3, ' ')
   const rows = colors.map(
     (c, i) => `${pad(c.rgb.r)} ${pad(c.rgb.g)} ${pad(c.rgb.b)}\t${swatchName(c, i)}`
   )
@@ -230,7 +259,7 @@ function buildGpl(colors) {
  * color-entry block per swatch with a UTF-16 name, the 'RGB ' model, three
  * float32 channels from 0 to 1 and the color type (2 = normal).
  */
-function buildAse(colors) {
+function buildAse(colors: Colors): Uint8Array<ArrayBuffer> {
   const blocks = colors.map((c, i) => {
     const name = swatchName(c, i)
     const nameUnits = name.length + 1 // UTF-16 code units, null terminator included
@@ -240,7 +269,7 @@ function buildAse(colors) {
   const total = 12 + blocks.reduce((sum, b) => sum + 6 + b.length, 0)
   const view = new DataView(new ArrayBuffer(total))
   let offset = 0
-  const ascii = (text) => {
+  const ascii = (text: string) => {
     for (const ch of text) view.setUint8(offset++, ch.charCodeAt(0))
   }
   ascii('ASEF')
@@ -269,7 +298,7 @@ function buildAse(colors) {
   return new Uint8Array(view.buffer)
 }
 
-const BUILDERS = {
+const BUILDERS: Record<string, (colors: Colors) => string | Uint8Array<ArrayBuffer>> = {
   css: buildCss,
   scss: buildScss,
   tailwind4: buildTailwind4,
@@ -282,19 +311,21 @@ const BUILDERS = {
 /**
  * Render a whole palette in the given format.
  *
- * @param {string} format one of EXPORT_FORMATS' keys
- * @param {Array} colors palette entries (see `paletteEntry`)
- * @param {{ basename?: string }} [options] file name without extension
- * @returns {{ filename: string, mime: string, content: string|Uint8Array }|null}
- *   content is a Uint8Array for `binary` formats, otherwise text;
- *   the result is null for an unknown format or an empty palette, so callers
+ * @param format one of EXPORT_FORMATS' keys
+ * @param colors palette entries (see `paletteEntry`)
+ * @param options.basename file name without extension
+ * @returns null for an unknown format or an empty palette, so callers
  *   can bail out.
  */
-export function buildPaletteExport(format, colors, options = {}) {
+export function buildPaletteExport(
+  format: string,
+  colors: Colors,
+  options: { basename?: string } = {}
+): ExportFile | null {
   const descriptor = exportFormat(format)
   if (!descriptor || !Array.isArray(colors) || colors.length === 0) return null
   const basename = options.basename || 'kodini-palette'
-  const build = BUILDERS[descriptor.key]
+  const build = Object.hasOwn(BUILDERS, descriptor.key) ? BUILDERS[descriptor.key] : undefined
   return {
     filename: `${basename}.${descriptor.ext}`,
     mime: descriptor.mime,
@@ -306,7 +337,7 @@ export function buildPaletteExport(format, colors, options = {}) {
  * Hand a rendered palette to the browser as a file download. Kept here so the
  * extractor and the generator save files the exact same way.
  */
-export function downloadPaletteFile(file) {
+export function downloadPaletteFile(file: ExportFile | null): boolean {
   if (!file) return false
   const type = typeof file.content === 'string' ? `${file.mime};charset=utf-8` : file.mime
   const blob = new Blob([file.content], { type })

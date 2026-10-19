@@ -10,40 +10,50 @@ export const MAX_FAVORITES = 200
 
 const HEX6 = /^#?[0-9a-f]{6}$/i
 
+export type LibrarySource = 'extractor' | 'generator'
+
+export interface LibraryEntry {
+  id: string
+  /** #RRGGBB, uppercase, in palette order. */
+  colors: string[]
+  source: LibrarySource
+  favorite: boolean
+  /** ms since epoch */
+  updatedAt: number
+}
+
 /**
- * @typedef {Object} LibraryEntry
- * @property {string} id
- * @property {string[]} colors  #RRGGBB, uppercase, in palette order
- * @property {'extractor'|'generator'} source
- * @property {boolean} favorite
- * @property {number} updatedAt  ms since epoch
+ * Where the list is kept. `persistent` is false when entries only live until
+ * reload.
  */
+export interface LibraryStorage {
+  persistent: boolean
+  load(): Promise<unknown>
+  save(entries: readonly LibraryEntry[]): Promise<void>
+}
 
 /**
  * Valid colors as uppercase #RRGGBB, in order; invalid entries are dropped.
- * @param {string[]} hexes
- * @returns {string[]}
  */
-export function normalizeColors(hexes) {
-  return (hexes || [])
+export function normalizeColors(hexes: unknown): string[] {
+  if (!Array.isArray(hexes)) return []
+  return hexes
     .map((hex) => String(hex).trim())
     .filter((hex) => HEX6.test(hex))
     .map((hex) => `#${hex.replace(/^#/, '').toUpperCase()}`)
 }
 
-const keyOf = (colors) => colors.join('-')
+const keyOf = (colors: readonly string[]) => colors.join('-')
 
-function newId() {
+function newId(): string {
   if (globalThis.crypto?.randomUUID) return globalThis.crypto.randomUUID()
   return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
 }
 
 /**
  * Favorites first, then the rest; newest first within each group.
- * @param {LibraryEntry[]} entries
- * @returns {LibraryEntry[]}
  */
-export function sortEntries(entries) {
+export function sortEntries(entries: readonly LibraryEntry[]): LibraryEntry[] {
   return [...entries].sort(
     (a, b) => Number(b.favorite) - Number(a.favorite) || b.updatedAt - a.updatedAt
   )
@@ -51,10 +61,8 @@ export function sortEntries(entries) {
 
 /**
  * Sorted, with the recent entries and favorites capped.
- * @param {LibraryEntry[]} entries
- * @returns {LibraryEntry[]}
  */
-export function pruneEntries(entries) {
+export function pruneEntries(entries: readonly LibraryEntry[]): LibraryEntry[] {
   const sorted = sortEntries(entries)
   const favorites = sorted.filter((e) => e.favorite).slice(0, MAX_FAVORITES)
   const recent = sorted.filter((e) => !e.favorite).slice(0, MAX_RECENT)
@@ -65,48 +73,46 @@ export function pruneEntries(entries) {
  * Records a palette as used. The same colors in the same order are one
  * entry: using them again moves that entry to the top and keeps its
  * favorite mark. Returns the list unchanged when no valid color is given.
- * @param {LibraryEntry[]} entries
- * @param {string[]} hexes
- * @param {{source: 'extractor'|'generator', favorite?: boolean, now?: number}} options
- * @returns {LibraryEntry[]}
  */
-export function addEntry(entries, hexes, { source, favorite = false, now = Date.now() }) {
+export function addEntry(
+  entries: LibraryEntry[],
+  hexes: readonly string[],
+  {
+    source,
+    favorite = false,
+    now = Date.now(),
+  }: { source: LibrarySource; favorite?: boolean; now?: number }
+): LibraryEntry[] {
   const colors = normalizeColors(hexes)
   if (!colors.length) return entries
   const key = keyOf(colors)
   const existing = entries.find((e) => keyOf(e.colors) === key)
   const rest = entries.filter((e) => e !== existing)
-  const entry = existing
+  const entry: LibraryEntry = existing
     ? { ...existing, source, favorite: existing.favorite || favorite, updatedAt: now }
     : { id: newId(), colors, source, favorite, updatedAt: now }
   return pruneEntries([entry, ...rest])
 }
 
 /**
- * @param {LibraryEntry[]} entries
- * @param {string} id
- * @returns {LibraryEntry[]}
  */
-export function toggleFavorite(entries, id) {
+export function toggleFavorite(entries: readonly LibraryEntry[], id: string): LibraryEntry[] {
   return pruneEntries(entries.map((e) => (e.id === id ? { ...e, favorite: !e.favorite } : e)))
 }
 
 /**
- * @param {LibraryEntry[]} entries
- * @param {string} id
- * @returns {LibraryEntry[]}
  */
-export function removeEntry(entries, id) {
+export function removeEntry(entries: readonly LibraryEntry[], id: string): LibraryEntry[] {
   return entries.filter((e) => e.id !== id)
 }
 
 /**
  * The entry holding exactly these colors, if any.
- * @param {LibraryEntry[]} entries
- * @param {string[]} hexes
- * @returns {LibraryEntry|undefined}
  */
-export function findEntry(entries, hexes) {
+export function findEntry(
+  entries: readonly LibraryEntry[],
+  hexes: readonly string[]
+): LibraryEntry | undefined {
   const colors = normalizeColors(hexes)
   if (!colors.length) return undefined
   const key = keyOf(colors)
@@ -116,34 +122,31 @@ export function findEntry(entries, hexes) {
 /**
  * Keeps only well-formed entries from stored data, which may be stale,
  * hand-edited or from an older version.
- * @param {unknown} data
- * @returns {LibraryEntry[]}
  */
-export function sanitizeEntries(data) {
+export function sanitizeEntries(data: unknown): LibraryEntry[] {
   if (!Array.isArray(data)) return []
-  const out = []
-  for (const raw of data) {
+  const out: LibraryEntry[] = []
+  for (const raw of data as unknown[]) {
     if (!raw || typeof raw !== 'object') continue
-    const colors = normalizeColors(raw.colors)
-    if (!colors.length || typeof raw.id !== 'string') continue
+    const { id, colors: rawColors, source, favorite, updatedAt } = raw as Record<string, unknown>
+    const colors = normalizeColors(rawColors)
+    if (!colors.length || typeof id !== 'string') continue
     out.push({
-      id: raw.id,
+      id,
       colors,
-      source: raw.source === 'extractor' ? 'extractor' : 'generator',
-      favorite: raw.favorite === true,
-      updatedAt: Number.isFinite(raw.updatedAt) ? raw.updatedAt : 0,
+      source: source === 'extractor' ? 'extractor' : 'generator',
+      favorite: favorite === true,
+      updatedAt: typeof updatedAt === 'number' && Number.isFinite(updatedAt) ? updatedAt : 0,
     })
   }
   return pruneEntries(out)
 }
 
 // ─── Storage adapters ───
-// An adapter has `load(): Promise<unknown>`, `save(entries): Promise<void>`
-// and `persistent: boolean` (false when entries only live until reload).
 
 /** Keeps entries in memory only. */
-export function createMemoryStorage() {
-  let data = []
+export function createMemoryStorage(): LibraryStorage {
+  let data: readonly LibraryEntry[] = []
   return {
     persistent: false,
     async load() {
@@ -159,7 +162,7 @@ const DB_NAME = 'kodini-color-extractor'
 const STORE = 'library'
 const RECORD_KEY = 'palettes'
 
-function request(req) {
+function request<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise((resolve, reject) => {
     req.onsuccess = () => resolve(req.result)
     req.onerror = () => reject(req.error)
@@ -169,9 +172,10 @@ function request(req) {
 /**
  * IndexedDB storage: the whole list is one record, so a save is atomic.
  * Rejects when IndexedDB is missing or blocked (e.g. some private modes).
- * @param {IDBFactory} [idb]
  */
-export async function createIndexedDbStorage(idb = globalThis.indexedDB) {
+export async function createIndexedDbStorage(
+  idb: IDBFactory | undefined = globalThis.indexedDB
+): Promise<LibraryStorage> {
   if (!idb) throw new Error('IndexedDB unavailable')
   const open = idb.open(DB_NAME, 1)
   open.onupgradeneeded = () => {

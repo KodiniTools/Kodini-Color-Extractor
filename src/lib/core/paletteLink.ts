@@ -10,10 +10,8 @@ const HEX6 = /^[0-9a-f]{6}$/i
 /**
  * Encode a list of #RRGGBB colors as the hash fragment (without the '#').
  * Invalid entries are skipped; an empty result yields ''.
- * @param {string[]} hexes
- * @returns {string}
  */
-export function encodePaletteHash(hexes) {
+export function encodePaletteHash(hexes: readonly string[] | null | undefined): string {
   const parts = (hexes || [])
     .map((hex) => String(hex).trim().replace(/^#/, '').toLowerCase())
     .filter((hex) => HEX6.test(hex))
@@ -25,10 +23,8 @@ export function encodePaletteHash(hexes) {
  * Read the colors from a location hash ('#p=...' or 'p=...').
  * Returns uppercase #RRGGBB strings, or [] when the hash carries no valid
  * palette. Invalid entries are dropped instead of rejecting the whole link.
- * @param {string} hash
- * @returns {string[]}
  */
-export function decodePaletteHash(hash) {
+export function decodePaletteHash(hash: string | null | undefined): string[] {
   const params = new URLSearchParams(String(hash || '').replace(/^#/, ''))
   const value = params.get(HASH_KEY)
   if (!value) return []
