@@ -73,6 +73,9 @@ export default [
     },
     rules: {
       ...tsPlugin.configs.recommended.rules,
+      // TypeScript resolves names itself and knows type-only globals such as
+      // CanvasRenderingContext2DSettings, which no-undef reports as undefined.
+      'no-undef': 'off',
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
       '@typescript-eslint/no-explicit-any': 'warn',
     },

@@ -21,7 +21,7 @@ Alle Daten werden lokal im Browser verarbeitet. Es gibt kein Backend und keine D
 | --------------- | ---------------------- | ------------------------------------------------------- |
 | Vue 3           | ^3.5                   | UI, Composition API, `<script setup>`-SFCs (JavaScript) |
 | Vue Router      | ^4.6                   | Routing, History-Modus, Seiten als Lazy-Chunks          |
-| Pinia           | ^3.0                   | State des Extraktors (`stores/palette.js`)              |
+| Pinia           | ^3.0                   | State des Extraktors (`stores/palette.ts`)              |
 | Vite            | ^8.3                   | Dev-Server und Build                                    |
 | Vitest + jsdom  | ^4.1                   | Unit- und Komponententests (`src/__tests__/`)           |
 | Playwright      | ^1.64                  | E2E-Tests (`e2e/`), Chromium                            |
@@ -76,8 +76,8 @@ src/
 │   ├── collageHandoff.ts        # Bild + Palettenkarte an den Collage Maker; eigene Übergabe ignorieren
 │   └── seo.ts
 ├── stores/
-│   ├── palette.js               # Extraktor
-│   └── handoff.js               # empfangene Galerie-Bilder
+│   ├── palette.ts               # Extraktor
+│   └── handoff.ts               # empfangene Galerie-Bilder
 ├── workers/colorExtractor.worker.ts
 ├── design-system/               # geteilte --ds-* Tokens, siehe README dort
 └── assets/main.css              # globale Styles, --app-* Tokens
@@ -91,11 +91,11 @@ public/samples/                  # 8 Beispielbilder
 
 Es gibt keine Datenbank. Der Extraktor hält seinen State im Pinia-Store, der Generator in `useColorGenerator`.
 
-### Extraktor (`stores/palette.js`)
+### Extraktor (`stores/palette.ts`)
 
 | State                           | Inhalt                                                                     |
 | ------------------------------- | -------------------------------------------------------------------------- |
-| `colors`                        | `Color[]`, nach Häufigkeit sortiert                                        |
+| `colors`                        | `ExtractedColor[]`, nach Häufigkeit sortiert                               |
 | `currentImage`                  | Data-URL des geladenen Bildes                                              |
 | `colorCount`                    | 1–20, Standard 5                                                           |
 | `selectedColorIndex`            | ausgewählte Farbe, `-1` für keine                                          |
@@ -106,13 +106,14 @@ Es gibt keine Datenbank. Der Extraktor hält seinen State im Pinia-Store, der Ge
 | `imageExportFormat` / `...Size` | `png \| jpeg \| webp` / `small \| medium \| large \| xlarge`               |
 
 ```typescript
-interface Color {
+// stores/palette.ts
+interface ExtractedColor {
   r: number
   g: number
   b: number // 0–255
   hex: string // #RRGGBB
-  hsl: { h: number; s: number; l: number }
-  position: { x: number; y: number } // Pixel im Originalbild
+  hsl: Hsl // { h, s, l }
+  position: Point // Pixel im Originalbild
 }
 ```
 
@@ -160,7 +161,7 @@ nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zu
   haben (siehe `src/design-system/README.md`).
 - **Keine Spenden-Elemente** (`src/__tests__/noDonation.test.ts`).
 - **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
-- **TypeScript (Umstellung läuft):** `lib/core/` und der Worker sind TypeScript und schreiben ihre Typen selbst aus
+- **TypeScript (Umstellung läuft):** `lib/core/`, der Worker und die Stores sind TypeScript und schreiben ihre Typen selbst aus
   (`Rgb`, `PaletteEntry`, `LibraryEntry` …). Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
   anderen Kodini-Tools geteilt wird. Neue Dateien in `lib/core/` werden `.ts`.
 

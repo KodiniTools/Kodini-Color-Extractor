@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
-import { rgbToHex, rgbToHslRounded as rgbToHsl } from '../lib/core/colorGenerator'
+import { rgbToHex, rgbToHslRounded as rgbToHsl, type Hsl } from '../lib/core/colorGenerator'
 import { ref, computed } from 'vue'
+import type { ExtractRequest, ExtractResponse } from '../workers/colorExtractor.worker'
 import {
   EXPORT_FORMATS,
   buildPaletteExport,
@@ -11,10 +12,57 @@ import {
   paletteEntry,
 } from '../lib/core/paletteExport'
 
-let filterDebounceTimer = null
+export interface Point {
+  x: number
+  y: number
+}
+
+/** A color picked from the image, with the pixel it was sampled at. */
+export interface ExtractedColor {
+  r: number
+  g: number
+  b: number
+  hex: string
+  hsl: Hsl
+  position: Point
+}
+
+/** The color values alone, as formatting needs them. */
+export type SampledColor = Omit<ExtractedColor, 'position'>
+
+export interface ImageAdjustments {
+  zoom: number
+  brightness: number
+  contrast: number
+  saturation: number
+  hue: number
+  blur: number
+  grayscale: number
+}
+
+export type ImageAdjustmentKey = keyof ImageAdjustments
+export type ImageExportFormat = 'png' | 'jpeg' | 'webp'
+
+// Available export sizes (width in pixels, height auto-calculated)
+const exportSizes = {
+  small: { width: 400 },
+  medium: { width: 800 },
+  large: { width: 1200 },
+  xlarge: { width: 1600 },
+}
+
+export type ImageExportSize = keyof typeof exportSizes
+
+/** What undo/redo restores: point positions and adjustments, not the view. */
+interface HistorySnapshot {
+  colors: ExtractedColor[]
+  adjustments: Omit<ImageAdjustments, 'zoom'>
+}
+
+let filterDebounceTimer: ReturnType<typeof setTimeout> | undefined
 // The source and filtered canvases are read pixel by pixel while dragging the
 // color pickers, so keep them in CPU memory instead of reading back from the GPU.
-const READ_OPTIONS = { willReadFrequently: true }
+const READ_OPTIONS: CanvasRenderingContext2DSettings = { willReadFrequently: true }
 // Bumped on every extractColors call, so only the latest request writes colors.
 let extractionId = 0
 
@@ -24,29 +72,21 @@ const MAX_HISTORY = 60
 const COALESCE_MS = 700
 
 export const usePaletteStore = defineStore('palette', () => {
-  const colors = ref([])
-  const currentImage = ref(null)
+  const colors = ref<ExtractedColor[]>([])
+  const currentImage = ref<string | null>(null)
   const colorCount = ref(5)
   const downloadFormat = ref('hex')
   const selectedColorIndex = ref(-1)
-  const canvasRef = ref(null)
-  const filteredCanvasRef = ref(null)
+  const canvasRef = ref<HTMLCanvasElement | null>(null)
+  const filteredCanvasRef = ref<HTMLCanvasElement | null>(null)
   const originalImageSize = ref({ width: 0, height: 0 })
 
   // Image export settings
-  const imageExportFormat = ref('png')
-  const imageExportSize = ref('medium')
-
-  // Available export sizes (width in pixels, height auto-calculated)
-  const exportSizes = {
-    small: { width: 400 },
-    medium: { width: 800 },
-    large: { width: 1200 },
-    xlarge: { width: 1600 },
-  }
+  const imageExportFormat = ref<ImageExportFormat>('png')
+  const imageExportSize = ref<ImageExportSize>('medium')
 
   // Image adjustment settings
-  const imageAdjustments = ref({
+  const imageAdjustments = ref<ImageAdjustments>({
     zoom: 100,
     brightness: 100,
     contrast: 100,
@@ -57,24 +97,22 @@ export const usePaletteStore = defineStore('palette', () => {
   })
 
   // Pan position for zoomed image
-  const panPosition = ref({ x: 0, y: 0 })
-
-  // Vertical center of the image container relative to .app-container top (px)
+  const panPosition = ref<Point>({ x: 0, y: 0 })
 
   const hasColors = computed(() => colors.value.length > 0)
 
   // Undo/redo over what the user changed on the image: color point positions
   // and the image adjustments. Zoom and pan are view state and stay out.
-  const history = ref([])
+  const history = ref<HistorySnapshot[]>([])
   const historyIndex = ref(-1)
-  let coalesceKey = null
+  let coalesceKey: string | null = null
   let coalesceTime = 0
 
   const canUndo = computed(() => historyIndex.value > 0)
   const canRedo = computed(() => historyIndex.value < history.value.length - 1)
 
-  function snapshot() {
-    // eslint-disable-next-line no-unused-vars
+  function snapshot(): HistorySnapshot {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { zoom, ...adjustments } = imageAdjustments.value
     return {
       colors: colors.value.map((c) => ({ ...c, hsl: { ...c.hsl }, position: { ...c.position } })),
@@ -84,15 +122,14 @@ export const usePaletteStore = defineStore('palette', () => {
 
   // Equal when every point sits in the same place under the same adjustments;
   // the sampled colors follow from those two.
-  function sameSnapshot(a, b) {
+  function sameSnapshot(a: HistorySnapshot, b: HistorySnapshot | undefined): boolean {
     if (!a || !b || a.colors.length !== b.colors.length) return false
     const samePoints = a.colors.every(
       (c, i) =>
         c.position?.x === b.colors[i].position?.x && c.position?.y === b.colors[i].position?.y
     )
-    return (
-      samePoints && Object.keys(a.adjustments).every((k) => a.adjustments[k] === b.adjustments[k])
-    )
+    const keys = Object.keys(a.adjustments) as (keyof HistorySnapshot['adjustments'])[]
+    return samePoints && keys.every((k) => a.adjustments[k] === b.adjustments[k])
   }
 
   /** Starts a fresh history with the current state as its only entry. */
@@ -105,9 +142,8 @@ export const usePaletteStore = defineStore('palette', () => {
   /**
    * Records the current state as an undo step. Calls with the same `key`
    * in quick succession replace the last step instead of adding one.
-   * @param {string|null} [key]
    */
-  function commitHistory(key = null) {
+  function commitHistory(key: string | null = null) {
     if (historyIndex.value < 0) return
     const snap = snapshot()
     const now = Date.now()
@@ -131,7 +167,7 @@ export const usePaletteStore = defineStore('palette', () => {
     historyIndex.value = next.length - 1
   }
 
-  function restore(snap) {
+  function restore(snap: HistorySnapshot) {
     clearTimeout(filterDebounceTimer)
     coalesceKey = null
     colors.value = snap.colors.map((c) => ({
@@ -157,7 +193,7 @@ export const usePaletteStore = defineStore('palette', () => {
     restore(history.value[historyIndex.value])
   }
 
-  function setImage(imgSrc) {
+  function setImage(imgSrc: string | null) {
     currentImage.value = imgSrc
   }
 
@@ -175,27 +211,27 @@ export const usePaletteStore = defineStore('palette', () => {
     coalesceKey = null
   }
 
-  function setColorCount(count) {
+  function setColorCount(count: number) {
     colorCount.value = count
   }
 
-  function setDownloadFormat(format) {
+  function setDownloadFormat(format: string) {
     if (findExportFormat(format)) downloadFormat.value = format
   }
 
-  function setImageExportFormat(format) {
+  function setImageExportFormat(format: ImageExportFormat) {
     imageExportFormat.value = format
   }
 
-  function setImageExportSize(size) {
+  function setImageExportSize(size: ImageExportSize) {
     imageExportSize.value = size
   }
 
-  function setSelectedColor(index) {
+  function setSelectedColor(index: number) {
     selectedColorIndex.value = index
   }
 
-  function setImageAdjustment(prop, value) {
+  function setImageAdjustment(prop: ImageAdjustmentKey, value: number) {
     imageAdjustments.value[prop] = value
     if (prop === 'zoom' && value === 100) {
       panPosition.value = { x: 0, y: 0 }
@@ -206,7 +242,7 @@ export const usePaletteStore = defineStore('palette', () => {
     filterDebounceTimer = setTimeout(applyFiltersToCanvas, 50)
   }
 
-  function setPanPosition(x, y) {
+  function setPanPosition(x: number, y: number) {
     panPosition.value = { x, y }
   }
 
@@ -245,7 +281,7 @@ export const usePaletteStore = defineStore('palette', () => {
     filteredCanvas.width = originalCanvas.width
     filteredCanvas.height = originalCanvas.height
 
-    const ctx = filteredCanvas.getContext('2d', READ_OPTIONS)
+    const ctx = filteredCanvas.getContext('2d', READ_OPTIONS)!
 
     // Apply CSS-like filters using canvas
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%) hue-rotate(${hue}deg) blur(${blur}px) grayscale(${grayscale}%)`
@@ -261,7 +297,7 @@ export const usePaletteStore = defineStore('palette', () => {
   function updateAllColorsFromFilteredCanvas() {
     if (!filteredCanvasRef.value || colors.value.length === 0) return
 
-    const ctx = filteredCanvasRef.value.getContext('2d', READ_OPTIONS)
+    const ctx = filteredCanvasRef.value.getContext('2d', READ_OPTIONS)!
 
     colors.value = colors.value.map((color) => {
       if (!color.position) return color
@@ -286,7 +322,7 @@ export const usePaletteStore = defineStore('palette', () => {
     })
   }
 
-  function extractColors(imgSrc) {
+  function extractColors(imgSrc: string): Promise<ExtractedColor[]> {
     const requestId = ++extractionId
     return new Promise((resolve) => {
       const img = new Image()
@@ -294,7 +330,7 @@ export const usePaletteStore = defineStore('palette', () => {
       img.onload = () => {
         if (requestId !== extractionId) return resolve(colors.value)
         const canvas = document.createElement('canvas')
-        const ctx = canvas.getContext('2d', READ_OPTIONS)
+        const ctx = canvas.getContext('2d', READ_OPTIONS)!
 
         canvas.width = img.width
         canvas.height = img.height
@@ -304,10 +340,11 @@ export const usePaletteStore = defineStore('palette', () => {
         canvasRef.value = canvas
 
         // Initialize filtered canvas with same content
-        filteredCanvasRef.value = document.createElement('canvas')
-        filteredCanvasRef.value.width = canvas.width
-        filteredCanvasRef.value.height = canvas.height
-        const filteredCtx = filteredCanvasRef.value.getContext('2d', READ_OPTIONS)
+        const filteredCanvas = document.createElement('canvas')
+        filteredCanvas.width = canvas.width
+        filteredCanvas.height = canvas.height
+        filteredCanvasRef.value = filteredCanvas
+        const filteredCtx = filteredCanvas.getContext('2d', READ_OPTIONS)!
         filteredCtx.drawImage(canvas, 0, 0)
 
         const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height)
@@ -317,10 +354,13 @@ export const usePaletteStore = defineStore('palette', () => {
         const worker = new Worker(new URL('../workers/colorExtractor.worker.ts', import.meta.url), {
           type: 'module',
         })
-        worker.postMessage({ pixelBuffer, width: canvas.width, colorCount: colorCount.value }, [
+        const request: ExtractRequest = {
           pixelBuffer,
-        ])
-        worker.onmessage = ({ data: { sorted } }) => {
+          width: canvas.width,
+          colorCount: colorCount.value,
+        }
+        worker.postMessage(request, [pixelBuffer])
+        worker.onmessage = ({ data: { sorted } }: MessageEvent<ExtractResponse>) => {
           worker.terminate()
           // A newer extraction started meanwhile: its result wins.
           if (requestId !== extractionId) return resolve(colors.value)
@@ -349,12 +389,12 @@ export const usePaletteStore = defineStore('palette', () => {
     })
   }
 
-  function updateColorFromPosition(index, x, y) {
+  function updateColorFromPosition(index: number, x: number, y: number) {
     // Use filtered canvas if available, otherwise original
     const canvas = filteredCanvasRef.value || canvasRef.value
     if (!canvas || index < 0 || index >= colors.value.length) return
 
-    const ctx = canvas.getContext('2d', READ_OPTIONS)
+    const ctx = canvas.getContext('2d', READ_OPTIONS)!
     const imgX = Math.max(0, Math.min(originalImageSize.value.width - 1, Math.round(x)))
     const imgY = Math.max(0, Math.min(originalImageSize.value.height - 1, Math.round(y)))
 
@@ -375,12 +415,12 @@ export const usePaletteStore = defineStore('palette', () => {
     }
   }
 
-  function getPixelZoomData(x, y, size = 12) {
+  function getPixelZoomData(x: number, y: number, size = 12): ImageData | null {
     // Use filtered canvas if available, otherwise original
     const canvas = filteredCanvasRef.value || canvasRef.value
     if (!canvas) return null
 
-    const ctx = canvas.getContext('2d', READ_OPTIONS)
+    const ctx = canvas.getContext('2d', READ_OPTIONS)!
     const imgX = Math.max(
       0,
       Math.min(originalImageSize.value.width - size, Math.round(x - size / 2))
@@ -399,7 +439,7 @@ export const usePaletteStore = defineStore('palette', () => {
 
   // Extracted colors carry their own rounded HSL — pass it through instead of
   // deriving it again, so the displayed values never shift.
-  function toEntry(color) {
+  function toEntry(color: SampledColor) {
     return paletteEntry(color.hex, { r: color.r, g: color.g, b: color.b }, color.hsl)
   }
 
@@ -407,7 +447,7 @@ export const usePaletteStore = defineStore('palette', () => {
     return colors.value.map(toEntry)
   }
 
-  function getFormatted(color, index) {
+  function getFormatted(color: SampledColor, index: number) {
     return formatColor(toEntry(color), downloadFormat.value, index)
   }
 
@@ -419,11 +459,12 @@ export const usePaletteStore = defineStore('palette', () => {
 
   // Binary formats (Adobe ASE) cannot go to the clipboard; copying then
   // falls back to the plain HEX list.
-  function getPaletteText() {
-    if (findExportFormat(downloadFormat.value)?.binary) {
-      return buildPaletteExport('hex', paletteEntries())?.content ?? ''
-    }
-    return buildExport()?.content ?? ''
+  function getPaletteText(): string {
+    const file = findExportFormat(downloadFormat.value)?.binary
+      ? buildPaletteExport('hex', paletteEntries())
+      : buildExport()
+    // Only binary formats build a Uint8Array, and those were swapped for HEX.
+    return (file?.content as string | undefined) ?? ''
   }
 
   // Saves the palette in the selected format, with the extension that format
@@ -443,7 +484,7 @@ export const usePaletteStore = defineStore('palette', () => {
   }
 
   /** Draws the palette card that the image download and the handoff use. */
-  function renderPaletteCanvas() {
+  function renderPaletteCanvas(): HTMLCanvasElement {
     const f = downloadFormat.value
     const cols = colors.value
     const targetWidth = exportSizes[imageExportSize.value].width
@@ -451,7 +492,7 @@ export const usePaletteStore = defineStore('palette', () => {
     // Calculate minimum swatch width based on format text length
     // Longer formats like rgba need more space to prevent text overlap
     // Longer notations need a wider swatch so the label does not overlap.
-    const formatWidths = {
+    const formatWidths: Record<string, number> = {
       hex: 80,
       rgb: 110,
       rgba: 130,
@@ -482,14 +523,14 @@ export const usePaletteStore = defineStore('palette', () => {
     const pCanvas = document.createElement('canvas')
     pCanvas.width = padding * 2 + cols_per_row * (swatchSize + gap) - gap
     pCanvas.height = padding * 2 + rows * (swatchSize + textHeight + gap) - gap
-    const pCtx = pCanvas.getContext('2d')
+    const pCtx = pCanvas.getContext('2d')!
 
     // Background (white for JPEG, transparent for PNG/WEBP optional)
     pCtx.fillStyle = '#ffffff'
     pCtx.fillRect(0, 0, pCanvas.width, pCanvas.height)
 
     // Font sizes scaled - use smaller font for longer formats
-    const baseFontSizes = {
+    const baseFontSizes: Record<string, number> = {
       hex: 12,
       rgb: 11,
       rgba: 10,
@@ -541,7 +582,7 @@ export const usePaletteStore = defineStore('palette', () => {
     const exportFormat = imageExportFormat.value
 
     // Determine MIME type and quality
-    let mimeType, quality, extension
+    let mimeType: string, quality: number | undefined, extension: string
     switch (exportFormat) {
       case 'jpeg':
         mimeType = 'image/jpeg'
@@ -569,7 +610,7 @@ export const usePaletteStore = defineStore('palette', () => {
    * The canvases handed to another Kodini tool: the image with its
    * adjustments applied, and the palette card. Empty without an image.
    */
-  function handoffCanvases() {
+  function handoffCanvases(): { name: string; canvas: HTMLCanvasElement }[] {
     const image = filteredCanvasRef.value || canvasRef.value
     if (!image || !colors.value.length) return []
     return [
