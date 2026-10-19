@@ -32,7 +32,7 @@ const sections = computed(() =>
 
 function meta(entry) {
   return [
-    t('libraryColors').replace('{n}', String(entry.colors.length)),
+    t('libraryColors', { n: entry.colors.length }),
     t(`librarySource_${entry.source}`),
     entry.updatedAt ? dateFormat.value.format(entry.updatedAt) : '',
   ]

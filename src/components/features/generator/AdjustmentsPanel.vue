@@ -119,15 +119,13 @@ function fieldValue(f) {
             }"
             :style="{ background: displayHex(color) }"
             :disabled="color.locked"
-            :title="
-              color.locked ? t('genLockedHint') : t('genScopeColor').replace('{n}', index + 1)
-            "
-            :aria-label="t('genScopeColor').replace('{n}', index + 1)"
+            :title="color.locked ? t('genLockedHint') : t('genScopeColor', { n: index + 1 })"
+            :aria-label="t('genScopeColor', { n: index + 1 })"
             @click="emit('select-scope', index)"
           ></button>
         </div>
         <span v-if="selectedCount > 0" class="scope-count" aria-live="polite">
-          {{ t('genSelectedCount').replace('{n}', selectedCount) }}
+          {{ t('genSelectedCount', { n: selectedCount }) }}
         </span>
       </div>
 

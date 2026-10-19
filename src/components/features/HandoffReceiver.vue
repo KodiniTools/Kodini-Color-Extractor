@@ -58,10 +58,10 @@ function removeHandoffParam() {
         </div>
         <div class="handoff-text">
           <span class="handoff-title">
-            {{ t('handoffTitle').replace('{count}', handoffData.images.length) }}
+            {{ t('handoffTitle', { count: handoffData.images.length }) }}
           </span>
           <span class="handoff-from">
-            {{ t('handoffFrom').replace('{tool}', handoffData.source) }}
+            {{ t('handoffFrom', { tool: handoffData.source }) }}
           </span>
         </div>
       </div>

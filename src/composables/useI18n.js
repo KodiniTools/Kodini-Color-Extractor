@@ -736,9 +736,38 @@ if (document.readyState === 'loading') {
   syncInitialLocale()
 }
 
+/**
+ * Fills `{name}` placeholders from `params`. Placeholders without a value
+ * stay as they are, so a missing parameter shows up instead of vanishing.
+ * @param {string} text
+ * @param {Record<string, string|number>} [params]
+ * @returns {string}
+ */
+export function interpolate(text, params) {
+  if (!params) return text
+  return text.replace(/\{(\w+)\}/g, (match, name) =>
+    Object.hasOwn(params, name) ? String(params[name]) : match
+  )
+}
+
+/** Placeholder names in each translation, for checks that both languages agree. */
+export function placeholders(locale) {
+  const table = translations[locale] || {}
+  return Object.fromEntries(
+    Object.entries(table).map(([key, text]) => [
+      key,
+      [...String(text).matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort(),
+    ])
+  )
+}
+
 export function useI18n() {
-  const t = (key) => {
-    return currentTranslations.value[key] || translations.de[key] || key
+  /**
+   * @param {string} key
+   * @param {Record<string, string|number>} [params] values for `{name}` placeholders
+   */
+  const t = (key, params) => {
+    return interpolate(currentTranslations.value[key] || translations.de[key] || key, params)
   }
 
   const locale = computed({
