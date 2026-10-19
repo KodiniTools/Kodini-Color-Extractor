@@ -442,10 +442,10 @@ export const usePaletteStore = defineStore('palette', () => {
     }
   }
 
-  function downloadImage() {
+  /** Draws the palette card that the image download and the handoff use. */
+  function renderPaletteCanvas() {
     const f = downloadFormat.value
     const cols = colors.value
-    const exportFormat = imageExportFormat.value
     const targetWidth = exportSizes[imageExportSize.value].width
 
     // Calculate minimum swatch width based on format text length
@@ -532,6 +532,14 @@ export const usePaletteStore = defineStore('palette', () => {
       }
     })
 
+    return pCanvas
+  }
+
+  function downloadImage() {
+    const pCanvas = renderPaletteCanvas()
+    const f = downloadFormat.value
+    const exportFormat = imageExportFormat.value
+
     // Determine MIME type and quality
     let mimeType, quality, extension
     switch (exportFormat) {
@@ -555,6 +563,19 @@ export const usePaletteStore = defineStore('palette', () => {
     link.download = `color-palette-${f}.${extension}`
     link.href = pCanvas.toDataURL(mimeType, quality)
     link.click()
+  }
+
+  /**
+   * The canvases handed to another Kodini tool: the image with its
+   * adjustments applied, and the palette card. Empty without an image.
+   */
+  function handoffCanvases() {
+    const image = filteredCanvasRef.value || canvasRef.value
+    if (!image || !colors.value.length) return []
+    return [
+      { name: 'image', canvas: image },
+      { name: 'palette', canvas: renderPaletteCanvas() },
+    ]
   }
 
   return {
@@ -587,6 +608,7 @@ export const usePaletteStore = defineStore('palette', () => {
     getPixelZoomData,
     getFormatted,
     downloadImage,
+    handoffCanvases,
     copyPalette,
     canUndo,
     canRedo,

@@ -72,7 +72,8 @@ src/
 │   ├── paletteLink.js           # Paletten im URL-Hash (#p=rrggbb-…)
 │   ├── contrast.js              # WCAG-Kontrast, Stufen, Paarvorschläge
 │   ├── paletteLibrary.js        # Listenlogik und Speicher-Adapter für gespeicherte Paletten
-│   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage)
+│   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage, geteilt)
+│   ├── collageHandoff.js        # Bild + Palettenkarte an den Collage Maker; eigene Übergabe ignorieren
 │   └── seo.js
 ├── stores/
 │   ├── palette.js               # Extraktor
@@ -136,13 +137,13 @@ außerdem ein Palettenbild als PNG, JPG oder WebP.
 
 ### Persistenz im Browser
 
-| Schlüssel                          | Wo                      | Inhalt                                         |
-| ---------------------------------- | ----------------------- | ---------------------------------------------- |
-| `localStorage.locale`              | useI18n, globale Nav    | `de` oder `en`                                 |
-| `localStorage.theme`               | index.html, globale Nav | `light` oder `dark` (`html[data-theme]`)       |
-| Handoff-Schlüssel                  | lib/core/handoff.js     | Bilder aus anderen Kodini-Tools                |
-| URL-Hash `#p=…`                    | Generator               | geteilte Palette, wird nach dem Laden entfernt |
-| IndexedDB `kodini-color-extractor` | usePaletteLibrary       | gespeicherte Paletten (Verlauf und Favoriten)  |
+| Schlüssel                          | Wo                      | Inhalt                                                   |
+| ---------------------------------- | ----------------------- | -------------------------------------------------------- |
+| `localStorage.locale`              | useI18n, globale Nav    | `de` oder `en`                                           |
+| `localStorage.theme`               | index.html, globale Nav | `light` oder `dark` (`html[data-theme]`)                 |
+| Handoff-Schlüssel                  | lib/core/handoff.js     | Bilder aus anderen Kodini-Tools und an den Collage Maker |
+| URL-Hash `#p=…`                    | Generator               | geteilte Palette, wird nach dem Laden entfernt           |
+| IndexedDB `kodini-color-extractor` | usePaletteLibrary       | gespeicherte Paletten (Verlauf und Favoriten)            |
 
 Gespeicherte Paletten: Kopieren, Herunterladen, Teilen und „Im Generator bearbeiten“ legen die Palette unter
 „Zuletzt verwendet“ ab (höchstens 30, gleiche Farben in gleicher Reihenfolge sind ein Eintrag). Favoriten fallen

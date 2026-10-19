@@ -1,7 +1,8 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useI18n } from '../../composables/useI18n'
-import { checkHandoff, consumeHandoff, clearHandoff } from '../../lib/core/handoff'
+import { consumeHandoff, clearHandoff } from '../../lib/core/handoff'
+import { checkIncomingHandoff } from '../../lib/core/collageHandoff'
 
 const emit = defineEmits(['accept', 'dismiss'])
 const { t } = useI18n()
@@ -9,7 +10,7 @@ const { t } = useI18n()
 const handoffData = ref(null)
 
 onMounted(() => {
-  const data = checkHandoff()
+  const data = checkIncomingHandoff()
   if (data) {
     handoffData.value = data
   }
