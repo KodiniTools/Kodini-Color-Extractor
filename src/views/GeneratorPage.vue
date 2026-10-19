@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { computed, ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { useColorGenerator } from '../composables/useColorGenerator'
@@ -65,14 +65,14 @@ const showVision = ref(false)
 const showLibrary = ref(false)
 const paletteHexes = computed(() => palette.value.map(displayHex))
 
-function openSaved(hexes) {
+function openSaved(hexes: string[]) {
   showLibrary.value = false
   loadPalette(hexes, t('libraryOpened'))
 }
 
 // Changing the harmony updates the mode and regenerates in one go.
-function onModeChange(event) {
-  mode.value = event.target.value
+function onModeChange(event: Event) {
+  mode.value = (event.target as HTMLSelectElement).value
   generate()
 }
 </script>
@@ -113,7 +113,7 @@ function onModeChange(event) {
               id="gen-count"
               :value="count"
               class="field-select"
-              @change="setCount(Number($event.target.value))"
+              @change="setCount(Number(($event.target as HTMLSelectElement).value))"
             >
               <option v-for="n in COUNT_OPTIONS" :key="n" :value="n">{{ n }}</option>
             </select>
@@ -127,7 +127,7 @@ function onModeChange(event) {
               id="gen-export-format"
               :value="exportFormat"
               class="field-select"
-              @change="setExportFormat($event.target.value)"
+              @change="setExportFormat(($event.target as HTMLSelectElement).value)"
             >
               <option v-for="f in EXPORT_FORMATS" :key="f.key" :value="f.key">
                 {{ t(f.labelKey) }}

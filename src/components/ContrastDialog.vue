@@ -1,16 +1,26 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import ModalDialog from './ui/ModalDialog.vue'
-import { bestPairs, contrastMatrix, formatRatio, textSuggestions } from '../lib/core/contrast'
+import {
+  bestPairs,
+  contrastMatrix,
+  formatRatio,
+  textSuggestions,
+  type ContrastPair,
+  type WcagLevel,
+} from '../lib/core/contrast'
 
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  /** Palette colors as #RRGGBB, in palette order. */
-  colors: { type: Array, default: () => [] },
-})
+const props = withDefaults(
+  defineProps<{
+    show?: boolean
+    /** Palette colors as #RRGGBB, in palette order. */
+    colors?: string[]
+  }>(),
+  { show: false, colors: () => [] }
+)
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{ close: [] }>()
 
 const { t } = useI18n()
 
@@ -18,18 +28,18 @@ const matrix = computed(() => contrastMatrix(props.colors))
 const pairs = computed(() => bestPairs(props.colors))
 const suggestions = computed(() => textSuggestions(props.colors))
 
-const LEVEL_KEYS = {
+const LEVEL_KEYS: Record<WcagLevel, string> = {
   AAA: 'contrastLevelAAA',
   AA: 'contrastLevelAA',
   AA18: 'contrastLevelAA18',
   fail: 'contrastLevelFail',
 }
 
-function levelLabel(level) {
+function levelLabel(level: WcagLevel) {
   return t(LEVEL_KEYS[level])
 }
 
-function cellLabel(cell) {
+function cellLabel(cell: ContrastPair) {
   return `${cell.text} / ${cell.background}: ${formatRatio(cell.ratio)}:1, ${levelLabel(cell.level)}`
 }
 </script>

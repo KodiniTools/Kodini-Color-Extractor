@@ -1,20 +1,23 @@
-<script setup>
+<script setup lang="ts">
 import { nextTick, onUnmounted, ref, useId, watch } from 'vue'
 
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  /** Heading of the dialog; also its accessible name. */
-  title: { type: String, required: true },
-  /** Label and tooltip of the close button. */
-  closeLabel: { type: String, required: true },
-})
+const props = withDefaults(
+  defineProps<{
+    show?: boolean
+    /** Heading of the dialog; also its accessible name. */
+    title: string
+    /** Label and tooltip of the close button. */
+    closeLabel: string
+  }>(),
+  { show: false }
+)
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{ close: [] }>()
 
 const titleId = useId()
-const closeRef = ref(null)
+const closeRef = ref<HTMLButtonElement | null>(null)
 
-function onKeydown(e) {
+function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') emit('close')
 }
 

@@ -1,47 +1,54 @@
-<script setup>
+<script setup lang="ts">
 import { useI18n } from '../../../composables/useI18n'
-import { displayHex } from '../../../lib/core/colorGenerator'
+import {
+  displayHex,
+  type Adjust,
+  type AdjustField,
+  type AdjustKey,
+  type GenColor,
+} from '../../../lib/core/colorGenerator'
+import type { GeneratorScope } from '../../../composables/useColorGenerator'
 import SliderField from '../../ui/SliderField.vue'
 import PanelSection from '../../ui/PanelSection.vue'
 
 const { t } = useI18n()
 
-const props = defineProps({
-  palette: { type: Array, required: true },
-  scope: { type: [String, Array], required: true },
-  selectedCount: { type: Number, required: true },
-  anyLocked: { type: Boolean, required: true },
-  activeAdjust: { type: Object, required: true },
-  activeLocked: { type: Boolean, required: true },
-  canPick: { type: Boolean, required: true },
-  pickerHex: { type: String, required: true },
-  hasActiveAdjust: { type: Boolean, required: true },
-  adjustFields: { type: Array, required: true },
-  isSelected: { type: Function, required: true },
-  canUndo: { type: Boolean, required: true },
-  canRedo: { type: Boolean, required: true },
-})
+const props = defineProps<{
+  palette: GenColor[]
+  scope: GeneratorScope
+  selectedCount: number
+  anyLocked: boolean
+  activeAdjust: Adjust
+  activeLocked: boolean
+  canPick: boolean
+  pickerHex: string
+  hasActiveAdjust: boolean
+  adjustFields: AdjustField[]
+  isSelected: (index: number) => boolean
+  canUndo: boolean
+  canRedo: boolean
+}>()
 
-const emit = defineEmits([
-  'all-scope',
-  'select-scope',
-  'clear-scope',
-  'copy-selected',
-  'reset',
-  'reset-field',
-  'pick',
-  'set-adjust',
-  'undo',
-  'redo',
-])
+const emit = defineEmits<{
+  'all-scope': []
+  'select-scope': [index: number]
+  'clear-scope': []
+  'copy-selected': []
+  reset: []
+  'reset-field': [key: AdjustKey]
+  pick: [hex: string]
+  'set-adjust': [key: AdjustKey, value: number]
+  undo: []
+  redo: []
+}>()
 
 /** Translated name of an adjustment field, used in labels and titles. */
-function fieldLabel(f) {
+function fieldLabel(f: AdjustField) {
   return t(f.key)
 }
 
 /** Current value of a field, falling back to its neutral default. */
-function fieldValue(f) {
+function fieldValue(f: AdjustField) {
   const v = Number(props.activeAdjust[f.key])
   return Number.isFinite(v) ? v : f.def
 }
@@ -104,7 +111,7 @@ function fieldValue(f) {
               'scope-tab--active': scope === 'all',
               'scope-tab--muted': anyLocked,
             }"
-            :title="anyLocked ? t('genUnlockAllHint') : null"
+            :title="anyLocked ? t('genUnlockAllHint') : undefined"
             @click="emit('all-scope')"
           >
             {{ t('genScopeAll') }}
@@ -144,7 +151,7 @@ function fieldValue(f) {
             type="color"
             :value="canPick ? pickerHex : '#000000'"
             :disabled="!canPick"
-            @input="emit('pick', $event.target.value)"
+            @input="emit('pick', ($event.target as HTMLInputElement).value)"
           />
         </label>
         <span class="adjust-picker-hex">{{ canPick ? pickerHex : '—' }}</span>

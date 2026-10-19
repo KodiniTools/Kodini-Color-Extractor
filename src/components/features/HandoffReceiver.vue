@@ -1,13 +1,14 @@
-<script setup>
+<script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 import { consumeHandoff, clearHandoff } from '../../lib/core/handoff'
 import { checkIncomingHandoff } from '../../lib/core/collageHandoff'
+import type { HandoffImage } from '../../stores/handoff'
 
-const emit = defineEmits(['accept', 'dismiss'])
+const emit = defineEmits<{ accept: [images: HandoffImage[]]; dismiss: [] }>()
 const { t } = useI18n()
 
-const handoffData = ref(null)
+const handoffData = ref<ReturnType<typeof checkIncomingHandoff>>(null)
 
 onMounted(() => {
   const data = checkIncomingHandoff()

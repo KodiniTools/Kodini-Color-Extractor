@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 /**
  * SliderField — one labelled control: range slider, number spinner and a
  * reset button that returns to `defaultValue`. Mirrors the Visualizer's
@@ -12,25 +12,35 @@ import { computed } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 import NumberSpinner from './NumberSpinner.vue'
 
-const props = defineProps({
-  modelValue: { type: Number, required: true },
-  min: { type: Number, required: true },
-  max: { type: Number, required: true },
-  step: { type: Number, default: 1 },
-  /** Suffix shown in the spinner ('%', '°', 'px', …). */
-  unit: { type: String, default: '' },
-  /** Neutral value for the reset button. Without it no reset button is shown. */
-  defaultValue: { type: Number, default: undefined },
-  disabled: { type: Boolean, default: false },
-  /** Control name: visible label and accessible name of all three parts. */
-  label: { type: String, required: true },
-  /** id of the range input, so outside `<label for>` / tests can target it. */
-  inputId: { type: String, default: undefined },
-  /** 'hue' paints the track as a colour wheel. */
-  variant: { type: String, default: 'default' },
-})
+const props = withDefaults(
+  defineProps<{
+    modelValue: number
+    min: number
+    max: number
+    step?: number
+    /** Suffix shown in the spinner ('%', '°', 'px', …). */
+    unit?: string
+    /** Neutral value for the reset button. Without it no reset button is shown. */
+    defaultValue?: number
+    disabled?: boolean
+    /** Control name: visible label and accessible name of all three parts. */
+    label: string
+    /** id of the range input, so outside `<label for>` / tests can target it. */
+    inputId?: string
+    /** 'hue' paints the track as a colour wheel. */
+    variant?: 'default' | 'hue'
+  }>(),
+  {
+    step: 1,
+    unit: '',
+    defaultValue: undefined,
+    disabled: false,
+    inputId: undefined,
+    variant: 'default',
+  }
+)
 
-const emit = defineEmits(['update:modelValue', 'reset'])
+const emit = defineEmits<{ 'update:modelValue': [value: number]; reset: [] }>()
 
 const { t } = useI18n()
 
@@ -42,8 +52,8 @@ const resetTitle = computed(() =>
 )
 const resetLabel = computed(() => t('genResetField', { label: props.label }))
 
-function onRangeInput(event) {
-  const n = Number(event.target.value)
+function onRangeInput(event: Event) {
+  const n = Number((event.target as HTMLInputElement).value)
   if (Number.isFinite(n) && n !== props.modelValue) emit('update:modelValue', n)
 }
 </script>

@@ -1,18 +1,22 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import { usePaletteLibrary } from '../composables/usePaletteLibrary'
+import type { LibraryEntry, LibrarySource } from '../lib/core/paletteLibrary'
 import ModalDialog from './ui/ModalDialog.vue'
 
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  /** The palette currently on screen, as #RRGGBB. */
-  colors: { type: Array, default: () => [] },
-  /** Which tool the current palette comes from. */
-  source: { type: String, required: true },
-})
+const props = withDefaults(
+  defineProps<{
+    show?: boolean
+    /** The palette currently on screen, as #RRGGBB. */
+    colors?: string[]
+    /** Which tool the current palette comes from. */
+    source: LibrarySource
+  }>(),
+  { show: false, colors: () => [] }
+)
 
-const emit = defineEmits(['close', 'open'])
+const emit = defineEmits<{ close: []; open: [colors: string[]] }>()
 
 const { t, locale } = useI18n()
 const library = usePaletteLibrary()
@@ -30,7 +34,7 @@ const sections = computed(() =>
   ].filter((s) => s.items.length)
 )
 
-function meta(entry) {
+function meta(entry: LibraryEntry) {
   return [
     t('libraryColors', { n: entry.colors.length }),
     t(`librarySource_${entry.source}`),

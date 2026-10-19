@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import LandingNav from '../components/LandingNav.vue'
 
 const { t } = useI18n()
 
-const openItems = ref([])
+const openItems = ref<number[]>([])
 
-function toggleItem(index) {
+function toggleItem(index: number) {
   const pos = openItems.value.indexOf(index)
   if (pos === -1) {
     openItems.value.push(index)
@@ -16,7 +16,7 @@ function toggleItem(index) {
   }
 }
 
-function isOpen(index) {
+function isOpen(index: number) {
   return openItems.value.includes(index)
 }
 

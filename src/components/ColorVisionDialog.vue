@@ -1,16 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
 import ModalDialog from './ui/ModalDialog.vue'
-import { colorVisionReport } from '../lib/core/colorVision'
+import { colorVisionReport, type VisionReport } from '../lib/core/colorVision'
 
-const props = defineProps({
-  show: { type: Boolean, default: false },
-  /** Palette colors as #RRGGBB, in palette order. */
-  colors: { type: Array, default: () => [] },
-})
+const props = withDefaults(
+  defineProps<{
+    show?: boolean
+    /** Palette colors as #RRGGBB, in palette order. */
+    colors?: string[]
+  }>(),
+  { show: false, colors: () => [] }
+)
 
-const emit = defineEmits(['close'])
+const emit = defineEmits<{ close: [] }>()
 
 const { t } = useI18n()
 
@@ -18,7 +21,7 @@ const report = computed(() => colorVisionReport(props.colors))
 // Normal vision first, as the reference row.
 const normal = computed(() => report.value[0]?.colors.map((c) => c.hex) ?? [])
 
-function issuesLabel(row) {
+function issuesLabel(row: VisionReport) {
   return t('visionIssues', { n: row.confusable.length })
 }
 </script>

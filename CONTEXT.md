@@ -40,9 +40,9 @@ und Einfügen), File API (Drag & Drop).
 
 ```
 src/
-├── main.js                      # App, Pinia, Router
+├── main.ts                      # App, Pinia, Router
 ├── App.vue                      # nur <router-view>
-├── router/index.js              # Routen, Titel, Handoff-Weiterleitung zur Galerie
+├── router/index.ts              # Routen, Titel, Handoff-Weiterleitung zur Galerie
 ├── views/
 │   ├── LandingPage.vue          # /
 │   ├── AppPage.vue              # /app – Extraktor
@@ -163,7 +163,8 @@ nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zu
 - **Logik in `lib/core/`** bleibt frei von Vue und DOM und wird dort direkt getestet.
 - **TypeScript (Umstellung läuft):** `lib/core/`, der Worker, die Stores und die Composables sind TypeScript und
   schreiben ihre Typen selbst aus (`Rgb`, `PaletteEntry`, `ExtractedColor`, `GenColor` …); `tsconfig` steht auf
-  `strict: true`. Die Komponenten folgen. Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
+  `strict: true`. `main.ts`, der Router, Views, Generator- und UI-Komponenten nutzen `<script setup lang="ts">`;
+  die Extractor-Komponenten folgen. Ausnahme: `lib/core/handoff.js` bleibt JavaScript, weil es 1:1 mit den
   anderen Kodini-Tools geteilt wird. Neue Dateien werden `.ts`.
 
 ---

@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { defineComponent, h } from 'vue'
 import { mount } from '@vue/test-utils'
+import type { AdjustField } from '../lib/core/colorGenerator'
 
 // Minimal palette entry shaped like makeColor() output.
 function color(locked = false) {
@@ -10,7 +11,7 @@ function neutral() {
   return { brightness: 100, contrast: 100, saturation: 100, hue: 0 }
 }
 
-const FIELDS = [
+const FIELDS: AdjustField[] = [
   { key: 'brightness', min: 0, max: 200, step: 1, unit: '%', def: 100 },
   { key: 'contrast', min: 0, max: 200, step: 1, unit: '%', def: 100 },
   { key: 'saturation', min: 0, max: 200, step: 1, unit: '%', def: 100 },
