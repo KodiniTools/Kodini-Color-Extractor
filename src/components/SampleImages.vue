@@ -1,13 +1,19 @@
-<script setup>
+<script setup lang="ts">
 import { ref, reactive } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
+
+interface SampleImage {
+  id: number
+  src: string
+  alt: string
+}
 
 const store = usePaletteStore()
 const { t } = useI18n()
 
 // Sample images configuration - using relative paths for subdirectory deployment
-const sampleImages = ref([
+const sampleImages = ref<SampleImage[]>([
   { id: 1, src: './samples/sample-1.jpg', alt: 'Sample 1' },
   { id: 2, src: './samples/sample-2.jpg', alt: 'Sample 2' },
   { id: 3, src: './samples/sample-3.jpg', alt: 'Sample 3' },
@@ -18,18 +24,18 @@ const sampleImages = ref([
   { id: 8, src: './samples/sample-8.jpg', alt: 'Sample 8' },
 ])
 
-const selectedSampleId = ref(null)
-const loadedImages = reactive({})
+const selectedSampleId = ref<number | null>(null)
+const loadedImages = reactive<Record<number, boolean>>({})
 
-function onImageLoad(id) {
+function onImageLoad(id: number) {
   loadedImages[id] = true
 }
 
-function onImageError(id) {
+function onImageError(id: number) {
   loadedImages[id] = false
 }
 
-async function loadSampleImage(sample) {
+async function loadSampleImage(sample: SampleImage) {
   // Only load if image is available
   if (loadedImages[sample.id] !== true) return
 

@@ -1,4 +1,4 @@
-<script setup>
+<script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 import { useI18n } from '../composables/useI18n'
@@ -11,12 +11,12 @@ import { useCanvasPan } from '../composables/useCanvasPan'
 const store = usePaletteStore()
 const { t } = useI18n()
 
-const imageContainer = ref(null)
-const displayImage = ref(null)
-const pixelMagnifierRef = ref(null)
-const imageRect = ref(null)
-const containerRect = ref(null)
-const imageAspectRatio = ref(null)
+const imageContainer = ref<HTMLElement | null>(null)
+const displayImage = ref<HTMLImageElement | null>(null)
+const pixelMagnifierRef = ref<InstanceType<typeof PixelMagnifier> | null>(null)
+const imageRect = ref<DOMRect | null>(null)
+const containerRect = ref<DOMRect | null>(null)
+const imageAspectRatio = ref<number | null>(null)
 
 const pixelZoomCanvas = computed(() => pixelMagnifierRef.value?.canvas)
 
@@ -75,7 +75,7 @@ const {
 })
 
 // Wrap startDrag to call updateRects first
-function startDragWithRects(e, index) {
+function startDragWithRects(e: PointerEvent, index: number) {
   updateRects()
   startDrag(e, index)
 }
@@ -93,7 +93,7 @@ const {
   isZoomed,
 })
 
-function selectColor(index) {
+function selectColor(index: number) {
   store.setSelectedColor(index)
 }
 

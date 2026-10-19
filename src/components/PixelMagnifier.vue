@@ -1,13 +1,13 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 
-defineProps({
-  show: Boolean,
-  x: Number,
-  y: Number,
-})
+defineProps<{
+  show?: boolean
+  x?: number
+  y?: number
+}>()
 
-const canvas = ref(null)
+const canvas = ref<HTMLCanvasElement | null>(null)
 
 defineExpose({ canvas })
 </script>

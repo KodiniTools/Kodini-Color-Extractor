@@ -1,9 +1,9 @@
-<script setup>
+<script setup lang="ts">
 import { ref } from 'vue'
 import { usePaletteStore } from '../stores/palette'
 
 const store = usePaletteStore()
-const fileInput = ref(null)
+const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const isProcessing = ref(false)
 
@@ -11,12 +11,12 @@ function triggerUpload() {
   fileInput.value?.click()
 }
 
-async function handleFile(e) {
-  const file = e.target.files?.[0]
+async function handleFile(e: Event) {
+  const file = (e.target as HTMLInputElement).files?.[0]
   if (file) await processFile(file)
 }
 
-async function handleDrop(e) {
+async function handleDrop(e: DragEvent) {
   isDragging.value = false
   const file = e.dataTransfer?.files?.[0]
   if (file && file.type.startsWith('image/')) {
@@ -24,14 +24,14 @@ async function handleDrop(e) {
   }
 }
 
-async function processFile(file) {
+async function processFile(file: File) {
   if (!file.type.startsWith('image/')) return
 
   isProcessing.value = true
 
   const reader = new FileReader()
-  reader.onload = async (e) => {
-    const imgSrc = e.target.result
+  reader.onload = async () => {
+    const imgSrc = reader.result as string
     store.setImage(imgSrc)
     await store.extractColors(imgSrc)
     isProcessing.value = false
