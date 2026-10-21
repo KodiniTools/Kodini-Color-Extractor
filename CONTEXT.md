@@ -47,7 +47,7 @@ src/
 │   ├── LandingPage.vue          # /
 │   ├── AppPage.vue              # /app – Extraktor
 │   ├── GeneratorPage.vue        # /generator – Generator
-│   ├── GalleryView.vue          # /app/gallery – Bilder aus anderen Kodini-Tools (noindex)
+│   ├── GalleryView.vue          # /app/gallery – Tab „Galerie“: Übernahme + eigener Upload (noindex)
 │   └── FaqPage.vue              # /faq
 ├── components/
 │   ├── ImageUploader.vue, SampleImages.vue, MainContent.vue, PixelMagnifier.vue,
@@ -56,7 +56,7 @@ src/
 │   ├── PaletteLibraryDialog.vue # „Meine Paletten“: Verlauf und Favoriten (beide Werkzeuge)
 │   ├── LandingNav.vue, ToolCrossLink.vue, ToastContainer.vue
 │   ├── features/generator/      # PaletteStrip.vue, AdjustmentsPanel.vue
-│   ├── features/HandoffReceiver.vue
+│   ├── features/HandoffReceiver.vue, features/GalleryUploader.vue
 │   └── ui/                      # PanelSection, SliderField, NumberSpinner
 ├── composables/
 │   ├── useColorGenerator.ts     # gesamter Generator-State inkl. Undo/Redo, Export, Teilen-Link
@@ -74,10 +74,11 @@ src/
 │   ├── paletteLibrary.ts        # Listenlogik und Speicher-Adapter für gespeicherte Paletten
 │   ├── handoff.js               # Bildübergabe zwischen Kodini-Tools (localStorage, geteilt)
 │   ├── collageHandoff.ts        # Bild + Palettenkarte an den Collage Maker; eigene Übergabe ignorieren
+│   ├── galleryUpload.ts         # Dateien → Galerie-Einträge (Data-URL, Größe), SVG ausgeschlossen
 │   └── seo.ts
 ├── stores/
 │   ├── palette.ts               # Extraktor
-│   └── handoff.ts               # empfangene Galerie-Bilder
+│   └── handoff.ts               # Bilder der Galerie (übernommen oder hochgeladen)
 ├── workers/colorExtractor.worker.ts
 ├── design-system/               # geteilte --ds-* Tokens, siehe README dort
 └── assets/main.css              # globale Styles, --app-* Tokens
@@ -150,6 +151,10 @@ Empfang (z. B. aus der Bildergalerie): `kodinitools-handoff` = `{source, timesta
 height}]}`, Ziel `/app/gallery?handoff=kodinitools`. Angenommen wird nur, was höchstens 5 Minuten alt ist und eine
 JPEG-, PNG-, WebP- oder GIF-Data-URL hat. Der Banner bietet „Übernehmen“ und „Verwerfen“. Übernommene Bilder stehen in
 der Galerie, ein Klick lädt eines in den Extraktor.
+
+Die Galerie ist ein eigener Tab der Navigation (mit Bildanzahl). Dort lassen sich auch eigene Bilder hochladen (mehrere,
+Drag & Drop), einzelne entfernen oder alle leeren. Übernommene Bilder werden angehängt, „Verwerfen“ lässt die Galerie
+unverändert. Die Galerie lebt im Pinia-Store, also nur bis zum Neuladen und nur im jeweiligen Tab.
 
 Gespeicherte Paletten: Kopieren, Herunterladen, Teilen und „Im Generator bearbeiten“ legen die Palette unter
 „Zuletzt verwendet“ ab (höchstens 30, gleiche Farben in gleicher Reihenfolge sind ein Eintrag). Favoriten fallen

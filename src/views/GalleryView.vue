@@ -5,7 +5,9 @@ import { useI18n } from '../composables/useI18n'
 import { useToast } from '../composables/useToast'
 import { usePaletteStore } from '../stores/palette'
 import { useHandoffStore, type HandoffImage } from '../stores/handoff'
+import LandingNav from '../components/LandingNav.vue'
 import HandoffReceiver from '../components/features/HandoffReceiver.vue'
+import GalleryUploader from '../components/features/GalleryUploader.vue'
 import ToastContainer from '../components/ToastContainer.vue'
 
 const router = useRouter()
@@ -17,14 +19,23 @@ const handoffStore = useHandoffStore()
 const images = computed(() => handoffStore.images)
 const hasImages = computed(() => handoffStore.images.length > 0)
 
-function handleHandoffAccept(handoffImages: HandoffImage[]) {
-  handoffStore.setImages(handoffImages, '')
-  const count = handoffImages.length
-  toast.show(count === 1 ? t('handoffAcceptedOne') : t('handoffAccepted', { count }), 'success')
+function countMessage(count: number, oneKey: string, manyKey: string) {
+  return count === 1 ? t(oneKey) : t(manyKey, { count })
 }
 
-function handleHandoffDismiss() {
-  handoffStore.clear()
+function handleHandoffAccept(handoffImages: HandoffImage[]) {
+  handoffStore.addImages(handoffImages)
+  toast.show(countMessage(handoffImages.length, 'handoffAcceptedOne', 'handoffAccepted'), 'success')
+}
+
+function handleUpload(uploaded: HandoffImage[], skipped: number) {
+  if (uploaded.length) {
+    handoffStore.addImages(uploaded)
+    toast.show(countMessage(uploaded.length, 'galleryAddedOne', 'galleryAdded'), 'success')
+  }
+  if (skipped) {
+    toast.show(countMessage(skipped, 'gallerySkippedOne', 'gallerySkipped'), 'error')
+  }
 }
 
 function selectImage(img: HandoffImage) {
@@ -32,74 +43,68 @@ function selectImage(img: HandoffImage) {
   paletteStore.extractColors(img.dataUrl)
   router.push({ name: 'app' })
 }
+
+function imageLabel(img: HandoffImage, index: number) {
+  return img.name || `${t('galleryImage')} ${index + 1}`
+}
 </script>
 
 <template>
   <div class="gallery-page">
-    <header class="gallery-header">
-      <div class="header-left">
-        <router-link to="/" class="back-link">
-          <svg
-            width="18"
-            height="18"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.75"
-          >
-            <line x1="19" y1="12" x2="5" y2="12"></line>
-            <polyline points="12 19 5 12 12 5"></polyline>
-          </svg>
-          <span>{{ t('navHome') }}</span>
-        </router-link>
-      </div>
-      <div class="header-center">
-        <h1 class="header-title">{{ t('galleryTitle') }}</h1>
-      </div>
-      <div class="header-right">
-        <router-link to="/app" class="header-link">{{ t('navApp') }}</router-link>
-      </div>
-    </header>
+    <LandingNav />
 
-    <HandoffReceiver @accept="handleHandoffAccept" @dismiss="handleHandoffDismiss" />
+    <!-- Verwerfen lässt die Galerie unverändert, es verfällt nur die Übergabe. -->
+    <HandoffReceiver @accept="handleHandoffAccept" />
 
     <main class="gallery-content">
-      <div v-if="hasImages" class="gallery-grid">
-        <button
-          v-for="(img, index) in images"
-          :key="index"
-          class="gallery-item"
-          @click="selectImage(img)"
-          :title="t('gallerySelectHint')"
-        >
-          <div class="gallery-thumb-wrapper">
-            <img :src="img.dataUrl" :alt="img.name || `Image ${index + 1}`" class="gallery-thumb" />
-          </div>
-          <div class="gallery-item-info">
-            <span class="gallery-item-name">{{ img.name || `Image ${index + 1}` }}</span>
-            <span class="gallery-item-size">{{ img.width }} × {{ img.height }}</span>
-          </div>
+      <div class="gallery-toolbar">
+        <div class="toolbar-text">
+          <h1 class="gallery-title">{{ t('galleryTitle') }}</h1>
+          <p class="gallery-intro">{{ t('galleryIntro') }}</p>
+        </div>
+        <button v-if="hasImages" class="clear-btn" @click="handoffStore.clear()">
+          {{ t('galleryClear') }}
         </button>
       </div>
 
-      <div v-else class="gallery-empty">
-        <div class="empty-icon">
-          <svg
-            width="48"
-            height="48"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
+      <GalleryUploader @add="handleUpload" />
+
+      <div v-if="hasImages" class="gallery-grid">
+        <div v-for="(img, index) in images" :key="index" class="gallery-item">
+          <button class="gallery-select" :title="t('gallerySelectHint')" @click="selectImage(img)">
+            <div class="gallery-thumb-wrapper">
+              <img :src="img.dataUrl" :alt="imageLabel(img, index)" class="gallery-thumb" />
+            </div>
+            <div class="gallery-item-info">
+              <span class="gallery-item-name">{{ imageLabel(img, index) }}</span>
+              <span class="gallery-item-size">{{ img.width }} × {{ img.height }}</span>
+            </div>
+          </button>
+          <button
+            class="gallery-remove"
+            :title="t('galleryRemove')"
+            :aria-label="`${t('galleryRemove')}: ${imageLabel(img, index)}`"
+            @click="handoffStore.removeImage(index)"
           >
-            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-            <circle cx="8.5" cy="8.5" r="1.5"></circle>
-            <polyline points="21 15 16 10 5 21"></polyline>
-          </svg>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              aria-hidden="true"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
+          </button>
         </div>
+      </div>
+
+      <div v-else class="gallery-empty">
         <p class="empty-text">{{ t('galleryEmpty') }}</p>
         <p class="empty-hint">{{ t('galleryEmptyHint') }}</p>
-        <router-link to="/app" class="empty-cta">{{ t('navApp') }}</router-link>
       </div>
     </main>
 
@@ -116,76 +121,60 @@ function selectImage(img: HandoffImage) {
   transition: var(--app-transition-colors);
 }
 
-/* Header — same style as the app header */
-.gallery-header {
-  position: relative;
-  z-index: 50;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: var(--ds-space-3) var(--ds-space-5);
-  background: var(--ds-surface-1);
-  border-bottom: var(--ds-border-width) solid var(--ds-border);
-  transition: var(--app-transition-colors);
-}
-
-.header-left,
-.header-right {
-  display: flex;
-  align-items: center;
-  gap: var(--ds-space-3);
-  min-width: 200px;
-}
-
-.header-right {
-  justify-content: flex-end;
-}
-
-.back-link,
-.header-link {
-  display: inline-flex;
-  align-items: center;
-  gap: var(--ds-space-1);
-  height: var(--ds-control-md);
-  padding: 0 var(--ds-space-3);
-  text-decoration: none;
-  color: var(--ds-text-2);
-  font-size: var(--ds-text-sm);
-  font-weight: var(--ds-weight-medium);
-  border-radius: var(--ds-radius-sm);
-  transition: var(--app-transition-colors);
-}
-
-.back-link:hover,
-.header-link:hover {
-  color: var(--ds-text);
-  background: var(--ds-surface-2);
-}
-
-.back-link:focus-visible,
-.header-link:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
-}
-
-.header-center {
-  flex: 1;
-  text-align: center;
-}
-
-.header-title {
-  font-size: var(--ds-text-lg);
-  font-weight: var(--ds-weight-semibold);
-  color: var(--ds-text);
-}
-
-/* Gallery content */
 .gallery-content {
   flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--ds-space-5);
   padding: var(--ds-space-8);
   max-width: var(--ds-container);
   margin: 0 auto;
   width: 100%;
+}
+
+.gallery-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--ds-space-4);
+  flex-wrap: wrap;
+}
+
+.gallery-title {
+  font-size: var(--ds-text-lg);
+  font-weight: var(--ds-weight-semibold);
+  color: var(--ds-text);
+  margin: 0 0 var(--ds-space-1) 0;
+}
+
+.gallery-intro {
+  font-size: var(--ds-text-sm);
+  color: var(--ds-text-2);
+  margin: 0;
+}
+
+.clear-btn {
+  display: inline-flex;
+  align-items: center;
+  height: var(--ds-control-md);
+  padding: 0 var(--ds-space-4);
+  background: var(--ds-surface-2);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-text);
+  font-size: var(--ds-text-sm);
+  font-weight: var(--ds-weight-medium);
+  cursor: pointer;
+  transition: var(--app-transition-colors);
+}
+
+.clear-btn:hover {
+  background: var(--ds-surface-3);
+}
+
+.clear-btn:focus-visible {
+  outline: none;
+  box-shadow: var(--ds-focus-ring);
 }
 
 /* Thumbnail grid */
@@ -197,25 +186,54 @@ function selectImage(img: HandoffImage) {
 
 /* A card: flat, one border; hover strengthens the border, never lifts. */
 .gallery-item {
-  display: flex;
-  flex-direction: column;
+  position: relative;
   background: var(--ds-surface-1);
   border: var(--ds-border-width) solid var(--ds-border);
   border-radius: var(--ds-radius-md);
   overflow: hidden;
-  cursor: pointer;
   transition: var(--app-transition-colors);
-  padding: 0;
-  text-align: left;
 }
 
 .gallery-item:hover {
   border-color: var(--ds-border-strong);
 }
 
-.gallery-item:focus-visible {
+.gallery-select {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+}
+
+.gallery-select:focus-visible,
+.gallery-remove:focus-visible {
   outline: none;
   box-shadow: var(--ds-focus-ring);
+}
+
+.gallery-remove {
+  position: absolute;
+  top: var(--ds-space-2);
+  right: var(--ds-space-2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-control-sm);
+  height: var(--ds-control-sm);
+  background: var(--ds-surface-1);
+  border: var(--ds-border-width) solid var(--ds-border-strong);
+  border-radius: var(--ds-radius-sm);
+  color: var(--ds-text);
+  cursor: pointer;
+  transition: var(--app-transition-colors);
+}
+
+.gallery-remove:hover {
+  background: var(--ds-surface-3);
 }
 
 .gallery-thumb-wrapper {
@@ -253,23 +271,14 @@ function selectImage(img: HandoffImage) {
   color: var(--ds-text-2);
 }
 
-/* Empty state */
+/* Empty state below the upload zone */
 .gallery-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: var(--ds-space-16) var(--ds-space-5);
+  padding: var(--ds-space-8) var(--ds-space-5);
   text-align: center;
 }
 
-.empty-icon {
-  color: var(--ds-text-3);
-  margin-bottom: var(--ds-space-4);
-}
-
 .empty-text {
-  font-size: var(--ds-text-lg);
+  font-size: var(--ds-text-md);
   font-weight: var(--ds-weight-semibold);
   color: var(--ds-text);
   margin: 0 0 var(--ds-space-1) 0;
@@ -278,33 +287,7 @@ function selectImage(img: HandoffImage) {
 .empty-hint {
   font-size: var(--ds-text-sm);
   color: var(--ds-text-2);
-  margin: 0 0 var(--ds-space-6) 0;
-}
-
-.empty-cta {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: var(--ds-control-md);
-  padding: 0 var(--ds-space-4);
-  background: var(--ds-accent);
-  color: var(--ds-on-accent);
-  border: var(--ds-border-width) solid transparent;
-  text-decoration: none;
-  font-size: var(--ds-text-md);
-  font-weight: var(--ds-weight-semibold);
-  line-height: 1;
-  border-radius: var(--ds-radius-md);
-  transition: var(--app-transition-colors);
-}
-
-.empty-cta:hover {
-  background: var(--ds-accent-hover);
-}
-
-.empty-cta:focus-visible {
-  outline: none;
-  box-shadow: var(--ds-focus-ring);
+  margin: 0;
 }
 
 @media (max-width: 900px) {
@@ -315,23 +298,6 @@ function selectImage(img: HandoffImage) {
   .gallery-grid {
     grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
     gap: var(--ds-space-3);
-  }
-
-  .gallery-header {
-    padding: var(--ds-space-2) var(--ds-space-3);
-  }
-
-  .header-left,
-  .header-right {
-    min-width: auto;
-  }
-
-  .back-link span {
-    display: none;
-  }
-
-  .header-title {
-    font-size: var(--ds-text-md);
   }
 }
 
@@ -347,10 +313,6 @@ function selectImage(img: HandoffImage) {
 
   .gallery-item-info {
     padding: var(--ds-space-2) var(--ds-space-3);
-  }
-
-  .gallery-empty {
-    padding: var(--ds-space-10) var(--ds-space-4);
   }
 }
 </style>

@@ -1,7 +1,10 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import { useI18n } from '../composables/useI18n'
+import { useHandoffStore } from '../stores/handoff'
 
 const { t } = useI18n()
+const galleryCount = computed(() => useHandoffStore().images.length)
 </script>
 
 <template>
@@ -10,6 +13,12 @@ const { t } = useI18n()
       <div class="nav-links">
         <router-link to="/" class="nav-link">{{ t('navHome') }}</router-link>
         <router-link to="/app" class="nav-link">{{ t('navApp') }}</router-link>
+        <router-link to="/app/gallery" class="nav-link">
+          {{ t('navGallery') }}
+          <span v-if="galleryCount" class="nav-badge" data-testid="gallery-count">{{
+            galleryCount
+          }}</span>
+        </router-link>
         <router-link to="/generator" class="nav-link">{{ t('navGenerator') }}</router-link>
         <router-link to="/faq" class="nav-link">{{ t('navFaq') }}</router-link>
         <a
@@ -44,7 +53,9 @@ const { t } = useI18n()
 
 .nav-links {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: var(--ds-space-2);
 }
 
@@ -69,6 +80,19 @@ const { t } = useI18n()
 .nav-link:focus-visible {
   outline: none;
   box-shadow: var(--ds-focus-ring);
+}
+
+.nav-badge {
+  margin-left: var(--ds-space-1);
+  min-width: 18px;
+  padding: 0 5px;
+  border-radius: var(--ds-radius-full);
+  background: var(--ds-accent);
+  color: var(--ds-on-accent);
+  font-size: var(--ds-text-xs);
+  font-weight: var(--ds-weight-semibold);
+  line-height: 18px;
+  text-align: center;
 }
 
 .nav-link.router-link-active {
