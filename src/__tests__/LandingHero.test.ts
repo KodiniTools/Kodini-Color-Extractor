@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest'
 import { mount } from '@vue/test-utils'
 import { createRouter, createMemoryHistory } from 'vue-router'
+import { createPinia } from 'pinia'
 
 const Stub = { template: '<div />' }
 
@@ -17,7 +18,7 @@ async function mountLanding() {
   })
   await router.push('/')
   await router.isReady()
-  return mount(LandingPage, { global: { plugins: [router] } })
+  return mount(LandingPage, { global: { plugins: [router, createPinia()] } })
 }
 
 describe('LandingPage hero image', () => {

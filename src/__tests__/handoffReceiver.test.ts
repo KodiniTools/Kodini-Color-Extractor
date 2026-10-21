@@ -124,20 +124,74 @@ describe('HandoffReceiver', () => {
 })
 
 describe('GalleryView', () => {
-  it('lists all accepted images and confirms the count', async () => {
+  async function mountGallery() {
     const { default: GalleryView } = await import('../views/GalleryView.vue')
-    const { useToast } = await import('../composables/useToast')
     useI18n().locale.value = 'de'
-    store(payload(3))
-
     const w = mount(GalleryView, {
       global: { stubs: { 'router-link': true, ToastContainer: true } },
     })
     await w.vm.$nextTick()
+    return w
+  }
+
+  it('lists all accepted images and confirms the count', async () => {
+    const { useToast } = await import('../composables/useToast')
+    store(payload(3))
+    const w = await mountGallery()
     await w.find('.handoff-btn-accept').trigger('click')
 
     expect(useHandoffStore().images).toHaveLength(3)
     expect(w.findAll('.gallery-item')).toHaveLength(3)
     expect(useToast().toasts.value.at(-1)?.message).toBe('3 Bilder in die Galerie übernommen')
+  })
+
+  it('appends accepted images to the ones already in the gallery', async () => {
+    useHandoffStore().addImages(payload(1, {}).images.map((img) => ({ ...img, name: 'eigenes' })))
+    store(payload(2))
+    const w = await mountGallery()
+    await w.find('.handoff-btn-accept').trigger('click')
+
+    expect(useHandoffStore().images.map((img) => img.name)).toEqual(['eigenes', 'Bild 1', 'Bild 2'])
+  })
+
+  it('dismiss discards only the handoff, not the gallery', async () => {
+    useHandoffStore().addImages(payload(1).images)
+    store(payload(2))
+    const w = await mountGallery()
+    await w.find('.handoff-btn-dismiss').trigger('click')
+
+    expect(useHandoffStore().images).toHaveLength(1)
+    expect(localStorage.getItem(STORAGE_KEY)).toBeNull()
+  })
+
+  it('shows the upload zone also without images', async () => {
+    const w = await mountGallery()
+    expect(w.find('[data-testid="gallery-upload"]').exists()).toBe(true)
+    expect(w.text()).toContain('Noch keine Bilder in der Galerie')
+  })
+
+  it('adds uploaded images and reports skipped files', async () => {
+    const { useToast } = await import('../composables/useToast')
+    const w = await mountGallery()
+    const uploader = w.findComponent({ name: 'GalleryUploader' })
+    uploader.vm.$emit('add', payload(2).images, 1)
+    await w.vm.$nextTick()
+
+    expect(w.findAll('.gallery-item')).toHaveLength(2)
+    const messages = useToast().toasts.value.map((toast) => toast.message)
+    expect(messages).toContain('2 Bilder hinzugefügt')
+    expect(messages).toContain('1 Datei ist kein Bild und wurde übersprungen')
+  })
+
+  it('removes a single image and clears the gallery', async () => {
+    useHandoffStore().addImages(payload(3).images)
+    const w = await mountGallery()
+
+    await w.findAll('.gallery-remove')[1].trigger('click')
+    expect(useHandoffStore().images.map((img) => img.name)).toEqual(['Bild 1', 'Bild 3'])
+
+    await w.find('.clear-btn').trigger('click')
+    expect(useHandoffStore().images).toHaveLength(0)
+    expect(w.find('.clear-btn').exists()).toBe(false)
   })
 })

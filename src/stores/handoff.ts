@@ -9,8 +9,8 @@ export interface HandoffImage {
 }
 
 /**
- * Store for handoff gallery images.
- * Persists received images across route changes (gallery → app → gallery).
+ * Images of the gallery tab: accepted from other Kodini tools or uploaded there.
+ * Persists across route changes (gallery → app → gallery), not across reloads.
  */
 export const useHandoffStore = defineStore('handoff', () => {
   const images = ref<HandoffImage[]>([])
@@ -21,6 +21,15 @@ export const useHandoffStore = defineStore('handoff', () => {
     source.value = sourceTool || ''
   }
 
+  /** Appends images, keeping the ones already in the gallery. */
+  function addImages(newImages: HandoffImage[]) {
+    images.value = [...images.value, ...newImages]
+  }
+
+  function removeImage(index: number) {
+    images.value = images.value.filter((_, i) => i !== index)
+  }
+
   function clear() {
     images.value = []
     source.value = ''
@@ -28,5 +37,5 @@ export const useHandoffStore = defineStore('handoff', () => {
 
   const hasImages = () => images.value.length > 0
 
-  return { images, source, setImages, clear, hasImages }
+  return { images, source, setImages, addImages, removeImage, clear, hasImages }
 })
