@@ -56,11 +56,13 @@ const translations = {
     closePreview: 'Close preview',
 
     // Handoff
-    handoffTitle: '{count} image(s) received',
+    handoffTitleOne: '1 image received',
+    handoffTitle: '{count} images received',
     handoffFrom: 'from {tool}',
     handoffAccept: 'Accept',
     handoffDismiss: 'Dismiss',
-    handoffAccepted: 'Image loaded from handoff',
+    handoffAcceptedOne: '1 image added to the gallery',
+    handoffAccepted: '{count} images added to the gallery',
 
     // Gallery
     galleryTitle: 'Image Gallery',
@@ -381,11 +383,13 @@ const translations = {
     closePreview: 'Vorschau schließen',
 
     // Handoff
-    handoffTitle: '{count} Bild(er) empfangen',
+    handoffTitleOne: '1 Bild empfangen',
+    handoffTitle: '{count} Bilder empfangen',
     handoffFrom: 'von {tool}',
     handoffAccept: 'Übernehmen',
     handoffDismiss: 'Verwerfen',
-    handoffAccepted: 'Bild aus Handoff geladen',
+    handoffAcceptedOne: '1 Bild in die Galerie übernommen',
+    handoffAccepted: '{count} Bilder in die Galerie übernommen',
 
     // Gallery
     galleryTitle: 'Bildergalerie',

@@ -146,6 +146,11 @@ außerdem ein Palettenbild als PNG, JPG oder WebP.
 | URL-Hash `#p=…`                    | Generator               | geteilte Palette, wird nach dem Laden entfernt           |
 | IndexedDB `kodini-color-extractor` | usePaletteLibrary       | gespeicherte Paletten (Verlauf und Favoriten)            |
 
+Empfang (z. B. aus der Bildergalerie): `kodinitools-handoff` = `{source, timestamp, images[{name, dataUrl, width,
+height}]}`, Ziel `/app/gallery?handoff=kodinitools`. Angenommen wird nur, was höchstens 5 Minuten alt ist und eine
+JPEG-, PNG-, WebP- oder GIF-Data-URL hat. Der Banner bietet „Übernehmen“ und „Verwerfen“. Übernommene Bilder stehen in
+der Galerie, ein Klick lädt eines in den Extraktor.
+
 Gespeicherte Paletten: Kopieren, Herunterladen, Teilen und „Im Generator bearbeiten“ legen die Palette unter
 „Zuletzt verwendet“ ab (höchstens 30, gleiche Farben in gleicher Reihenfolge sind ein Eintrag). Favoriten fallen
 nie heraus. Ohne IndexedDB (z. B. manche private Modi) gilt die Liste nur bis zum Neuladen.

@@ -14,6 +14,10 @@ const STORAGE_KEY = 'kodinitools-handoff'
 const HANDOFF_PARAM = 'kodinitools'
 const MAX_WIDTH = 1200
 const JPEG_QUALITY = 0.7
+/** A handoff older than this is stale and ignored. */
+const MAX_AGE_MS = 5 * 60 * 1000
+/** Only raster image data URLs are accepted, no SVG and no other schemes. */
+const IMAGE_DATA_URL = /^data:image\/(jpeg|png|webp|gif);base64,/
 
 const TARGET_URLS = {
   bildkonverter: '/bildkonverter/gallery',
@@ -92,23 +96,47 @@ export function prepareHandoff(canvases, targetKey, sourceTool) {
  * @returns {{ source: string, images: Array<{name: string, dataUrl: string, width: number, height: number}>, timestamp: number } | null}
  */
 export function checkHandoff() {
+  return readHandoff(true)
+}
+
+/**
+ * Reads and validates the pending handoff. `checkAge` is off only when consuming,
+ * so a banner that stayed open past the expiry still imports what it shows.
+ */
+function readHandoff(checkAge) {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
     if (!raw) return null
 
     const payload = JSON.parse(raw)
-    if (!payload || !Array.isArray(payload.images) || payload.images.length === 0) {
-      return null
-    }
+    if (!payload || !Array.isArray(payload.images)) return null
+    if (typeof payload.timestamp !== 'number') return null
+    if (checkAge && Date.now() - payload.timestamp > MAX_AGE_MS) return null
+
+    const images = validImages(payload.images)
+    if (images.length === 0) return null
 
     return {
-      source: payload.source || 'unknown',
-      images: payload.images,
-      timestamp: payload.timestamp || 0,
+      source: typeof payload.source === 'string' && payload.source ? payload.source : 'unknown',
+      images,
+      timestamp: payload.timestamp,
     }
   } catch {
     return null
   }
+}
+
+/**
+ * Keeps only entries with a name and a raster image data URL.
+ */
+function validImages(images) {
+  return images.filter(
+    (img) =>
+      img &&
+      typeof img.name === 'string' &&
+      typeof img.dataUrl === 'string' &&
+      IMAGE_DATA_URL.test(img.dataUrl)
+  )
 }
 
 /**
@@ -117,10 +145,8 @@ export function checkHandoff() {
  * @returns {{ source: string, images: Array<{name: string, dataUrl: string, width: number, height: number}> } | null}
  */
 export function consumeHandoff() {
-  const data = checkHandoff()
-  if (data) {
-    localStorage.removeItem(STORAGE_KEY)
-  }
+  const data = readHandoff(false)
+  localStorage.removeItem(STORAGE_KEY)
   return data
 }
 
@@ -161,4 +187,4 @@ export function hasHandoffParam() {
   return params.get('handoff') === HANDOFF_PARAM
 }
 
-export { STORAGE_KEY, HANDOFF_PARAM, TARGET_URLS }
+export { STORAGE_KEY, HANDOFF_PARAM, TARGET_URLS, MAX_AGE_MS }

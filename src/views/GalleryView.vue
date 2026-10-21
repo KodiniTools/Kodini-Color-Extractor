@@ -19,7 +19,8 @@ const hasImages = computed(() => handoffStore.images.length > 0)
 
 function handleHandoffAccept(handoffImages: HandoffImage[]) {
   handoffStore.setImages(handoffImages, '')
-  toast.show(t('handoffAccepted'), 'success')
+  const count = handoffImages.length
+  toast.show(count === 1 ? t('handoffAcceptedOne') : t('handoffAccepted', { count }), 'success')
 }
 
 function handleHandoffDismiss() {
