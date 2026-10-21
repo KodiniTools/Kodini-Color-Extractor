@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useI18n } from '../../composables/useI18n'
 import { consumeHandoff, clearHandoff } from '../../lib/core/handoff'
-import { checkIncomingHandoff } from '../../lib/core/collageHandoff'
+import { checkIncomingHandoff, handoffSourceLabel } from '../../lib/core/collageHandoff'
 import type { HandoffImage } from '../../stores/handoff'
 
 const emit = defineEmits<{ accept: [images: HandoffImage[]]; dismiss: [] }>()
@@ -60,10 +60,14 @@ function removeHandoffParam() {
         </div>
         <div class="handoff-text">
           <span class="handoff-title">
-            {{ t('handoffTitle', { count: handoffData.images.length }) }}
+            {{
+              handoffData.images.length === 1
+                ? t('handoffTitleOne')
+                : t('handoffTitle', { count: handoffData.images.length })
+            }}
           </span>
           <span class="handoff-from">
-            {{ t('handoffFrom', { tool: handoffData.source }) }}
+            {{ t('handoffFrom', { tool: handoffSourceLabel(handoffData.source) }) }}
           </span>
         </div>
       </div>

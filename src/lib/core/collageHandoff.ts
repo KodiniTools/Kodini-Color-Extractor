@@ -3,6 +3,18 @@ import { checkHandoff, prepareHandoff } from './handoff'
 /** How this tool names itself in a handoff payload. */
 export const HANDOFF_SOURCE = 'color-extractor'
 
+/** Display names of the tools that send images here; unknown ids are shown as sent. */
+const SOURCE_LABELS: Record<string, string> = {
+  bildergalerie: 'Bildergalerie',
+  bildkonverter: 'Bildkonverter',
+  collagemaker: 'Collage Maker',
+  'bilder-batchbearbeitung': 'Bilder-Batchbearbeitung',
+}
+
+export function handoffSourceLabel(source: string): string {
+  return SOURCE_LABELS[source] ?? source
+}
+
 /**
  * The pending handoff another tool left for this one, or null. A payload this
  * tool wrote itself (sent to the Collage Maker but not picked up there) does

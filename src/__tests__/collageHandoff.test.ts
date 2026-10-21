@@ -52,8 +52,11 @@ describe('collageHandoff', () => {
     sendToCollageMaker([{ name: 'image', canvas: fakeCanvas(10, 10) }])
     expect(checkIncomingHandoff()).toBeNull()
 
-    const images = [{ name: 'a', dataUrl: 'data:,', width: 1, height: 1 }]
-    localStorage.setItem(STORAGE_KEY, JSON.stringify({ source: 'bildkonverter', images }))
+    const images = [{ name: 'a', dataUrl: 'data:image/jpeg;base64,AAAA', width: 1, height: 1 }]
+    localStorage.setItem(
+      STORAGE_KEY,
+      JSON.stringify({ source: 'bildkonverter', timestamp: Date.now(), images })
+    )
     expect(checkIncomingHandoff()).toMatchObject({ source: 'bildkonverter', images })
   })
 
