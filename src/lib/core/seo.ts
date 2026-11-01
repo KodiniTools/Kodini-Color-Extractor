@@ -20,9 +20,21 @@ export function ogLocale(lang: string): string {
 }
 
 // Build the absolute canonical URL for a router path ('/', '/app', '/faq', ...).
-export function canonicalUrl(path: string | null | undefined): string {
-  if (!path || path === '/') return `${SITE_URL}/`
-  return SITE_URL + path
+// German is the URL without parameters, English the same URL with ?lang=en.
+export function canonicalUrl(path: string | null | undefined, lang = 'de'): string {
+  const url = !path || path === '/' ? `${SITE_URL}/` : SITE_URL + path
+  return lang === 'en' ? `${url}?lang=en` : url
+}
+
+// hreflang targets for a router path: de, en (?lang=en), x-default -> de.
+export function alternateUrls(
+  path: string | null | undefined
+): { hreflang: string; href: string }[] {
+  return [
+    { hreflang: 'de', href: canonicalUrl(path, 'de') },
+    { hreflang: 'en', href: canonicalUrl(path, 'en') },
+    { hreflang: 'x-default', href: canonicalUrl(path, 'de') },
+  ]
 }
 
 // Per-route SEO metadata. Titles/descriptions are i18n keys resolved via t().

@@ -704,14 +704,28 @@ function isLocale(lang: unknown): lang is Locale {
 //   2. MutationObserver auf <html lang="..."> → Fallback
 //   3. storage Event → Tab-übergreifende Synchronisation
 
-// Default 'de' - identisch mit SSI-Nav: localStorage.getItem('locale') || 'de'
-function getInitialLocale(): Locale {
+// ?lang=de|en (hreflang-Ziel) hat Vorrang; danach wie die SSI-Nav:
+// localStorage.getItem('locale') || 'de'. Ein ?lang wird gespeichert, damit die
+// SSI-Nav (liest 'locale' bei DOMContentLoaded) dieselbe Sprache zeigt.
+export function getInitialLocale(search = globalThis.location?.search ?? ''): Locale {
+  const fromUrl = new URLSearchParams(search).get('lang')
+  if (isLocale(fromUrl)) {
+    try {
+      localStorage.setItem('locale', fromUrl)
+    } catch {
+      // Speicher gesperrt: Sprache gilt nur für diesen Aufruf
+    }
+    return fromUrl
+  }
   const stored = localStorage.getItem('locale')
   if (isLocale(stored)) return stored
   return 'de'
 }
 
 const currentLocale = ref<Locale>(getInitialLocale())
+// <html lang> sofort setzen: syncInitialLocale() und der MutationObserver lesen es
+// und würden sonst das statische lang="de" aus index.html übernehmen.
+document.documentElement.setAttribute('lang', currentLocale.value)
 
 // Computed für aktuelle Übersetzungen – stärkt die reaktive Abhängigkeitskette
 const currentTranslations = computed(() => tables[currentLocale.value] || tables.de)

@@ -7,6 +7,7 @@ import {
   OG_IMAGE,
   ogLocale,
   canonicalUrl,
+  alternateUrls,
   routeSeo,
   upsertMeta,
   upsertLink,
@@ -25,8 +26,8 @@ export function useSeo() {
 
   function apply() {
     const seo = routeSeo(route.name, t)
-    const url = canonicalUrl(route.path)
     const lang = locale.value
+    const url = canonicalUrl(route.path, lang)
 
     // Title (localized; overrides the router's static fallback)
     document.title = seo.title
@@ -35,11 +36,11 @@ export function useSeo() {
     upsertMeta('name', 'description', seo.description)
     upsertMeta('name', 'robots', seo.robots)
 
-    // Canonical + language alternates (both locales share one URL, x-default -> home locale)
+    // Canonical (EN = ?lang=en) + language alternates (x-default -> German)
     upsertLink('canonical', url)
-    upsertLink('alternate', url, 'de')
-    upsertLink('alternate', url, 'en')
-    upsertLink('alternate', url, 'x-default')
+    for (const { hreflang, href } of alternateUrls(route.path)) {
+      upsertLink('alternate', href, hreflang)
+    }
 
     // Open Graph
     upsertMeta('property', 'og:type', route.name === 'landing' ? 'website' : 'article')

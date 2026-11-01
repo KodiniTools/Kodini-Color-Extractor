@@ -12,6 +12,16 @@ describe('useI18n', () => {
     vi.resetModules()
   })
 
+  it('?lang=en hat Vorrang vor dem Speicher und wird gespeichert', async () => {
+    localStorage.setItem('locale', 'de')
+    const { getInitialLocale } = await import('../composables/useI18n')
+    expect(getInitialLocale('?lang=en')).toBe('en')
+    expect(localStorage.getItem('locale')).toBe('en')
+    expect(getInitialLocale('?lang=fr')).toBe('en')
+    localStorage.clear()
+    expect(getInitialLocale('')).toBe('de')
+  })
+
   it('t() returns translations for known keys (not the key itself)', async () => {
     const { useI18n } = await import('../composables/useI18n')
     const { t } = useI18n()
