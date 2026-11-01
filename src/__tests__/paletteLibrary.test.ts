@@ -130,6 +130,35 @@ describe('usePaletteLibrary', () => {
     expect(lib.entries.value).toHaveLength(1)
     expect(lib.persistent.value).toBe(false)
   })
+
+  // The Collage Maker handoff awaits record() before leaving the page, so it
+  // must not resolve before the entry has been written.
+  it('resolves record() only after the entry is saved', async () => {
+    let finishSave: () => void = () => {}
+    const saved: unknown[] = []
+    resetPaletteLibrary({
+      persistent: true,
+      load: async () => [],
+      save: (entries) =>
+        new Promise<void>((resolve) => {
+          finishSave = () => {
+            saved.push(...entries)
+            resolve()
+          }
+        }),
+    })
+    const lib = usePaletteLibrary()
+    let done = false
+    const pending = lib.record(['#666666'], 'extractor').then(() => {
+      done = true
+    })
+    await new Promise((r) => setTimeout(r, 0))
+    expect(done).toBe(false)
+    finishSave()
+    await pending
+    expect(done).toBe(true)
+    expect(saved).toHaveLength(1)
+  })
 })
 
 describe('PaletteLibraryDialog', () => {
