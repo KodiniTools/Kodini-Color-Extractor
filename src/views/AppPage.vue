@@ -77,9 +77,9 @@ function handleDownloadTxt() {
 }
 
 // Copying, downloading and handing over count as using a palette: it goes
-// into the recently used list.
-function recordUse() {
-  library.record(paletteHexes.value, 'extractor')
+// into the recently used list. Resolves once the entry is stored.
+function recordUse(): Promise<void> {
+  return library.record(paletteHexes.value, 'extractor')
 }
 
 function openSaved(hexes: string[]) {
@@ -96,13 +96,19 @@ function openInGenerator() {
 
 // The Collage Maker is another app on the same site, so this is a full page
 // load; the image and the palette card travel through localStorage.
-function sendToCollage() {
+// The palette is stored before leaving: a page unload can drop a pending
+// IndexedDB write, and the entry would be lost.
+async function sendToCollage() {
   const url = sendToCollageMaker(store.handoffCanvases())
   if (!url) {
     toast.show(t('sendToCollageError'), 'error')
     return
   }
-  recordUse()
+  try {
+    await recordUse()
+  } catch {
+    // The handoff matters more than the list entry.
+  }
   window.location.assign(url)
 }
 
