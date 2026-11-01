@@ -4,6 +4,7 @@ import {
   OG_IMAGE,
   ogLocale,
   canonicalUrl,
+  alternateUrls,
   routeSeo,
   upsertMeta,
   upsertLink,
@@ -25,6 +26,17 @@ describe('seo helpers', () => {
     expect(canonicalUrl('')).toBe(`${SITE_URL}/`)
     expect(canonicalUrl('/app')).toBe(`${SITE_URL}/app`)
     expect(canonicalUrl('/faq')).toBe(`${SITE_URL}/faq`)
+  })
+
+  it('canonicalUrl adds ?lang=en for English, alternateUrls lists de/en/x-default', () => {
+    expect(canonicalUrl('/', 'en')).toBe(`${SITE_URL}/?lang=en`)
+    expect(canonicalUrl('/faq', 'en')).toBe(`${SITE_URL}/faq?lang=en`)
+    expect(canonicalUrl('/faq', 'de')).toBe(`${SITE_URL}/faq`)
+    expect(alternateUrls('/faq')).toEqual([
+      { hreflang: 'de', href: `${SITE_URL}/faq` },
+      { hreflang: 'en', href: `${SITE_URL}/faq?lang=en` },
+      { hreflang: 'x-default', href: `${SITE_URL}/faq` },
+    ])
   })
 
   it('ogLocale maps app language codes to OG locales', () => {
