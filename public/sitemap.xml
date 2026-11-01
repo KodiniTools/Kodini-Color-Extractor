@@ -1,25 +1,74 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xhtml="http://www.w3.org/1999/xhtml">
   <url>
     <loc>https://kodinitools.com/kodini-color-extractor/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/"/>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>1.0</priority>
+  </url>
+  <url>
+    <loc>https://kodinitools.com/kodini-color-extractor/?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/"/>
     <lastmod>2026-07-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
     <loc>https://kodinitools.com/kodini-color-extractor/app</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/app"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/app?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/app"/>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://kodinitools.com/kodini-color-extractor/app?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/app"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/app?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/app"/>
     <lastmod>2026-07-19</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://kodinitools.com/kodini-color-extractor/generator</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/generator"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/generator?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/generator"/>
+    <lastmod>2026-09-25</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://kodinitools.com/kodini-color-extractor/generator?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/generator"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/generator?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/generator"/>
     <lastmod>2026-09-25</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://kodinitools.com/kodini-color-extractor/faq</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/faq"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/faq?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/faq"/>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://kodinitools.com/kodini-color-extractor/faq?lang=en</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://kodinitools.com/kodini-color-extractor/faq"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://kodinitools.com/kodini-color-extractor/faq?lang=en"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://kodinitools.com/kodini-color-extractor/faq"/>
     <lastmod>2026-07-19</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
