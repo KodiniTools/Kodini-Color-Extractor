@@ -326,12 +326,12 @@ const translations = {
     faqCtaButton: 'Open Color Extractor',
 
     // SEO meta (page titles & descriptions)
-    metaTitleHome: 'Kodini Color Extractor – Extract Color Palettes from Images',
+    metaTitleHome: 'Color Palette from Image – Kodini Color Extractor',
     metaTitleApp: 'Color Extractor App – Pick Colors from Your Image',
     metaTitleGenerator: 'Color Palette Generator – Create Harmonious Color Schemes',
     metaTitleFaq: 'FAQ – Kodini Color Extractor',
     metaDescHome:
-      'Extract beautiful color palettes from any image for free. Privacy-first and 100% in-browser – no uploads, no tracking. Export as HEX, RGB, HSL & CSS.',
+      'Create a color palette from an image, free and with no upload: extract dominant colors and copy color codes as HEX, RGB, HSL or CSS. 100% in your browser.',
     metaDescApp:
       'Upload an image and extract up to 20 dominant colors with pixel-precise picking. Export palettes as HEX, RGB, HSL or CSS variables. 100% private, in your browser.',
     metaDescGenerator:
@@ -666,12 +666,12 @@ const translations = {
     faqCtaButton: 'Color Extractor öffnen',
 
     // SEO meta (page titles & descriptions)
-    metaTitleHome: 'Kodini Color Extractor – Farbpaletten aus Bildern extrahieren',
+    metaTitleHome: 'Farbpalette aus Bild erstellen – Kodini Color Extractor',
     metaTitleApp: 'Color Extractor App – Farben aus deinem Bild wählen',
     metaTitleGenerator: 'Farbpaletten-Generator – Harmonische Farbschemata erstellen',
     metaTitleFaq: 'FAQ – Kodini Color Extractor',
     metaDescHome:
-      'Extrahiere kostenlos Farbpaletten aus jedem Bild. Datenschutzfreundlich und 100% im Browser – keine Uploads, kein Tracking. Export als HEX, RGB, HSL & CSS.',
+      'Farbpalette aus Bild erstellen, kostenlos und ohne Upload: dominante Farben extrahieren und Farbcodes als HEX, RGB, HSL oder CSS kopieren. 100 % im Browser.',
     metaDescApp:
       'Lade ein Bild hoch und extrahiere bis zu 20 dominante Farben mit pixelgenauer Auswahl. Export als HEX, RGB, HSL oder CSS-Variablen. 100% privat, direkt im Browser.',
     metaDescGenerator:
