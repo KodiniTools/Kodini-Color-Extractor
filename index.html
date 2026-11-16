@@ -33,8 +33,10 @@
 
     <!-- Canonical & hreflang: bewusst NICHT statisch gesetzt. Die SPA liefert fuer
          jede Route dieselbe index.html aus; ein statisches Canonical wuerde /app,
-         /generator und /faq als Duplikat der Startseite markieren. useSeo.js setzt
-         Canonical und hreflang pro Route (Google rendert JavaScript). -->
+         /generator und /faq als Duplikat der Startseite markieren. useSeo.ts setzt
+         Canonical und hreflang pro Route (Google rendert JavaScript). Für ?lang=en
+         erzeugt der Build pro Route eine englische Kopie mit statischem Canonical
+         (src/lib/core/staticHead.ts, nginx-Regel im README). -->
 
     <!-- Icons & PWA (shared kodinitools.com brand assets, served from site root) -->
     <link
