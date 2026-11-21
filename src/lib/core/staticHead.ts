@@ -30,7 +30,8 @@ export const STATIC_ROUTES: readonly { name: string; path: string }[] = [
  */
 export function staticHtmlFile(path: string, lang: string): string {
   const base = path === '/' ? 'index' : path.replace(/^\/+/, '').replace(/\/+$/, '')
-  return `${base}.${lang}.html`
+  // Deutsch ist die URL ohne ?lang: nginx sucht dann `$uri.html` (map liefert "").
+  return lang === 'de' ? `${base}.html` : `${base}.${lang}.html`
 }
 
 /** Escape a value for use inside a double-quoted HTML attribute or <title>. */
