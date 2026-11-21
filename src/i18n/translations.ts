@@ -667,15 +667,15 @@ export const translations = {
 
     // SEO meta (page titles & descriptions)
     metaTitleHome: 'Farbpalette aus Bild erstellen – Kodini Color Extractor',
-    metaTitleApp: 'Color Extractor App – Farben aus deinem Bild wählen',
+    metaTitleApp: 'Color Extractor App – Farben aus Ihrem Bild wählen',
     metaTitleGenerator: 'Farbpaletten-Generator – Harmonische Farbschemata erstellen',
-    metaTitleFaq: 'FAQ – Kodini Color Extractor',
+    metaTitleFaq: 'Häufige Fragen – Kodini Color Extractor',
     metaDescHome:
       'Farbpalette aus Bild erstellen, kostenlos und ohne Upload: dominante Farben extrahieren und Farbcodes als HEX, RGB, HSL oder CSS kopieren. 100 % im Browser.',
     metaDescApp:
-      'Lade ein Bild hoch und extrahiere bis zu 20 dominante Farben mit pixelgenauer Auswahl. Export als HEX, RGB, HSL oder CSS-Variablen. 100% privat, direkt im Browser.',
+      'Laden Sie ein Bild und extrahieren Sie bis zu 20 dominante Farben mit pixelgenauer Auswahl. Export als HEX, RGB, HSL oder CSS-Variablen, lokal im Browser.',
     metaDescGenerator:
-      'Erstelle in Sekunden harmonische Farbpaletten. Wähle einen Harmonie-Modus, sperre deine Lieblingsfarben und kopiere jeden HEX-Wert mit einem Klick. Kostenlos und 100% im Browser.',
+      'Harmonische Farbpaletten in Sekunden erstellen: Harmonie-Modus wählen, Lieblingsfarben sperren und HEX-Werte mit einem Klick kopieren. Kostenlos, 100 % im Browser.',
     metaDescFaq:
       'Antworten auf häufige Fragen zum Kodini Color Extractor: Kosten, Datenschutz, unterstützte Bildformate, Exportoptionen, mobile Nutzung und Dark Mode.',
   },

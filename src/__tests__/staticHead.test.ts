@@ -27,6 +27,11 @@ describe('staticHtmlFile', () => {
     expect(staticHtmlFile('/faq', 'en')).toBe('faq.en.html')
     expect(staticHtmlFile('/app/gallery', 'en')).toBe('app/gallery.en.html')
   })
+
+  it('names German sub-page copies like the URL without ?lang ($uri.html)', () => {
+    expect(staticHtmlFile('/faq', 'de')).toBe('faq.html')
+    expect(staticHtmlFile('/app/gallery', 'de')).toBe('app/gallery.html')
+  })
 })
 
 describe('STATIC_ROUTES', () => {
@@ -39,6 +44,22 @@ describe('STATIC_ROUTES', () => {
 })
 
 describe('localizeHead', () => {
+  it('renders the German head for the FAQ route (faq.html)', () => {
+    const de: Record<string, string> = translations.de
+    const tDe = (key: string) => de[key] ?? key
+    const doc = parse(
+      localizeHead(indexHtml, { routeName: 'faq', path: '/faq', lang: 'de', t: tDe })
+    )
+    expect(doc.documentElement.getAttribute('lang')).toBe('de')
+    expect(doc.title).toBe(de.metaTitleFaq)
+    expect(doc.title).not.toBe(de.metaTitleHome)
+    expect(meta(doc, 'name', 'description')).toBe(de.metaDescFaq)
+    expect(meta(doc, 'property', 'og:locale')).toBe('de_DE')
+    expect(doc.head.querySelector('link[rel="canonical"]')?.getAttribute('href')).toBe(
+      `${SITE_URL}/faq`
+    )
+  })
+
   it('renders the English head for the FAQ route', () => {
     const doc = parse(localizeHead(indexHtml, { routeName: 'faq', path: '/faq', lang: 'en', t }))
     const url = `${SITE_URL}/faq?lang=en`
