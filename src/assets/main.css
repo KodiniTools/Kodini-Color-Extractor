@@ -141,11 +141,11 @@ input {
    Ausgenommen sind #app, #app-layer (teleportierte Toasts, Tooltip, Modal)
    und das Cookie-Banner, das seine eigene Fläche behält. */
 
-/* Wurzel jedes Partials: normale Spezifität. */
+/* Die globale Navigation erhält ihre Fläche im Header-Stylesheet. */
 body
-  > :not(#app):not(#app-layer):not(script):not(.cookie-banner):not(.cookie-consent):not(
-    [class*='cookie']
-  ):not([id*='cookie']) {
+  > :not(#app):not(#app-layer):not(.global-nav):not(script):not(.cookie-banner):not(
+    .cookie-consent
+  ):not([class*='cookie']):not([id*='cookie']) {
   background-color: transparent !important;
 }
 

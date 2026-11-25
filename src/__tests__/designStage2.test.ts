@@ -53,6 +53,13 @@ describe('Design Etappe 2', () => {
     expect(missing).toEqual([])
   })
 
+  it('nimmt die globale Navigation von der Durchsichtig-Regel für Partials aus', () => {
+    // Etappe 5: Die Fläche der Leiste setzt kodini-header-stage2.css.
+    expect(mainCss).toMatch(
+      /body\s*>\s*:not\(#app\):not\(#app-layer\):not\(\.global-nav\)[^{]*\{\s*background-color: transparent !important;/
+    )
+  })
+
   it('hebt die aktuelle Seite der Werkzeugnavigation über aria-current hervor', () => {
     const active = rules(stage2).find(([selector]) => selector.includes("[aria-current='page']"))
     expect(active?.[1]).toMatch(/var\(--ds-accent\)/)
