@@ -86,8 +86,12 @@
   --app-stage1-glow: #d9ebeb;
   --app-stage1-cyan: #086a80;
   --app-stage1-gold: #8f6320;
-  --app-stage1-gold-hover: #79551c;
+  --app-stage1-gold-hover: #7d561c;
   --app-stage1-on-gold: #ffffff;
+  /* KodiniTools-Standard für gefüllte Buttons: dreistufiger Verlauf, oberster
+     Stopp #9c6c26 hat 4,58:1 zu Weiß. Ersetzt die Fläche in Etappe 3. */
+  --app-stage1-gold-grad: linear-gradient(180deg, #9c6c26 0%, #7a5218 45%, #4a2f0a 100%);
+  --app-stage1-gold-grad-hover: linear-gradient(180deg, #8c5f1f 0%, #6a4614 45%, #402908 100%);
   --app-stage1-media-shadow: 0 22px 50px rgb(0 0 0 / 0.17);
   color-scheme: light;
 }

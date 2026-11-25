@@ -34,15 +34,37 @@
   border-color: var(--ds-border-strong);
 }
 
-#app :is(.upload-area:not(.processing), .export-btn-primary) {
+/* Alle gefüllten Goldbuttons: Dunkelgold mit dreistufigem Verlauf und weißer
+   Schrift. Die Fläche bleibt als Rückfall unter dem Verlauf. */
+#app
+  :is(
+    .upload-area:not(.processing),
+    .export-btn-primary,
+    .hero-cta:not(.hero-cta-secondary),
+    .showcase-cta,
+    .cta-button,
+    .faq-cta-button,
+    .handoff-btn-accept
+  ) {
   background: var(--kce-nav-gold);
+  background-image: var(--app-stage1-gold-grad);
   border-color: transparent;
   color: var(--app-stage1-on-gold);
 }
 
-#app :is(.upload-area:not(.processing), .export-btn-primary:not(:disabled)):hover,
+#app
+  :is(
+    .upload-area:not(.processing),
+    .export-btn-primary:not(:disabled),
+    .hero-cta:not(.hero-cta-secondary),
+    .showcase-cta,
+    .cta-button,
+    .faq-cta-button,
+    .handoff-btn-accept
+  ):hover,
 #app .upload-area.dragging:not(.processing) {
   background: var(--kce-gold-hover);
+  background-image: var(--app-stage1-gold-grad-hover);
 }
 
 :is(#app, #app-layer)

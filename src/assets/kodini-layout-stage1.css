@@ -79,11 +79,13 @@
 
 #app .landing-page :is(.hero-cta:not(.hero-cta-secondary), .showcase-cta, .cta-button) {
   background: var(--kce-gold-fill);
+  background-image: var(--app-stage1-gold-grad);
   color: var(--kce-on-gold);
 }
 
 #app .landing-page :is(.hero-cta:not(.hero-cta-secondary), .showcase-cta, .cta-button):hover {
   background: var(--kce-gold-hover);
+  background-image: var(--app-stage1-gold-grad-hover);
 }
 
 @media (max-width: 900px) {

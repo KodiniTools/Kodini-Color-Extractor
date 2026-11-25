@@ -60,8 +60,9 @@ describe('Design Etappe 3', () => {
 
   it('färbt Hauptaktionen dunkelgold mit weisser Schrift', () => {
     expect(stage3).toMatch(/--kce-gold-hover:\s*var\(--app-stage1-gold-hover\)/)
-    const primary = stage3.match(/\.export-btn-primary\) \{([^}]*)\}/)?.[1] ?? ''
+    const primary = stage3.match(/\.export-btn-primary,[^{]*\) \{([^}]*)\}/)?.[1] ?? ''
     expect(primary).toMatch(/background:\s*var\(--kce-nav-gold\)/)
+    expect(primary).toMatch(/background-image:\s*var\(--app-stage1-gold-grad\)/)
     expect(primary).toMatch(/color:\s*var\(--app-stage1-on-gold\)/)
   })
 
