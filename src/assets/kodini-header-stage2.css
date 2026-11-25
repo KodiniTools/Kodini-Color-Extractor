@@ -1,0 +1,100 @@
+/* Etappe 2 · Werkzeugnavigation und Einbindung der globalen SSI-Navigation */
+/* Farben aus den --app-stage1-* Tokens in main.css; sie wechseln mit
+   data-theme, deshalb braucht es hier keinen Dunkel-Block. */
+:root {
+  --kce-nav-tint: var(--app-stage1-cyan);
+  --kce-nav-gold: var(--app-stage1-gold);
+}
+
+body > #app {
+  /* Die vorhandene SSI-Leiste ist sticky und bleibt im Dokumentfluss. */
+  --app-nav-height: 0px;
+  padding-top: 0;
+}
+
+body > .global-nav.sticky ~ #app {
+  --app-nav-height: 71px;
+}
+
+#app .landing-nav {
+  background: color-mix(in srgb, var(--ds-surface-1) 94%, var(--kce-nav-tint) 6%);
+  border-bottom-color: color-mix(in srgb, var(--ds-border) 78%, var(--kce-nav-tint) 22%);
+}
+
+#app .landing-nav .nav-container {
+  max-width: 1160px;
+}
+
+#app .landing-nav .nav-links {
+  gap: var(--ds-space-1);
+}
+
+#app .landing-nav .nav-link {
+  height: auto;
+  min-height: var(--ds-control-md);
+  border: var(--ds-border-width) solid transparent;
+  border-radius: var(--ds-radius-md);
+  color: var(--ds-text-2);
+  background: transparent;
+}
+
+#app .landing-nav .nav-link:hover {
+  color: var(--ds-text);
+  background: color-mix(in srgb, var(--ds-surface-2) 86%, var(--kce-nav-tint) 14%);
+  border-color: color-mix(in srgb, var(--ds-border) 72%, var(--kce-nav-tint) 28%);
+}
+
+#app .landing-nav .nav-link[aria-current='page'] {
+  color: var(--ds-text);
+  background: color-mix(in srgb, var(--ds-surface-2) 90%, var(--ds-accent) 10%);
+  border-color: color-mix(in srgb, var(--ds-border) 64%, var(--ds-accent) 36%);
+  box-shadow: inset 0 -2px 0 var(--ds-accent);
+}
+
+#app .landing-nav .nav-link:focus-visible {
+  box-shadow: var(--ds-focus-ring);
+}
+
+/* Die globale Navigation bleibt das Server-Partial. Die Farbregeln gelten
+   nur dort, wo der Farbextraktor sein Stylesheet lädt.
+   main.css macht Flächen und Texte der Partials mit Selektoren aus zwei IDs
+   (:not(#app):not(#app-layer)) und !important durchsichtig bzw. einfarbig.
+   Die Fläche der Leiste und die Schrift des aktiven Sprachknopfs brauchen
+   deshalb eine dritte ID im Selektor (:not(#kce-nav)), sonst greifen sie nicht. */
+html body > nav.global-nav.sticky:not(#app):not(#app-layer):not(#kce-nav) {
+  --nav-bg: color-mix(in srgb, var(--ds-surface-1) 96%, var(--kce-nav-tint) 4%);
+  --nav-bg-hover: color-mix(in srgb, var(--ds-surface-2) 86%, var(--kce-nav-tint) 14%);
+  --nav-border: var(--ds-border);
+  --dropdown-border: var(--ds-border);
+  --accent-color: var(--kce-nav-tint);
+  background: var(--nav-bg) !important;
+  border-bottom-color: var(--nav-border);
+  font-synthesis: none;
+}
+
+/* !important, weil main.css alle Flächen der Partials mit !important
+   durchsichtig macht; ohne wäre das offene Mobilmenü durchsichtig. */
+body > nav.global-nav .global-nav-links.is-open {
+  background-color: var(--nav-bg) !important;
+}
+
+html body > nav.global-nav .global-nav-theme-toggle {
+  border-color: var(--ds-border-strong);
+  background-color: var(--ds-surface-2) !important;
+}
+
+html body > nav.global-nav .global-nav-theme-toggle:hover {
+  background-color: var(--nav-bg-hover) !important;
+  border-color: var(--kce-nav-tint);
+}
+
+html body > nav.global-nav:not(#app):not(#app-layer):not(#kce-nav) .global-nav-lang-btn.active {
+  background-color: var(--kce-nav-gold) !important;
+  color: var(--app-stage1-on-gold) !important;
+}
+
+@media (max-width: 768px) {
+  body > .global-nav.sticky ~ #app {
+    --app-nav-height: 61px;
+  }
+}
