@@ -168,10 +168,15 @@ describe('Komponenten nutzen nur die Tokens', () => {
     expect([...used].filter((name) => !defined.includes(name))).toEqual([])
   })
 
-  it('zeichnen keine Verläufe mit Farbwerten (nur der Farbton-Regler zeigt den Farbkreis)', () => {
+  it('zeichnen keine Verläufe mit Farbwerten (nur Farbton-Regler und Goldbutton-Token)', () => {
     const hits: string[] = []
     for (const [file, css] of Object.entries(styleSources())) {
-      for (const match of css.matchAll(/gradient\(([^;]*)/g)) {
+      // Der Goldbutton-Verlauf ist KodiniTools-Standard und steht nur als Token in main.css.
+      const source =
+        file === 'assets/main.css'
+          ? css.replace(/--app-stage1-gold-grad(?:-hover)?:\s*linear-gradient\([^;]*\);/g, '')
+          : css
+      for (const match of source.matchAll(/gradient\(([^;]*)/g)) {
         if (/#|rgba?\(/.test(match[1])) hits.push(file)
       }
     }
