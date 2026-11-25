@@ -1,0 +1,107 @@
+/* Etappe 1 · Projektweite Typografie und Grundflächen */
+#app,
+#app-layer {
+  --ds-weight-medium: var(--ds-weight-regular);
+  --ds-weight-semibold: var(--ds-weight-regular);
+  --ds-weight-bold: var(--ds-weight-regular);
+  font-weight: var(--ds-weight-regular);
+  font-synthesis: none;
+}
+
+:is(#app, #app-layer) :where(h1, h2, h3, h4, h5, h6, b, strong, button, input, select, textarea) {
+  font-weight: var(--ds-weight-regular);
+}
+
+/* Farben kommen aus den --app-stage1-* Tokens in main.css (Hell und Dunkel). */
+#app {
+  --kce-glow: radial-gradient(ellipse at 78% 0%, var(--app-stage1-glow), transparent 70%);
+  --kce-card: linear-gradient(150deg, var(--ds-surface-1), var(--ds-surface-0));
+  --kce-cyan: var(--app-stage1-cyan);
+  --kce-gold-fill: var(--app-stage1-gold);
+  --kce-gold-hover: var(--app-stage1-gold-hover);
+  --kce-on-gold: var(--app-stage1-on-gold);
+}
+
+#app :is(.landing-page, .app-page, .gallery-page, .faq-page) {
+  background-image: var(--kce-glow);
+  background-repeat: no-repeat;
+  background-size: 100% 42rem;
+}
+
+#app .app-container > :is(.workspace-main, .main-content:not(.file-dragging)) {
+  background-color: transparent;
+}
+
+#app .app-container > :is(.sidebar, .edit-panel) {
+  background-image: var(--kce-card);
+}
+
+#app .landing-page .hero {
+  max-width: 1160px;
+  padding: clamp(40px, 7vw, 96px) clamp(14px, 3vw, 32px) clamp(30px, 5vw, 54px);
+}
+
+#app .landing-page .hero-intro {
+  grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+  gap: clamp(24px, 5vw, 70px);
+  max-width: none;
+  margin-bottom: clamp(26px, 5vw, 54px);
+}
+
+#app .landing-page .hero-title {
+  font-size: clamp(36px, 5.25vw, 68px);
+  line-height: 1.05;
+  letter-spacing: -0.045em;
+  overflow-wrap: anywhere;
+}
+
+#app .landing-page .hero-subtitle {
+  max-width: 45ch;
+  color: var(--kce-cyan);
+}
+
+#app .landing-page .hero-media {
+  border-radius: 20px;
+  box-shadow: var(--app-stage1-media-shadow);
+}
+
+#app .landing-page .feature-cards {
+  max-width: none;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#app .landing-page .feature-card {
+  background: var(--kce-card);
+  border-radius: 15px;
+  padding: clamp(16px, 2vw, 22px);
+  text-align: start;
+}
+
+#app .landing-page :is(.hero-cta:not(.hero-cta-secondary), .showcase-cta, .cta-button) {
+  background: var(--kce-gold-fill);
+  color: var(--kce-on-gold);
+}
+
+#app .landing-page :is(.hero-cta:not(.hero-cta-secondary), .showcase-cta, .cta-button):hover {
+  background: var(--kce-gold-hover);
+}
+
+@media (max-width: 900px) {
+  #app .landing-page .hero-intro {
+    text-align: start;
+  }
+
+  #app .landing-page .hero-actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 760px) {
+  #app .landing-page :is(.hero-intro, .feature-cards) {
+    grid-template-columns: 1fr;
+  }
+
+  #app .landing-page .hero-intro {
+    max-width: 640px;
+  }
+}

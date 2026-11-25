@@ -145,8 +145,13 @@ describe('Komponenten nutzen nur die Tokens', () => {
     for (const [file, css] of Object.entries(styleSources())) {
       let source = css.replace(/\/\*[\s\S]*?\*\//g, '')
       // main.css's first :root block holds the app's own fixed colours for
-      // overlays on photos and palette colours; everything else uses them.
-      if (file === 'assets/main.css') source = source.replace(/:root \{[^}]*\}/, '')
+      // overlays on photos and palette colours; the first dark block holds the
+      // dark values of the theme-dependent ones. Everything else uses them.
+      if (file === 'assets/main.css') {
+        source = source
+          .replace(/:root \{[^}]*\}/, '')
+          .replace(/:root\[data-theme='dark'\] \{[^}]*\}/, '')
+      }
       source.split('\n').forEach((line, index) => {
         if (literal.test(line)) hits.push(`${file}:${index + 1}: ${line.trim()}`)
       })

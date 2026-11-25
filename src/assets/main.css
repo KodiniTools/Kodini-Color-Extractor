@@ -10,6 +10,7 @@
    ========================================================================== */
 
 @import '../design-system/tokens-v2.css';
+@import './kodini-layout-stage1.css';
 
 /* === Schrift: Supreme in den drei genutzten Gewichten (500 = Medium,
    600 und 700 fallen auf Bold), gebündelt aus src/assets/fonts. === */
@@ -75,10 +76,20 @@
     hsl(300, 100%, 50%),
     hsl(360, 100%, 50%)
   );
+  /* Etappe 1 des Design-Umbaus (kodini-layout-stage1.css): Blau-Cyan-Verlauf,
+     dunkelgoldene Hauptbuttons mit weisser Schrift (5.3:1), Cyan-Untertitel. */
+  --app-stage1-glow: #d9ebeb;
+  --app-stage1-cyan: #086a80;
+  --app-stage1-gold: #8f6320;
+  --app-stage1-gold-hover: #79551c;
+  --app-stage1-on-gold: #ffffff;
+  --app-stage1-media-shadow: 0 22px 50px rgb(0 0 0 / 0.17);
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
+  --app-stage1-glow: #163e56;
+  --app-stage1-cyan: #69d7e9;
   color-scheme: dark;
 }
 
