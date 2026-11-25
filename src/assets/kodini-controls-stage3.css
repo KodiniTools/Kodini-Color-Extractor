@@ -1,0 +1,107 @@
+/* Etappe 3 · Upload, Einstellungen, Regler und Dialoge */
+/* Farben aus den --app-stage1-* Tokens in main.css und den Etappe-2-Aliassen. */
+:is(#app, #app-layer) {
+  --kce-control-frame: color-mix(in srgb, var(--ds-border-strong) 78%, var(--kce-nav-tint));
+  --kce-panel-frame: color-mix(in srgb, var(--ds-border) 78%, var(--kce-nav-tint));
+  --kce-control-hover: color-mix(in srgb, var(--ds-surface-2) 90%, var(--kce-nav-tint));
+  --kce-gold-hover: var(--app-stage1-gold-hover);
+}
+
+#app .panel-section {
+  border-top-color: var(--kce-panel-frame);
+}
+
+#app .panel-section-title {
+  color: var(--kce-nav-tint);
+}
+
+#app .gallery-upload {
+  background: color-mix(in srgb, var(--ds-surface-1) 94%, var(--kce-nav-tint));
+  border-color: color-mix(in srgb, var(--ds-border-strong) 48%, var(--kce-nav-tint));
+  border-radius: var(--ds-radius-lg);
+}
+
+#app .gallery-upload:is(:hover, .dragging):not(.processing) {
+  background: var(--kce-control-hover);
+  border-color: var(--kce-nav-tint);
+}
+
+#app .gallery-upload.dragging:not(.processing) {
+  box-shadow: var(--ds-focus-ring);
+}
+
+#app .gallery-upload.processing {
+  border-color: var(--ds-border-strong);
+}
+
+#app :is(.upload-area:not(.processing), .export-btn-primary) {
+  background: var(--kce-nav-gold);
+  border-color: transparent;
+  color: var(--app-stage1-on-gold);
+}
+
+#app :is(.upload-area:not(.processing), .export-btn-primary:not(:disabled)):hover,
+#app .upload-area.dragging:not(.processing) {
+  background: var(--kce-gold-hover);
+}
+
+:is(#app, #app-layer)
+  :is(
+    .field-select,
+    .export-btn:not(.export-btn-primary),
+    .btn-history,
+    .slider-field__reset,
+    .spin
+  ) {
+  border-color: var(--kce-control-frame);
+}
+
+:is(#app, #app-layer)
+  :is(
+    .field-select,
+    .export-btn:not(.export-btn-primary),
+    .btn-history,
+    .slider-field__reset
+  ):hover:not(:disabled) {
+  background-color: var(--kce-control-hover);
+  border-color: var(--kce-nav-tint);
+}
+
+:is(#app, #app-layer) :is(.field-select, .spin):focus-within {
+  border-color: var(--ds-accent);
+}
+
+#app .app-page input[type='range']:not(.slider-field__range--hue) {
+  background-color: var(--kce-control-frame);
+}
+
+#app .app-page input[type='range']:not(.slider-field__range--hue)::-moz-range-track {
+  background-color: var(--kce-control-frame);
+}
+
+#app .app-page input[type='range'].slider-field__range--hue::-moz-range-track {
+  background: var(--app-hue-spectrum);
+}
+
+#app .app-page input[type='range']::-webkit-slider-thumb {
+  background-color: var(--kce-nav-gold);
+  border-color: var(--ds-text);
+}
+
+#app .app-page input[type='range']::-moz-range-thumb {
+  background-color: var(--kce-nav-gold);
+  border-color: var(--ds-text);
+}
+
+#app-layer .modal-content {
+  border-color: var(--kce-panel-frame);
+}
+
+#app-layer .modal-header {
+  background-color: color-mix(in srgb, var(--ds-surface-2) 94%, var(--kce-nav-tint));
+  border-bottom-color: var(--kce-panel-frame);
+}
+
+#app-layer .close-btn:hover {
+  background-color: var(--kce-control-hover);
+}
