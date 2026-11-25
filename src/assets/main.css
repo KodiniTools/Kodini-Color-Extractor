@@ -13,6 +13,7 @@
 @import './kodini-layout-stage1.css';
 @import './kodini-header-stage2.css';
 @import './kodini-controls-stage3.css';
+@import './kodini-workspace-stage4.css';
 
 /* === Schrift: Supreme in den drei genutzten Gewichten (500 = Medium,
    600 und 700 fallen auf Bold), gebündelt aus src/assets/fonts. === */
@@ -60,6 +61,8 @@
   --app-scrim: rgb(0 0 0 / 0.5);
   /* Ring, Linie und Schrift über Fotos und dunklen Swatches. */
   --app-overlay-light: #ffffff;
+  /* Dunkle Gegenkontur, z. B. für den Fokusring auf Palettenfarben (Etappe 4). */
+  --app-overlay-dark: #101827;
   /* Dünne dunkle Kante, damit der helle Ring auch auf hellen Fotos sichtbar bleibt. */
   --app-overlay-edge: rgb(0 0 0 / 0.35);
   /* Hintergrund der Vorher/Nachher-Beschriftung im Bild. */

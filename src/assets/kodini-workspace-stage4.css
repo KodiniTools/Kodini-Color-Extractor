@@ -1,0 +1,73 @@
+/* Etappe 4 · Bildarbeitsfläche und Paletten */
+/* Farben aus den Tokens in main.css und den Aliassen der Etappen 2 und 3. */
+#app .main-content .image-container {
+  border-color: var(--kce-control-frame);
+}
+
+#app .main-content .image-container:not(.has-image):not(.file-dragging) {
+  background: linear-gradient(
+    145deg,
+    color-mix(in srgb, var(--ds-surface-1) 92%, var(--kce-nav-tint)),
+    var(--ds-surface-1) 65%
+  );
+}
+
+#app .main-content .image-container.has-image {
+  border-style: solid;
+  box-shadow: var(--ds-shadow-overlay);
+}
+
+#app .main-content .image-container.file-dragging {
+  border-color: var(--ds-accent);
+}
+
+#app .main-content .placeholder-icon {
+  color: var(--kce-nav-tint);
+}
+
+#app .main-content .placeholder-hint {
+  color: var(--ds-text-2);
+}
+
+#app .color-list .color-item {
+  border-color: var(--kce-panel-frame);
+}
+
+#app .color-list .color-item:hover:not(.placeholder):not(.selected) {
+  background: var(--kce-control-hover);
+  border-color: var(--kce-control-frame);
+}
+
+#app .color-list .color-item.selected {
+  border-color: var(--ds-accent);
+  box-shadow: inset 3px 0 var(--ds-accent);
+}
+
+#app .color-list .color-swatch {
+  border-radius: var(--ds-radius-md);
+}
+
+#app .sample-images .sample-thumbnail.loaded:hover:not(.selected) {
+  border-color: var(--kce-nav-tint);
+}
+
+#app .workspace-main .palette-strip {
+  border-color: var(--kce-control-frame);
+  box-shadow: var(--ds-shadow-overlay);
+}
+
+#app .palette-strip .swatch-hex {
+  letter-spacing: 0.035em;
+  line-height: var(--ds-leading);
+}
+
+#app .palette-strip .swatch-hex--long {
+  letter-spacing: 0.02em;
+}
+
+#app .palette-strip :is(.swatch-hex, .swatch-action):focus-visible {
+  /* Feste helle und dunkle Konturen bleiben auf beliebigen Palettenfarben sichtbar. */
+  box-shadow:
+    0 0 0 2px var(--app-overlay-light),
+    0 0 0 4px var(--app-overlay-dark);
+}
