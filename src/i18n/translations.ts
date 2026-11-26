@@ -90,6 +90,8 @@ export const translations = {
 
     // Landing Page - Hero
     heroTitle: 'Extract Beautiful Color Palettes from Any Image',
+    heroTitleLead: 'Extract Beautiful Color Palettes',
+    heroTitleRest: 'from Any Image',
     heroSubtitle:
       'A free, privacy-focused tool that runs entirely in your browser. No uploads, no tracking - just pure color extraction.',
     heroCta: 'Start Extracting Colors',
@@ -429,6 +431,8 @@ export const translations = {
 
     // Landing Page - Hero
     heroTitle: 'Extrahiere Farbpaletten aus jedem Bild',
+    heroTitleLead: 'Extrahiere Farbpaletten',
+    heroTitleRest: 'aus jedem Bild',
     heroSubtitle:
       'Ein kostenloses, datenschutzfreundliches Tool, das vollständig in deinem Browser läuft. Keine Uploads, kein Tracking - nur reine Farbextraktion.',
     heroCta: 'Farben extrahieren',

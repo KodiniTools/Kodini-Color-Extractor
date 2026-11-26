@@ -55,6 +55,15 @@
   overflow-wrap: anywhere;
 }
 
+/* Zweifarbiger Titel: Gold für den ersten Teil, Logo-Blau für den Rest. */
+#app .landing-page .hero-title-lead {
+  color: var(--app-hero-gold);
+}
+
+#app .landing-page .hero-title-rest {
+  color: var(--app-hero-blue);
+}
+
 #app .landing-page .hero-subtitle {
   max-width: 45ch;
   color: var(--kce-cyan);

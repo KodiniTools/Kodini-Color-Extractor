@@ -52,3 +52,30 @@ describe('LandingPage hero image', () => {
     expect(alt).not.toBe('heroImageAlt')
   })
 })
+
+describe('LandingPage zweifarbiger Titel', () => {
+  beforeEach(() => {
+    localStorage.clear()
+    vi.resetModules()
+  })
+
+  it('teilt den Titel in Gold- und Blau-Teil, der Text bleibt der ganze Titel', async () => {
+    const { translations } = await import('../i18n/translations')
+    const wrapper = await mountLanding()
+    const title = wrapper.find('h1.hero-title')
+    const lead = title.find('.hero-title-lead').text()
+    const rest = title.find('.hero-title-rest').text()
+    const lang = document.documentElement.lang === 'en' ? 'en' : 'de'
+    expect(lead).toBe(translations[lang].heroTitleLead)
+    expect(rest).toBe(translations[lang].heroTitleRest)
+    expect(title.element.textContent?.replace(/\s+/g, ' ').trim()).toBe(
+      translations[lang].heroTitle
+    )
+  })
+
+  it.each(['de', 'en'] as const)('Lead + Rest ergeben den Titel (%s)', async (lang) => {
+    const { translations } = await import('../i18n/translations')
+    const t = translations[lang]
+    expect(`${t.heroTitleLead} ${t.heroTitleRest}`).toBe(t.heroTitle)
+  })
+})

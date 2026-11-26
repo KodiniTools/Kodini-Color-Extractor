@@ -93,12 +93,17 @@
   --app-stage1-gold-grad: linear-gradient(180deg, #9c6c26 0%, #7a5218 45%, #4a2f0a 100%);
   --app-stage1-gold-grad-hover: linear-gradient(180deg, #8c5f1f 0%, #6a4614 45%, #402908 100%);
   --app-stage1-media-shadow: 0 22px 50px rgb(0 0 0 / 0.17);
+  /* Zweifarbiger Hero-Titel: Gold und Blau aus dem KodiniTools-Logo. */
+  --app-hero-gold: #775115;
+  --app-hero-blue: #0058a0;
   color-scheme: light;
 }
 
 :root[data-theme='dark'] {
   --app-stage1-glow: #163e56;
   --app-stage1-cyan: #69d7e9;
+  --app-hero-gold: #e6bc76;
+  --app-hero-blue: #48a0d8;
   color-scheme: dark;
 }
 

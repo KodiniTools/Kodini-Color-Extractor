@@ -18,7 +18,11 @@ const heroImage = import.meta.env.BASE_URL + 'landingpage-colorextractor.webp'
     <section class="hero">
       <div class="hero-intro">
         <div class="hero-content">
-          <h1 class="hero-title">{{ t('heroTitle') }}</h1>
+          <h1 class="hero-title">
+            <span class="hero-title-lead">{{ t('heroTitleLead') }}</span>
+            {{ ' ' }}
+            <span class="hero-title-rest">{{ t('heroTitleRest') }}</span>
+          </h1>
           <p class="hero-subtitle">{{ t('heroSubtitle') }}</p>
           <div class="hero-actions">
             <router-link to="/app" class="hero-cta">

@@ -90,3 +90,20 @@ describe('Design Etappe 1', () => {
     expect(contrast(app['--app-stage1-cyan'], app['--app-stage1-glow'])).toBeGreaterThanOrEqual(4.5)
   })
 })
+
+describe('Zweifarbiger Hero-Titel', () => {
+  it('färbt Lead gold und Rest blau über Tokens', () => {
+    expect(stage1).toMatch(/\.hero-title-lead \{\s*color: var\(--app-hero-gold\);/)
+    expect(stage1).toMatch(/\.hero-title-rest \{\s*color: var\(--app-hero-blue\);/)
+  })
+
+  it.each([
+    ['hell', light, dsLight],
+    ['dunkel', dark, dsDark],
+  ])('erreicht mindestens 3:1 für grossen Text im Theme %s', (_name, app, ds) => {
+    for (const token of ['--app-hero-gold', '--app-hero-blue']) {
+      expect(contrast(app[token], ds['--ds-surface-0'])).toBeGreaterThanOrEqual(3)
+      expect(contrast(app[token], app['--app-stage1-glow'])).toBeGreaterThanOrEqual(3)
+    }
+  })
+})
